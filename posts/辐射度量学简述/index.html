@@ -58,14 +58,14 @@
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "datePublished": "2022-03-22T15:45:59+00:00",
-        "dateModified": "2022-03-24T16:09:52+08:00",
+        "dateModified": "2023-01-06T00:09:33+08:00",
         "url": "https://visualgmq.gitee.io/posts/%E8%BE%90%E5%B0%84%E5%BA%A6%E9%87%8F%E5%AD%A6%E7%AE%80%E8%BF%B0/",
         "headline": "辐射度量学简述",
         "description": "本文是Games101 RayTracing课程中辐射度量学一章的笔记。\n……",
         "inLanguage" : "zh-CN",
         "articleSection": "posts",
-        "wordCount":  1402 ,
-        "image": ["https://visualgmq.gitee.io/assets/%E5%BE%AE%E5%88%86%E7%AB%8B%E4%BD%93%E8%A7%92%E7%9A%84%E8%AE%A1%E7%AE%97.png","https://visualgmq.gitee.io/assets/irradiance.png","https://visualgmq.gitee.io/assets/radiance.png"],
+        "wordCount":  1391 ,
+        "image": ["https://visualgmq.gitee.io/assets/%E5%BE%AE%E5%88%86%E7%AB%8B%E4%BD%93%E8%A7%92%E7%9A%84%E8%AE%A1%E7%AE%97.png","https://visualgmq.gitee.io/assets/irradiance.png","https://visualgmq.gitee.io/assets/radiance.png","https://visualgmq.gitee.io/assets/exiting_radiance.png","https://visualgmq.gitee.io/assets/incident_radiance.png","https://visualgmq.gitee.io/assets/irradiant_vs_radiant.png"],
         "author": {
             "@type": "Person",
             "description": "What I can't make is what I don't understand",
@@ -111,7 +111,7 @@
 <meta property="og:locale" content="zh" /><meta property="og:image" content="https://visualgmq.gitee.io/assets/%E5%BE%AE%E5%88%86%E7%AB%8B%E4%BD%93%E8%A7%92%E7%9A%84%E8%AE%A1%E7%AE%97.png" />
 <meta property="og:type" content="article" />
     <meta property="article:published_time" content="2022-03-22T15:45:59&#43;00:00" />
-    <meta property="article:modified_time" content="2022-03-24T16:09:52&#43;08:00" />
+    <meta property="article:modified_time" content="2023-01-06T00:09:33&#43;08:00" />
     
     <meta property="article:section" content="posts" />
 
@@ -244,7 +244,7 @@
     
     
         
-        <time datetime="2022-03-24T16:09:52&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2022.3.24</time>
+        <time datetime="2023-01-06T00:09:33&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2023.1.6</time>
     
     
     
@@ -258,7 +258,7 @@
     
     
         
-        <span class="post-meta-item wordcount"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9zM284.2 99.8L21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0zM124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>&nbsp;1402</span>
+        <span class="post-meta-item wordcount"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9zM284.2 99.8L21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0zM124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>&nbsp;1391</span>
     
     
         
@@ -377,12 +377,12 @@ $$</p>
 <p>这里$p$是辐射到的点，$\omega$是立体角，$S$是辐射到这一点的面积，$\cos\theta$是这一点所在面的法向量和光线的夹角。</p>
 <p>这里的Radiance是总体的定义，我们也可以对入射和出射光定义，分别是光源发出的Radiance（Exiting Radiance）和接收的Radiance（Incident Radiance）。</p>
 <p>Exiting Radiance使用Radiant Intensity定义，根据前面对Radiant Intensity的定义，可以将公式变化为：</p>
-<p>![Exiting Radiance](/assets/exiting\ radiance.png)</p>
+<p><img src="/assets/exiting_radiance.png" alt="Exiting Radiance"></p>
 <p>$$
 L(p,\omega) = \frac{\partial{I(p, \omega)}}{\partial{\omega}\partial{S\cos{\theta}}}
 $$</p>
 <p>Incident Radiance使用Irradiance定义，根据Irradiance的定义，可以将公式化简为：</p>
-<p>![Incident Radiance](/assets/incident\ radiance.png)</p>
+<p><img src="/assets/incident_radiance.png" alt="Incident Radiance"></p>
 <p>$$
 L(p,\omega) = \frac{\text{d}{E(p, \omega)}}{\text{d}{\omega}\cos{\theta}}
 $$</p>
@@ -396,7 +396,7 @@ $$</p>
 E(p) = \int L(p, \omega) \cos{\theta} \text{d}\omega
 $$</p>
 <p>显然，irradiance只是在radiance上增加了方向，而这个公式则说明了，某一点所受的irradiance的总量为其半球面上垂直于该面的radiance总和:</p>
-<p>![irradiant vs radiant](/assets/irradiant\ vs\ radiant.png)</p>
+<p><img src="/assets/irradiant_vs_radiant.png" alt="irradiant vs radiant"></p>
 <p>之所以是半球面，是因为从面的底部照射的光不应该产生任何光照效果。</p>
             </div>
 
@@ -425,9 +425,9 @@ $$</p>
 
         
     <div class="updated-badge-container">
-        <span title="Updated @ 2022-03-24 16:09:52 CST" style="cursor:help">
+        <span title="Updated @ 2023-01-06 00:09:33 CST" style="cursor:help">
 
-<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2022-03-24</text><text x="915" y="140" textLength="650" transform="scale(.1)">2022-03-24</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2023-01-06</text><text x="915" y="140" textLength="650" transform="scale(.1)">2023-01-06</text></g></svg>
         </span></div>
 
 
@@ -530,10 +530,6 @@ $$</p>
             <ul class="related-list">
                 
                     <li class="related-item">
-                        <a href="/posts/rtr4%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B01-gpu/" class="related-link">RTR4读书笔记1-GPU</a>
-                    </li>
-                
-                    <li class="related-item">
                         <a href="/posts/%E4%BD%BF%E7%94%A8brdf%E5%AE%9A%E4%B9%89%E6%9D%90%E8%B4%A8/" class="related-link">使用BRDF定义材质</a>
                     </li>
                 
@@ -546,7 +542,11 @@ $$</p>
                     </li>
                 
                     <li class="related-item">
-                        <a href="/posts/%E7%8E%B0%E4%BB%A3%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E-%E5%85%A5%E9%97%A8%E5%88%B0%E5%AE%9E%E8%B7%B5-%E7%AC%94%E8%AE%B03/" class="related-link">现代游戏引擎-入门到实践[笔记3]</a>
+                        <a href="/posts/%E5%88%87%E7%BA%BF%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/" class="related-link">切线空间详解</a>
+                    </li>
+                
+                    <li class="related-item">
+                        <a href="/posts/3d%E7%A9%BA%E9%97%B4%E4%B8%AD%E7%9A%84%E6%97%8B%E8%BD%AC/" class="related-link">3D空间中的旋转</a>
                     </li>
                 
             </ul>
