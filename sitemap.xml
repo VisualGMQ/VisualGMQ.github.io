@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://visualgmq.gitee.io/</loc>
-    <lastmod>2023-01-06T00:20:03+08:00</lastmod>
+    <lastmod>2023-01-21T23:43:51+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/about/</loc>
     <lastmod>2022-09-15T22:25:58+08:00</lastmod>
@@ -12,10 +12,10 @@
     <lastmod>2023-01-06T00:09:33+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/posts/</loc>
-    <lastmod>2023-01-06T00:12:16+08:00</lastmod>
+    <lastmod>2023-01-21T23:43:51+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/tags/</loc>
-    <lastmod>2023-01-06T00:12:16+08:00</lastmod>
+    <lastmod>2023-01-21T23:43:51+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/posts/%E5%85%B3%E4%BA%8E%E9%80%90%E6%B8%90%E8%BF%81%E7%A7%BB%E8%87%B3b%E7%AB%99%E7%9A%84%E8%AF%B4%E6%98%8E/</loc>
     <lastmod>2022-06-01T23:31:17+08:00</lastmod>
@@ -66,7 +66,7 @@
     <lastmod>2022-04-07T14:31:20+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/tags/%E5%9B%BE%E5%BD%A2%E5%AD%A6/</loc>
-    <lastmod>2023-01-06T00:09:33+08:00</lastmod>
+    <lastmod>2023-01-21T23:43:51+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/posts/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2022-04-07T14:31:58+08:00</lastmod>
@@ -547,6 +547,12 @@
   </url><url>
     <loc>https://visualgmq.gitee.io/grogue/</loc>
     <priority>0</priority>
+  </url><url>
+    <loc>https://visualgmq.gitee.io/posts/geomentric-tools-for-computer-graphics%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B01/</loc>
+    <lastmod>2023-01-19T19:35:14+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.gitee.io/posts/geomentric-tools-for-computer-graphics%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B02/</loc>
+    <lastmod>2023-01-21T23:43:51+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.gitee.io/posts/cc&#43;&#43;%E4%B8%8D%E5%AE%9A%E5%8F%82%E6%95%B0%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/</loc>
     <lastmod>2021-01-21T17:57:37+08:00</lastmod>
