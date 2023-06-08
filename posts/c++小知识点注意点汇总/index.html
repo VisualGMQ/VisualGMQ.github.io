@@ -3,7 +3,7 @@
     <head prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
     <meta charset="UTF-8" />
 
-    <meta name="generator" content="Hugo 0.102.3" /><meta name="theme-color" content="#16171d" />
+    <meta name="generator" content="Hugo 0.113.0"><meta name="theme-color" content="#16171d" />
     <meta name="color-scheme" content="light dark">
 
     
@@ -58,7 +58,7 @@
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "datePublished": "2019-07-28T16:01:01+00:00",
-        "dateModified": "2021-01-21T18:13:27+08:00",
+        "dateModified": "2023-06-08T09:43:47+08:00",
         "url": "https://visualgmq.gitee.io/posts/c++%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B3%A8%E6%84%8F%E7%82%B9%E6%B1%87%E6%80%BB/",
         "headline": "C/C++小知识点，注意点汇总（持续更新）",
         "description": "这里汇总了一些C/C++的知识点和注意点\n",
@@ -111,7 +111,7 @@
 <meta property="og:locale" content="es" /><meta property="og:image" content="https://s2.ax1x.com/2020/02/27/3dVgqx.png" />
 <meta property="og:type" content="article" />
     <meta property="article:published_time" content="2019-07-28T16:01:01&#43;00:00" />
-    <meta property="article:modified_time" content="2021-01-21T18:13:27&#43;08:00" />
+    <meta property="article:modified_time" content="2023-06-08T09:43:47&#43;08:00" />
     
     <meta property="article:section" content="posts" />
 
@@ -261,7 +261,7 @@
     
     
         
-        <time datetime="2021-01-21T18:13:27&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2021.1.21</time>
+        <time datetime="2023-06-08T09:43:47&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2023.6.8</time>
     
     
     
@@ -340,11 +340,11 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="n">class</span> <span class="n">number</span><span class="p">{</span>
 </span></span><span class="line"><span class="cl"><span class="nl">public</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">number</span><span class="p">(</span><span class="kt">int</span> <span class="n">m_i</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">number</span><span class="p">(</span><span class="kt">int</span> <span class="n">m_i</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="n">m_i</span> <span class="o">=</span> <span class="n">m_i</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="n">info</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">info</span><span class="p">(){</span>
 </span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">m_local_i</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;m_local_i:&#34;</span><span class="o">&lt;&lt;</span><span class="n">m_local_i</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -357,8 +357,8 @@
 </span></span><span class="line"><span class="cl">    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;global_i:&#34;</span><span class="o">&lt;&lt;</span><span class="n">global_i</span><span class="o">&lt;&lt;</span><span class="n">endl</span>
 </span></span><span class="line"><span class="cl">        <span class="o">&lt;&lt;</span><span class="s">&#34;static_i:&#34;</span><span class="o">&lt;&lt;</span><span class="n">static_i</span><span class="o">&lt;&lt;</span><span class="n">endl</span>
 </span></span><span class="line"><span class="cl">        <span class="o">&lt;&lt;</span><span class="s">&#34;local_i:&#34;</span><span class="o">&lt;&lt;</span><span class="n">local_i</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">number</span> <span class="n">n</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">n</span><span class="p">.</span><span class="n">info</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">number</span> <span class="nf">n</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span><span class="p">.</span><span class="nf">info</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;m_i:&#34;</span><span class="o">&lt;&lt;</span><span class="n">n</span><span class="p">.</span><span class="n">m_i</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -385,7 +385,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">class</span> <span class="n">Point</span><span class="p">{</span>
 </span></span><span class="line"><span class="cl"><span class="nl">public</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Point</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Point</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -482,7 +482,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">boolalpha</span><span class="o">&lt;&lt;</span><span class="nb">false</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="err">等价于</span>
-</span></span><span class="line"><span class="cl"><span class="n">cout</span><span class="p">.</span><span class="n">setf</span><span class="p">(</span><span class="n">ios</span><span class="o">::</span><span class="n">boolalpha</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cout</span><span class="p">.</span><span class="nf">setf</span><span class="p">(</span><span class="n">ios</span><span class="o">::</span><span class="n">boolalpha</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="nb">false</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
@@ -520,7 +520,7 @@
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rb</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="o">*</span> <span class="n">pb</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">changed</span><span class="p">(</span><span class="o">*</span><span class="n">pb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">changed</span><span class="p">(</span><span class="o">*</span><span class="n">pb</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">b</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -592,7 +592,7 @@
 </span></span><span class="line"><span class="cl"><span class="nl">public</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">height</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Person</span><span class="p">(</span><span class="kt">int</span> <span class="n">age</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Person</span><span class="p">(</span><span class="kt">int</span> <span class="n">age</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">-&gt;</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">-&gt;</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -600,7 +600,7 @@
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">agrc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">arhv</span><span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Person</span><span class="o">*</span> <span class="n">p</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Person</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">170</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Person</span><span class="o">*</span> <span class="n">p</span> <span class="o">=</span> <span class="n">new</span> <span class="nf">Person</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">170</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">age</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="o">&lt;&lt;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">height</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -642,11 +642,11 @@
 </span></span><span class="line"><span class="cl"><span class="nl">public</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">height</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Person</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Person</span><span class="p">(){</span>
 </span></span><span class="line"><span class="cl">        <span class="n">age</span> <span class="o">=</span> <span class="mi">17</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">height</span> <span class="o">=</span> <span class="mi">170</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Person</span><span class="p">(</span><span class="kt">int</span> <span class="n">age</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Person</span><span class="p">(</span><span class="kt">int</span> <span class="n">age</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">-&gt;</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">-&gt;</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -721,12 +721,12 @@
 </span></span><span class="line"><span class="cl">    <span class="n">struct_c</span><span class="o">*</span> <span class="n">c</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="c1">//malloc memory
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_c</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_c</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_b</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_b</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_a</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_a</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_c</span><span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_c</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_b</span><span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_b</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">struct_a</span><span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">struct_a</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">c</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">array</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="c1">//free memory
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">free</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">free</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="n">c</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
@@ -1302,8 +1302,8 @@
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">s</span><span class="o">*</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl"><span class="n">ps</span><span class="o">-&gt;</span><span class="n">elem</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">SIZE</span><span class="p">);</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">s</span><span class="o">*</span> <span class="n">ps</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="n">ps</span><span class="o">-&gt;</span><span class="n">elem</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">SIZE</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>但是如果按照这种写法，你只需要:</p>
@@ -1312,7 +1312,7 @@
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">s</span><span class="o">*</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">+</span><span class="n">SIZE</span><span class="p">);</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">s</span><span class="o">*</span> <span class="n">ps</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">+</span><span class="n">SIZE</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>即可。</p>
@@ -1359,9 +1359,9 @@
 
         
     <div class="updated-badge-container">
-        <span title="Updated @ 2021-01-21 18:13:27 CST" style="cursor:help">
+        <span title="Updated @ 2023-06-08 09:43:47 CST" style="cursor:help">
 
-<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2021-01-21</text><text x="915" y="140" textLength="650" transform="scale(.1)">2021-01-21</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2023-06-08</text><text x="915" y="140" textLength="650" transform="scale(.1)">2023-06-08</text></g></svg>
         </span></div>
 
 

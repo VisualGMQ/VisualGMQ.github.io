@@ -3,7 +3,7 @@
     <head prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
     <meta charset="UTF-8" />
 
-    <meta name="generator" content="Hugo 0.102.3" /><meta name="theme-color" content="#16171d" />
+    <meta name="generator" content="Hugo 0.113.0"><meta name="theme-color" content="#16171d" />
     <meta name="color-scheme" content="light dark">
 
     
@@ -58,7 +58,7 @@
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "datePublished": "2019-07-28T16:01:01+00:00",
-        "dateModified": "2021-01-21T17:55:15+08:00",
+        "dateModified": "2023-06-08T09:43:47+08:00",
         "url": "https://visualgmq.gitee.io/posts/c++%E5%A4%84%E7%90%86json%E6%96%87%E4%BB%B6/",
         "headline": "C++处理Json文件(Jsoncpp)",
         "description": "使用的库 我们使用的库是Jsoncpp库，是一个面向对象的C++库。\n",
@@ -111,7 +111,7 @@
 <meta property="og:locale" content="es" /><meta property="og:image" content="https://visualgmq.gitee.io/images/5DAFA975ABB8CB992727B998C4A009DA.png" />
 <meta property="og:type" content="article" />
     <meta property="article:published_time" content="2019-07-28T16:01:01&#43;00:00" />
-    <meta property="article:modified_time" content="2021-01-21T17:55:15&#43;08:00" />
+    <meta property="article:modified_time" content="2023-06-08T09:43:47&#43;08:00" />
     
     <meta property="article:section" content="posts" />
 
@@ -261,7 +261,7 @@
     
     
         
-        <time datetime="2021-01-21T17:55:15&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2021.1.21</time>
+        <time datetime="2023-06-08T09:43:47&#43;08:00" class="post-meta-item modified dt-updated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M400 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v52H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 400H54a6 6 0 0 1-6-6V160h352v298a6 6 0 0 1-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2023.6.8</time>
     
     
     
@@ -345,8 +345,8 @@
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;name&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Json</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="s">&#34;VisualGMQ&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;age&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Json</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;name&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Json</span><span class="o">::</span><span class="nf">Value</span><span class="p">(</span><span class="s">&#34;VisualGMQ&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;age&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Json</span><span class="o">::</span><span class="nf">Value</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>这个时候的Json文件如下：</p>
@@ -418,9 +418,9 @@
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="n">append</span><span class="p">(</span><span class="s">&#34;XianFen&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="n">append</span><span class="p">(</span><span class="s">&#34;CaiChuanXun&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="n">append</span><span class="p">(</span><span class="s">&#34;WuTao&#34;</span><span class="p">);</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="s">&#34;XianFen&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="s">&#34;CaiChuanXun&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">[</span><span class="s">&#34;friend&#34;</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="s">&#34;WuTao&#34;</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>最后结果为：</p>
@@ -478,7 +478,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">FastWriter</span> <span class="n">wb</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">string</span> <span class="n">str</span> <span class="o">=</span> <span class="n">wb</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">string</span> <span class="n">str</span> <span class="o">=</span> <span class="n">wb</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">root</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>首先声明对象，然后调用write方法传入要变为字符串的Json对象（这里传入root表示整个Json对象）就可以得到字符串了。然后通过C++IO就可以写到文件里面去了：</p>
@@ -491,7 +491,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ofstream</span> <span class="nf">ofile</span><span class="p">(</span><span class="s">&#34;ret1.json&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="n">ofile</span><span class="o">&lt;&lt;</span><span class="n">str</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">ofile</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">ofile</span><span class="p">.</span><span class="nf">close</span><span class="p">();</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>结果如下：</p>
@@ -612,11 +612,11 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ifstream</span> <span class="nf">ifile</span><span class="p">(</span><span class="s">&#34;test.json&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="n">seekg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ios</span><span class="o">::</span><span class="n">end</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">ifile</span><span class="p">.</span><span class="n">tellg</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="n">seekg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ios</span><span class="o">::</span><span class="n">beg</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="nf">seekg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ios</span><span class="o">::</span><span class="n">end</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">ifile</span><span class="p">.</span><span class="nf">tellg</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="nf">seekg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ios</span><span class="o">::</span><span class="n">beg</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">1024</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="sc">&#39;\0&#39;</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ifile</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="c1">//数据存储在buffer里
 </span></span></span></code></pre></td></tr></table></div>
 </div>
@@ -631,7 +631,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Reader</span> <span class="n">rd</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">Value</span> <span class="n">root</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">rd</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">rd</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>首先声明Reader对象，然后调用<code>parse</code>函数，第一个参数是要解析的文本字符串，第二个参数是解析完成之后返回的Json::Value，第三个参数表示是否也解析注释。如果为false则会丢弃注释。</p>
@@ -648,10 +648,10 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">CharReaderBuilder</span> <span class="n">crb</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">CharReader</span><span class="o">*</span> <span class="n">cr</span> <span class="o">=</span> <span class="n">crb</span><span class="p">.</span><span class="n">newCharReader</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">CharReader</span><span class="o">*</span> <span class="n">cr</span> <span class="o">=</span> <span class="n">crb</span><span class="p">.</span><span class="nf">newCharReader</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="n">Json</span><span class="o">::</span><span class="n">Value</span> <span class="n">root</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="n">JSONCPP_STRING</span> <span class="n">err</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">cr</span><span class="o">-&gt;</span><span class="n">parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">buffer</span><span class="p">[</span><span class="n">len</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">root</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">err</span><span class="p">);</span>   <span class="c1">//返回true解析完成，false解析失败
+</span></span><span class="line"><span class="cl"><span class="n">cr</span><span class="o">-&gt;</span><span class="nf">parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">buffer</span><span class="p">[</span><span class="n">len</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">root</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">err</span><span class="p">);</span>   <span class="c1">//返回true解析完成，false解析失败
 </span></span></span></code></pre></td></tr></table></div>
 </div>
 </div><p>但是CharReader解析Json有一个很麻烦的事情，就是它的parse函数需要传入要解析文本的第一个字符和最后一个字符，来确定要解析哪一段。这样你就必须在读取json文件的时候顺便将文本长度读取出来（或者你直接用strlen(buffer)也可以）。
@@ -708,9 +708,9 @@
 
         
     <div class="updated-badge-container">
-        <span title="Updated @ 2021-01-21 17:55:15 CST" style="cursor:help">
+        <span title="Updated @ 2023-06-08 09:43:47 CST" style="cursor:help">
 
-<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2021-01-21</text><text x="915" y="140" textLength="650" transform="scale(.1)">2021-01-21</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2023-06-08</text><text x="915" y="140" textLength="650" transform="scale(.1)">2023-06-08</text></g></svg>
         </span></div>
 
 
