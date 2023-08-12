@@ -2,19 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://visualgmq.github.io/posts/</loc>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/</loc>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/tags/</loc>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
     <loc>https://visualgmq.github.io/</loc>
-    <lastmod>2023-06-18T21:13:08+08:00</lastmod>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/tags/%E5%9B%BE%E5%BD%A2%E5%AD%A6/</loc>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</loc>
+    <lastmod>2023-08-13T01:22:47+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/tags/cpp/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/posts/%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0%E5%92%8C%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/tags/entt/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%89/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%8C/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
+  </url><url>
+    <loc>https://visualgmq.github.io/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/</loc>
+    <lastmod>2023-08-12T23:20:41+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/about/</loc>
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/categories/</loc>
-    <lastmod>2023-06-18T21:13:08+08:00</lastmod>
-  </url><url>
-    <loc>https://visualgmq.github.io/posts/</loc>
-    <lastmod>2023-06-18T21:13:08+08:00</lastmod>
-  </url><url>
-    <loc>https://visualgmq.github.io/tags/</loc>
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/posts/%E5%85%B3%E4%BA%8E%E9%80%90%E6%B8%90%E8%BF%81%E7%A7%BB%E8%87%B3b%E7%AB%99%E7%9A%84%E8%AF%B4%E6%98%8E/</loc>
@@ -33,9 +60,6 @@
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/categories/language/</loc>
-    <lastmod>2023-06-18T21:13:08+08:00</lastmod>
-  </url><url>
-    <loc>https://visualgmq.github.io/tags/cpp/</loc>
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/posts/usrefl%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
@@ -63,9 +87,6 @@
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/posts/%E4%BD%BF%E7%94%A8brdf%E5%AE%9A%E4%B9%89%E6%9D%90%E8%B4%A8/</loc>
-    <lastmod>2023-06-18T21:13:08+08:00</lastmod>
-  </url><url>
-    <loc>https://visualgmq.github.io/tags/%E5%9B%BE%E5%BD%A2%E5%AD%A6/</loc>
     <lastmod>2023-06-18T21:13:08+08:00</lastmod>
   </url><url>
     <loc>https://visualgmq.github.io/posts/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%AE%97%E6%B3%95/</loc>
