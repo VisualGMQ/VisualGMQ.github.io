@@ -1,0 +1,976 @@
+<!doctype html><html lang=zh-CN><head prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#"><meta charset=UTF-8><meta name=generator content="Hugo 0.139.4"><meta name=theme-color content="#16171d"><meta name=color-scheme content="light dark"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=format-detection content="telephone=no, date=no, address=no, email=no"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><title>Raylib的BatchRendering | VisualGMQ的博客</title>
+<link rel=stylesheet href=/css/meme.min.cf0eee490255d6fd894c26f18cafee6712100401ed50baad9d7315def2e08ef0.css><script src=https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js defer></script><script src=/js/meme.min.583b14902715db8b5c3aae9f291aed190d985933ba7944c7fb7821fd391606f5.js></script><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" media=print onload='this.media="all"'><noscript><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap"></noscript><meta name=author content><meta name=description content="本文分析了开源游戏框架Raylib v4.5.0中的batch rendering实现。
+"><link rel="shortcut icon" href=/favicon.ico type=image/x-icon><link rel=mask-icon href=/icons/safari-pinned-tab.svg color=#2a6df4><link rel=apple-touch-icon sizes=180x180 href=/icons/apple-touch-icon.png><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-title content="VisualGMQ的博客"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=mobile-web-app-capable content="yes"><meta name=application-name content="VisualGMQ的博客"><meta name=msapplication-starturl content="../../"><meta name=msapplication-TileColor content="#fff"><meta name=msapplication-TileImage content="../../icons/mstile-150x150.png"><link rel=manifest href=/manifest.json><link rel=canonical href=https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","datePublished":"2023-08-12T23:21:25+08:00","dateModified":"2024-12-15T18:29:17+00:00","url":"https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/","headline":"Raylib的BatchRendering","description":"本文分析了开源游戏框架Raylib v4.5.0中的batch rendering实现。\n","inLanguage":"zh-CN","articleSection":"posts","wordCount":7583,"image":"https://visualgmq.github.io/icons/logo.png","author":{"@type":"Person","url":"https://visualgmq.github.io/"},"license":"[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)","publisher":{"@type":"Organization","name":"VisualGMQ的博客","logo":{"@type":"ImageObject","url":"https://visualgmq.github.io/icons/logo.png"},"url":"https://visualgmq.github.io/"},"mainEntityOfPage":{"@type":"WebSite","@id":"https://visualgmq.github.io/"}}</script><meta name=twitter:card content="summary"><meta name=twitter:site content="@VisualGMQ"><meta property="og:title" content="Raylib的BatchRendering"><meta property="og:description" content="本文分析了开源游戏框架Raylib v4.5.0中的batch rendering实现。
+"><meta property="og:url" content="https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/"><meta property="og:site_name" content="VisualGMQ的博客"><meta property="og:locale" content="zh"><meta property="og:image" content="https://visualgmq.github.io/icons/logo.png"><meta property="og:type" content="article"><meta property="article:published_time" content="2023-08-12T23:21:25+08:00"><meta property="article:modified_time" content="2024-12-15T18:29:17+00:00"><meta property="article:section" content="posts"></head><body><div class=container><header class=header><div class=header-wrapper><div class="header-inner single"><div class=site-brand><a href=/ class=brand>VisualGMQ的博客</a></div><nav class=nav><ul class=menu id=menu><li class=menu-item><a href=/><svg viewBox="0 0 576 512" class="icon home"><path d="M280.37 148.26 96 300.11V464a16 16 0 0016 16l112.06-.29a16 16 0 0015.92-16V368a16 16 0 0116-16h64a16 16 0 0116 16v95.64a16 16 0 0016 16.05L464 480a16 16 0 0016-16V3e2L295.67 148.26a12.19 12.19.0 00-15.3.0zM571.6 251.47 488 182.56V44.05a12 12 0 00-12-12h-56a12 12 0 00-12 12v72.61L318.47 43a48 48 0 00-61 0L4.34 251.47a12 12 0 00-1.6 16.9l25.5 31A12 12 0 0045.15 301l235.22-193.74a12.19 12.19.0 0115.3.0L530.9 301a12 12 0 0016.9-1.6l25.5-31a12 12 0 00-1.7-16.93z"/></svg><span class=menu-item-name>首页</span></a></li><li class="menu-item active"><a href=/posts/><svg viewBox="0 0 512 512" class="icon archive"><path d="M32 448c0 17.7 14.3 32 32 32h384c17.7.0 32-14.3 32-32V160H32v288zm160-212c0-6.6 5.4-12 12-12h104c6.6.0 12 5.4 12 12v8c0 6.6-5.4 12-12 12H204c-6.6.0-12-5.4-12-12v-8zM480 32H32C14.3 32 0 46.3.0 64v48c0 8.8 7.2 16 16 16h480c8.8.0 16-7.2 16-16V64c0-17.7-14.3-32-32-32z"/></svg><span class=menu-item-name>文章</span></a></li><li class=menu-item><a href=/categories/><svg viewBox="0 0 512 512" class="icon th"><path d="M149.333 56v80c0 13.255-10.745 24-24 24H24c-13.255.0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h101.333c13.255.0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24H205.333c-13.255.0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256.0 24.001-10.745 24.001-24zm32-240v80c0 13.255 10.745 24 24 24H488c13.255.0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H386.667c-13.255.0-24 10.745-24 24zm-32 80V56c0-13.255-10.745-24-24-24H205.333c-13.255.0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256.0 24.001-10.745 24.001-24zm-205.334 56H24c-13.255.0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.255.0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24zM0 376v80c0 13.255 10.745 24 24 24h101.333c13.255.0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H24c-13.255.0-24 10.745-24 24zm386.667-56H488c13.255.0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255.0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zm0 160H488c13.255.0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255.0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zM181.333 376v80c0 13.255 10.745 24 24 24h101.333c13.255.0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H205.333c-13.255.0-24 10.745-24 24z"/></svg><span class=menu-item-name>分类</span></a></li><li class=menu-item><a href=/tags/><svg viewBox="0 0 640 512" class="icon tags"><path d="M497.941 225.941 286.059 14.059A48 48 0 00252.118.0H48C21.49.0.0 21.49.0 48v204.118a48 48 0 0014.059 33.941l211.882 211.882c18.744 18.745 49.136 18.746 67.882.0l204.118-204.118c18.745-18.745 18.745-49.137.0-67.882zM112 160c-26.51.0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm513.941 133.823L421.823 497.941c-18.745 18.745-49.137 18.745-67.882.0l-.36-.36L527.64 323.522c16.999-16.999 26.36-39.6 26.36-63.64s-9.362-46.641-26.36-63.64L331.397.0h48.721a48 48 0 0133.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137.0 67.882z"/></svg><span class=menu-item-name>标签</span></a></li><li class=menu-item><a href=/about/><span class=menu-item-name>关于</span></a></li><li class=menu-item><a href=/projects/><span class=menu-item-name>自制程序</span></a></li><li class=menu-item><a href=/tl/><span class=menu-item-name>TreasureLooter</span></a></li><li class=menu-item><a id=theme-switcher href=#><svg viewBox="0 0 512 512" class="icon theme-icon-light"><path d="M193.2 104.5 242 7a18 18 0 0128 0l48.8 97.5L422.2 70A18 18 0 01442 89.8l-34.5 103.4L505 242a18 18 0 010 28l-97.5 48.8L442 422.2A18 18 0 01422.2 442l-103.4-34.5L270 505a18 18 0 01-28 0l-48.8-97.5L89.8 442A18 18 0 0170 422.2l34.5-103.4-97.5-48.8a18 18 0 010-28l97.5-48.8L70 89.8A18 18 0 0189.8 70zM256 128a128 128 0 10.01.0M256 160a96 96 0 10.01.0"/></svg><svg viewBox="0 0 512 512" class="icon theme-icon-dark"><path d="M27 412A256 256 0 10181 5a11.5 11.5.0 00-5 20A201.5 201.5.0 0142 399a11.5 11.5.0 00-15 13"/></svg></a></li><li class="menu-item search-item"><form id=search class=search role=search><label for=search-input><svg viewBox="0 0 512 512" class="icon search-icon"><path d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></label>
+<input type=search id=search-input class=search-input></form><template id=search-result hidden><article class="content post"><h2 class=post-title><a class=summary-title-link></a></h2><summary class=summary></summary><div class=read-more-container><a class=read-more-link>»</a></div></article></template></li></ul></nav></div></div><input type=checkbox id=nav-toggle aria-hidden=true>
+<label for=nav-toggle class=nav-toggle></label>
+<label for=nav-toggle class=nav-curtain></label></header><main class="main single" id=main><div class=main-inner><article class="content post h-entry" data-align=justify data-type=posts data-toc-num=true><h1 class="post-title p-name">Raylib的BatchRendering</h1><div class=post-meta><time datetime=2023-08-12T23:21:25+08:00 class="post-meta-item published dt-published"><svg viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M148 288h-40c-6.6.0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6.0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6.0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6.0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6.0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6.0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6.0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6.0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6.0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6.0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6.0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6.0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5.0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6.0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6.0 12 5.4 12 12v52h48c26.5.0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3.0 6-2.7 6-6z"/></svg>&nbsp;2023.8.12</time>
+<time datetime=2024-12-15T18:29:17+00:00 class="post-meta-item modified dt-updated"><svg viewBox="0 0 448 512" class="icon post-meta-icon"><path d="M4e2 64h-48V12c0-6.627-5.373-12-12-12h-40c-6.627.0-12 5.373-12 12v52H160V12c0-6.627-5.373-12-12-12h-40c-6.627.0-12 5.373-12 12v52H48C21.49 64 0 85.49.0 112v352c0 26.51 21.49 48 48 48h352c26.51.0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 4e2H54a6 6 0 01-6-6V160h352v298a6 6 0 01-6 6zm-52.849-200.65L198.842 404.519c-4.705 4.667-12.303 4.637-16.971-.068l-75.091-75.699c-4.667-4.705-4.637-12.303.068-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l44.104 44.461 111.072-110.181c4.705-4.667 12.303-4.637 16.971.068l22.536 22.718c4.667 4.705 4.636 12.303-.069 16.97z"/></svg>&nbsp;2024.12.15</time>
+<span class="post-meta-item wordcount"><svg viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3.0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9.0l60.1 60.1c18.8 18.7 18.8 49.1.0 67.9zM284.2 99.8 21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3.0-17l-111-111c-4.8-4.7-12.4-4.7-17.1.0zM124.1 339.9c-5.5-5.5-5.5-14.3.0-19.8l154-154c5.5-5.5 14.3-5.5 19.8.0s5.5 14.3.0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8.0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>&nbsp;7583</span>
+<span class="post-meta-item reading-time"><svg viewBox="0 0 512 512" class="icon post-meta-icon"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5.0-2e2-89.5-2e2-2e2S145.5 56 256 56s2e2 89.5 2e2 2e2-89.5 2e2-2e2 2e2zm61.8-104.4-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6.0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"/></svg>&nbsp;16&nbsp;</span>
+<span class="post-meta-item busuanzi-page-pv" id=busuanzi_container_page_pv><svg viewBox="0 0 576 512" class="icon post-meta-icon"><path d="M288 144a110.94 110.94.0 00-31.24 5 55.4 55.4.0 017.24 27 56 56 0 01-56 56 55.4 55.4.0 01-27-7.24A111.71 111.71.0 10288 144zm284.52 97.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35.0 000 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35.0 000-29.19zM288 4e2c-98.65.0-189.09-55-237.93-144C98.91 167 189.34 112 288 112s189.09 55 237.93 144C477.1 345 386.66 4e2 288 4e2z"/></svg>&nbsp;<span id=busuanzi_value_page_pv></span></span></div><nav class=contents><h2 id=contents class=contents-title></h2><ol class=toc><li><a id=contents:什么是batch-rendering href=#什么是batch-rendering>什么是Batch Rendering</a></li><li><a id=contents:raylib中的batch-rendering href=#raylib中的batch-rendering>Raylib中的Batch Rendering</a><ol><li><a id=contents:重要数据结构 href=#重要数据结构>重要数据结构</a><ol><li><a id=contents:rlgldata href=#rlgldata>rlglData</a></li><li><a id=contents:rlvertexbuffer href=#rlvertexbuffer>rlVertexBuffer</a></li><li><a id=contents:rldrawcall href=#rldrawcall>rlDrawCall</a></li></ol></li><li><a id=contents:batch-rendering的源码 href=#batch-rendering的源码>Batch Rendering的源码</a><ol><li><a id=contents:初始化rlgl部分 href=#初始化rlgl部分>初始化RLGL部分</a></li><li><a id=contents:batch部分 href=#batch部分>Batch部分</a><ol><li><a id=contents:典型raylib绘制程序结构分析 href=#典型raylib绘制程序结构分析>典型raylib绘制程序结构分析</a></li><li><a id=contents:改变texture href=#改变texture>改变texture</a></li><li><a id=contents:开始进行渲染rlbegin href=#开始进行渲染rlbegin>开始进行渲染rlBegin</a></li><li><a id=contents:将数据存放入buffer中 href=#将数据存放入buffer中>将数据存放入buffer中</a></li><li><a id=contents:真正的batch-renderingrldrawrenderbatch href=#真正的batch-renderingrldrawrenderbatch>真正的Batch Rendering：rlDrawRenderBatch()</a></li></ol></li></ol></li></ol></li><li><a id=contents:总结 href=#总结>总结</a></li></ol></nav><div class="post-body e-content"><p>本文分析了<a href=https://www.raylib.com/ target=_blank rel=noopener>开源游戏框架Raylib</a> v4.5.0中的batch rendering实现。</p><p>Raylib是一个非常易用的游戏框架。其中90%的代码都是调库代码，只有渲染部分，作者自己封装了一个<code>rlgl</code>作为OpenGL的抽象层，里面比较有技术含量的就是他的Batch Rendering部分。</p><p><strong>注意：Raylib对各个版本的OpenGL（gl2,gl3,gles）都做了统一封装（在<code>src/rlgl.h</code>中），我们只分析gl3的代码。gl2的太老了就不看了，gles和gl3差不多，原理一样也就不分析了。</strong></p><h2 id=什么是batch-rendering><a href=#什么是batch-rendering class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:什么是batch-rendering class=headings>什么是Batch Rendering</a></h2><p>直译过来是“批渲染”，就是一次性渲染一堆数据。</p><p>假设现在有一个TileMap，他需要从一张图上取多个区域绘制在屏幕上，每一个区域是矩形。如果不使用Batch Rendering，函数的可能形式如下：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=nf>RenderOneTile</span><span class=p>(</span><span class=k>const</span> <span class=n>Texture</span><span class=o>&amp;</span> <span class=n>texture</span><span class=p>,</span> <span class=k>const</span> <span class=n>Rect</span><span class=o>&amp;</span> <span class=n>region</span><span class=p>,</span> <span class=k>const</span> <span class=n>Rect</span><span class=o>&amp;</span> <span class=n>dst</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 将数据传给GPU
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>glBindBuffer</span><span class=p>(</span><span class=n>GL_ARRAY_BUFFER</span><span class=p>,</span> <span class=n>RenderContext</span><span class=p>.</span><span class=n>buffer</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>glBufferData</span><span class=p>(</span><span class=n>GL_ARRAY_BUFFER</span><span class=p>,</span> <span class=n>CreateRectData</span><span class=p>(</span><span class=n>region</span><span class=p>,</span> <span class=n>dst</span><span class=p>),</span> <span class=n>GL_STATIC_DRAW</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 绑定element buffer
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>glBindBuffer</span><span class=p>(</span><span class=n>GL_ELEMENT_BUFFER</span><span class=p>,</span> <span class=n>RenderContext</span><span class=p>.</span><span class=n>index_buffer</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 绑定Texture
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>glBindTexture</span><span class=p>(</span><span class=n>GL_TEXTURE0</span><span class=p>,</span> <span class=n>texture</span><span class=p>.</span><span class=n>id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 准备渲染
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>glUseProgram</span><span class=p>(</span><span class=n>RenderContext</span><span class=p>.</span><span class=n>program</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 渲染
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>glDrawElements</span><span class=p>(</span><span class=n>GL_TRIANGLES</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>6</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>也就是说，每一次渲染都需要将矩形的数据传递给GPU，然后绑定Texture，进行渲染。</p><p>这里的性能缺陷主要是：</p><ul><li>数据传递给GPU：如果的多个<code>Rect</code>使用的是同一个<code>Texture</code>，那么我们可以将他们的数据全部存储起来，等到最后一并传给GPU</li><li>多次的<code>DrawCall</code>：这里每一个<code>Rect</code>都需要一次<code>DrawCall</code>。我们可以将数据全部存储起来，然后调用一次关于<code>Rect</code>的<code>DrawCall</code>就可以绘制全部。</li></ul><h2 id=raylib中的batch-rendering><a href=#raylib中的batch-rendering class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:raylib中的batch-rendering class=headings>Raylib中的Batch Rendering</a></h2><h3 id=重要数据结构><a href=#重要数据结构 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:重要数据结构 class=headings>重要数据结构</a></h3><p><code>raylib</code>自定义了可以绘制的类型：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Primitive assembly draw modes
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define RL_LINES                                0x0001      </span><span class=c1>// GL_LINES
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define RL_TRIANGLES                            0x0004      </span><span class=c1>// GL_TRIANGLES
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define RL_QUADS                                0x0007      </span><span class=c1>// GL_QUADS
+</span></span></span></code></pre></td></tr></table></div></div></div><p>有三种。在绘制的时候，<code>raylib</code>会自行将相关的数据存储在一起，最后进行统一绘制。</p><h4 id=rlgldata><a href=#rlgldata class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:rlgldata class=headings>rlglData</a></h4><p>重要的数据结构如下：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>rlglData</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>rlRenderBatch</span> <span class=o>*</span><span class=n>currentBatch</span><span class=p>;</span>            <span class=c1>// Current render batch
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>rlRenderBatch</span> <span class=n>defaultBatch</span><span class=p>;</span>             <span class=c1>// Default internal render batch
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>rlglData</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div></div><p><code>rlglData</code>中存储着整个Batch Rendering需要的数据，其最后是一个全局变量：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>static</span> <span class=n>rlglData</span> <span class=n>RLGL</span> <span class=o>=</span> <span class=p>{</span> <span class=mi>0</span> <span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>其中对Batch Rendering的数据定义是结构体<code>rlRenderBatch</code>：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// rlRenderBatch type
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>rlRenderBatch</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>bufferCount</span><span class=p>;</span>            <span class=c1>// Number of vertex buffers (multi-buffering support)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>int</span> <span class=n>currentBuffer</span><span class=p>;</span>          <span class=c1>// Current buffer tracking in case of multi-buffering
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>rlVertexBuffer</span> <span class=o>*</span><span class=n>vertexBuffer</span><span class=p>;</span> <span class=c1>// Dynamic buffer(s) for vertex data
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=n>rlDrawCall</span> <span class=o>*</span><span class=n>draws</span><span class=p>;</span>          <span class=c1>// Draw calls array, depends on textureId
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>int</span> <span class=n>drawCounter</span><span class=p>;</span>            <span class=c1>// Draw calls counter
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>float</span> <span class=n>currentDepth</span><span class=p>;</span>         <span class=c1>// Current depth value for next draw
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span> <span class=n>rlRenderBatch</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>成员解释如下：</p><ul><li><code>vertexBuffer</code>,<code>bufferCount</code>和<code>currentBuffer</code>：分别指定了存储顶点数据的buffer(s)，以及当前的buffer下标，和<code>vertexBuffer</code>中buffer的数量</li><li><code>draws</code>,<code>drawCounter</code>：<code>draws</code>代表一个<code>DrawCall</code>，而<code>drawCounter</code>则存储<code>draws</code>中有多少个<code>rlDrawCall</code></li><li><code>currentDepth</code>：当前的深度值。当你在绘制2D图像的时候，后绘制的图像应该在先绘制的图像后面（z值要更大）。每次绘制的时候，顶点的z值就会应用这里的<code>currentDepth</code>，然后<code>currentDepth</code>会自动变大一些以实现前面的功能。</li></ul><h4 id=rlvertexbuffer><a href=#rlvertexbuffer class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:rlvertexbuffer class=headings>rlVertexBuffer</a></h4><p>然后是存储顶点数据的<code>rlVertexBuffer</code>：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Dynamic vertex buffers (position + texcoords + colors + indices arrays)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>rlVertexBuffer</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>elementCount</span><span class=p>;</span>           <span class=c1>// Number of elements in the buffer (QUADS)
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=kt>float</span> <span class=o>*</span><span class=n>vertices</span><span class=p>;</span>            <span class=c1>// Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>float</span> <span class=o>*</span><span class=n>texcoords</span><span class=p>;</span>           <span class=c1>// Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>unsigned</span> <span class=kt>char</span> <span class=o>*</span><span class=n>colors</span><span class=p>;</span>      <span class=c1>// Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#if defined(GRAPHICS_API_OPENGL_11) || defined(GRAPHICS_API_OPENGL_33)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=kt>unsigned</span> <span class=kt>int</span> <span class=o>*</span><span class=n>indices</span><span class=p>;</span>      <span class=c1>// Vertex indices (in case vertex data comes indexed) (6 indices per quad)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_ES2)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=kt>unsigned</span> <span class=kt>short</span> <span class=o>*</span><span class=n>indices</span><span class=p>;</span>    <span class=c1>// Vertex indices (in case vertex data comes indexed) (6 indices per quad)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>vaoId</span><span class=p>;</span>         <span class=c1>// OpenGL Vertex Array Object id
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>vboId</span><span class=p>[</span><span class=mi>4</span><span class=p>];</span>      <span class=c1>// OpenGL Vertex Buffer Objects id (4 types of vertex data)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span> <span class=n>rlVertexBuffer</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>结构解释如下：</p><ul><li><code>elementCount</code>：</li><li><code>vertices</code>：顶点数据，由<code>x</code>,<code>y</code>,<code>z</code>三个分量组成</li><li><code>texcoords</code>：顶点的纹理坐标，由<code>u</code>,<code>v</code>两个分量组成</li><li><code>colors</code>：顶点颜色，由<code>r</code>,<code>g</code>,<code>b</code>,<code>a</code>四个分量组成</li><li><code>indices</code>：顶点的索引</li><li><code>vaoId</code>：OpenGL中Vertex Attributes的ID</li><li><code>vboId[4]</code>：OpenGL中的Buffer的ID，分别对应<code>vertices</code>，<code>texcoords</code>，<code>colors</code>和<code>indices</code>（也就是说前三个类型是<code>GL_ARRAY_BUFFER</code>，最后一个是<code>GL_ELEMENT_BUFFER</code>）</li></ul><p>可以看出<code>Raylib</code>对Vertex的各信息组织是分开的，并用四个Buffer存储，不像Learning OpenGL教程中放在一起。</p><h4 id=rldrawcall><a href=#rldrawcall class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:rldrawcall class=headings>rlDrawCall</a></h4><p>然后看一下<code>rlDrawCall</code>：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Draw call type
+</span></span></span><span class=line><span class=cl><span class=c1>// NOTE: Only texture changes register a new draw, other state-change-related elements are not
+</span></span></span><span class=line><span class=cl><span class=c1>// used at this moment (vaoId, shaderId, matrices), raylib just forces a batch draw call if any
+</span></span></span><span class=line><span class=cl><span class=c1>// of those state-change happens (this is done in core module)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>rlDrawCall</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>mode</span><span class=p>;</span>                   <span class=c1>// Drawing mode: LINES, TRIANGLES, QUADS
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>int</span> <span class=n>vertexCount</span><span class=p>;</span>            <span class=c1>// Number of vertex of the draw
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>int</span> <span class=n>vertexAlignment</span><span class=p>;</span>        <span class=c1>// Number of vertex required for index alignment (LINES, TRIANGLES)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//unsigned int vaoId;       // Vertex array id to be used on the draw -&gt; Using RLGL.currentBatch-&gt;vertexBuffer.vaoId
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//unsigned int shaderId;    // Shader id to be used on the draw -&gt; Using RLGL.currentShaderId
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>textureId</span><span class=p>;</span>     <span class=c1>// Texture id to be used on the draw -&gt; Use to create new draw call if changes
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=c1>//Matrix projection;        // Projection matrix for this draw -&gt; Using RLGL.projection by default
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//Matrix modelview;         // Modelview matrix for this draw -&gt; Using RLGL.modelview by default
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span> <span class=n>rlDrawCall</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>各结构解释如下：</p><ul><li><code>mode</code>：绘制的类型，就是一开始说的三种类型</li><li><code>vertexCount</code>：绘制所需的顶点数目，之后会直接应用在<code>glDrawArrays()</code>或<code>glDrawElements()</code>函数中</li><li><code>vertexAlignment</code>：顶点的对齐</li><li><code>textureId</code>：要绘制的图像</li></ul><p>最后绘制的时候，对于每一个<code>rlDrawCall</code>，都会有一个DrawCall一次性将其中的所有数据全部绘制。</p><p>这里要说一下<code>vertexAlignment</code>的作用。之前说过<code>rlVertexBuffer.vboId[4]</code>中最后一个Buffer是索引Buffer，但是不总是能用到这个Buffer（比如你要绘制不连续的三角形，或者很多条不连续的直线时，这个Buffer就完全无用（<code>Raylib</code>中就是当你的<code>mode</code>为<code>RL_LINES</code>或<code>RL_TRIANGLES</code>时），调用<code>glDrawArrays()</code>就好了）。那么如果用不到，常见的做法是在将顶点数据放入<code>rlVertexBuffer</code>中的时候，同时置索引Buffer处的索引为一个固定值：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>vertices</span> <span class=p>:</span> <span class=p>(</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>)</span> <span class=p>(</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>)</span> <span class=p>(</span><span class=mf>10.0</span><span class=p>,</span> <span class=mf>11.0</span><span class=p>,</span> <span class=mf>12.0</span><span class=p>,</span> <span class=mf>13.0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>indices</span>  <span class=p>:</span> <span class=o>-</span><span class=mi>1</span>              <span class=o>-</span><span class=mi>1</span>              <span class=mi>6</span> <span class=mi>7</span> <span class=mi>8</span> <span class=mi>7</span> <span class=mi>8</span> <span class=mi>9</span>
+</span></span><span class=line><span class=cl><span class=err>是否使用：</span>                   <span class=err>不使用</span>           <span class=err>不使用</span>           <span class=err>使用，绘制一个矩形</span>   
+</span></span></code></pre></td></tr></table></div></div></div><p>但是<code>Raylib</code>使用了另一种方法：直接将索引Buffer初始化为绘制多个矩形的Buffer：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=n>indices</span> <span class=err>：</span> <span class=mi>0</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>3</span>  <span class=mi>4</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>7</span>  <span class=mi>8</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>11</span> <span class=p>...</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>每六个元素代表绘制一个矩形。那么你将数据放入<code>rlVertexBuffer::vertices/texcoords/colors</code>中的时候，就需要和<code>indices</code>对齐。比如我现在要绘制一个矩形，那我直接将数据放入即可：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>vertices</span> <span class=p>:</span> <span class=n>v0</span> <span class=n>v1</span> <span class=n>v2</span> <span class=n>v3</span>
+</span></span><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>indices</span>  <span class=p>:</span> <span class=mi>0</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>3</span>    <span class=mi>4</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>7</span>
+</span></span><span class=line><span class=cl><span class=err>是否使用</span><span class=nl>indces</span><span class=p>:</span>				<span class=err>会使用</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>如果我接下来要绘制一个单独的三角形呢？依旧将数据放入：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>vertices</span> <span class=p>:</span> <span class=n>v0</span> <span class=n>v1</span> <span class=n>v2</span> <span class=n>v3</span>    <span class=n>v4</span> <span class=n>v5</span> <span class=n>v6</span>
+</span></span><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>indices</span>  <span class=p>:</span> <span class=mi>0</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>3</span>    <span class=mi>4</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>7</span>   <span class=mi>8</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>11</span>
+</span></span><span class=line><span class=cl><span class=err>是否使用</span><span class=nl>indces</span><span class=p>:</span>				<span class=err>会使用</span>          <span class=err>不会使用</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>那这个时候我又要绘制矩形呢？这个时候矩形应该能够利用到<code>indices</code>中的索引才行，所以我不能直接放入<code>vertices</code>末尾，如果直接放入，顶点对应的索引下标会变为<code>7 8 9 8 9 10</code>而不是我们要的<code>8 9 10 9 10 11</code>。所以这个时候就要对齐，<code>Raylib</code>会设置<code>rlDrawCall::vertexAlignment</code>为1以指定偏移量：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>vertices</span> <span class=p>:</span> <span class=n>v0</span> <span class=n>v1</span> <span class=n>v2</span> <span class=n>v3</span>    <span class=n>v4</span> <span class=n>v5</span> <span class=n>v6</span> <span class=p>[</span><span class=n>v7</span><span class=p>]</span> <span class=n>v8</span> <span class=n>v9</span> <span class=n>v10</span> <span class=n>v11</span>
+</span></span><span class=line><span class=cl><span class=n>rlVertexBuffer</span><span class=o>::</span><span class=nl>indices</span>  <span class=p>:</span> <span class=mi>0</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>1</span> <span class=mi>2</span> <span class=mi>3</span>    <span class=mi>4</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>5</span> <span class=mi>6</span> <span class=mi>7</span>   <span class=mi>8</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>9</span> <span class=mi>10</span> <span class=mi>11</span>
+</span></span><span class=line><span class=cl><span class=err>是否使用</span><span class=nl>indces</span><span class=p>:</span>				<span class=err>会使用</span>          <span class=err>不会使用</span>        <span class=err>会使用</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>注意这里的<code>v7</code>（即<code>vertices[7]</code>）是没有数据的，只是用来占位的。</p><p>而是否使用<code>indices</code>由<code>rlDrawCall::mode</code>来决定。是<code>RL_QUAD</code>就调用<code>glDrawElements</code>并使用索引Buffer。否则调用<code>glDrawArray()</code>。</p><h3 id=batch-rendering的源码><a href=#batch-rendering的源码 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:batch-rendering的源码 class=headings>Batch Rendering的源码</a></h3><h4 id=初始化rlgl部分><a href=#初始化rlgl部分 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:初始化rlgl部分 class=headings>初始化RLGL部分</a></h4><p>初始化<code>RLGL</code>部分的代码在：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>//&gt; src/rlgl.h 2477
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>rlRenderBatch</span> <span class=nf>rlLoadRenderBatch</span><span class=p>(</span><span class=kt>int</span> <span class=n>numBuffers</span><span class=p>,</span> <span class=kt>int</span> <span class=n>bufferElements</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>rlRenderBatch</span> <span class=n>batch</span> <span class=o>=</span> <span class=p>{</span> <span class=mi>0</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=c1>// Initialize CPU (RAM) vertex buffers (position, texcoord, color data and indexes)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//--------------------------------------------------------------------------------------------
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span> <span class=o>=</span> <span class=p>(</span><span class=n>rlVertexBuffer</span> <span class=o>*</span><span class=p>)</span><span class=n>RL_MALLOC</span><span class=p>(</span><span class=n>numBuffers</span><span class=o>*</span><span class=k>sizeof</span><span class=p>(</span><span class=n>rlVertexBuffer</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>numBuffers</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>...(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// Indices can be initialized right now
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=p>(</span><span class=mi>6</span><span class=o>*</span><span class=n>bufferElements</span><span class=p>);</span> <span class=n>j</span> <span class=o>+=</span> <span class=mi>6</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span> <span class=o>+</span> <span class=mi>2</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span> <span class=o>+</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span> <span class=o>+</span> <span class=mi>3</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span> <span class=o>+</span> <span class=mi>4</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span> <span class=o>+</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>batch</span><span class=p>.</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>indices</span><span class=p>[</span><span class=n>j</span> <span class=o>+</span> <span class=mi>5</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span><span class=o>*</span><span class=n>k</span> <span class=o>+</span> <span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>k</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>...(</span><span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p><code>(1)</code>处省略的是<code>batch</code>中各个数组<code>vertices, indices, texcoords, colors</code>的内存初始化。紧接着的代码是初始化<code>indices</code>的部分。然后<code>(2)</code>处省略的是对<code>vaoId</code>和<code>vboId[4]</code>的初始化和绑定，以及对<code>draws</code>成员的初始化。省略的代码都是常规操作。</p><p>这个函数在一开始初始化窗口（<code>void InitWindow(int width, int height, const char *title)</code>）时会调用（<code>InitGraphicsDevice()</code>-><code>rlglInit()</code>-><code>rlLoadRenderBatch()</code>）。最后返回值会给<code>RLGL</code>。</p><p>需要注意的是，这个函数传入的参数决定了batch buffer和buffer中能够存储的vertex数目。这个数目之后是不会变的。</p><h4 id=batch部分><a href=#batch部分 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:batch部分 class=headings>Batch部分</a></h4><p>通过刚才的初始化我们知道，<code>RLGL.currentBatch->vertexBuffer</code>和<code>RLGL.currentBatch->draws</code>的数目初始化后是固定不变的。那么<code>Raylib</code>在何时会真正调用DrawCall绘制呢？答案是：</p><ul><li>当顶点数据超出<code>vertexBuffer</code>时，调用所有存储的drawcall然后清除<code>draws</code>和<code>vertexBuffer</code>中数据</li><li>当<code>draws</code>已满时，调用所有drawcall然后清除<code>draws</code>和<code>vertexBuffer</code>中数据</li><li>调用<code>void EndDrawing(void)</code>时，代表游戏循环中的渲染全部结束了，会将剩下的batch全部绘制掉</li></ul><p>那么何时会出现新对的drawcall呢？答案如下：</p><ul><li>需要绘制的元素类型和当前drawcall类型（即<code>mode</code>成员）不一致时</li><li>改变了<code>texture</code>时</li></ul><h5 id=典型raylib绘制程序结构分析><a href=#典型raylib绘制程序结构分析 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:典型raylib绘制程序结构分析 class=headings>典型raylib绘制程序结构分析</a></h5><p>一个典型的<code>Raylib</code>程序如下：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// 精简过后的examples/shapes/shapes_basic_shapes.c
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;raylib.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=kt>int</span> <span class=n>screenWidth</span> <span class=o>=</span> <span class=mi>800</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=kt>int</span> <span class=n>screenHeight</span> <span class=o>=</span> <span class=mi>450</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>InitWindow</span><span class=p>(</span><span class=n>screenWidth</span><span class=p>,</span> <span class=n>screenHeight</span><span class=p>,</span> <span class=s>&#34;raylib [shapes] example - basic shapes drawing&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=o>!</span><span class=n>WindowShouldClose</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>BeginDrawing</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=n>ClearBackground</span><span class=p>(</span><span class=n>RAYWHITE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// Circle shapes and lines
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>DrawCircle</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>5</span><span class=p>,</span> <span class=mi>120</span><span class=p>,</span> <span class=mi>35</span><span class=p>,</span> <span class=n>DARKBLUE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>DrawCircleGradient</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>5</span><span class=p>,</span> <span class=mi>220</span><span class=p>,</span> <span class=mi>60</span><span class=p>,</span> <span class=n>GREEN</span><span class=p>,</span> <span class=n>SKYBLUE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>DrawCircleLines</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>5</span><span class=p>,</span> <span class=mi>340</span><span class=p>,</span> <span class=mi>80</span><span class=p>,</span> <span class=n>DARKBLUE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// Rectangle shapes and lines
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>DrawRectangle</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>2</span> <span class=o>-</span> <span class=mi>60</span><span class=p>,</span> <span class=mi>100</span><span class=p>,</span> <span class=mi>120</span><span class=p>,</span> <span class=mi>60</span><span class=p>,</span> <span class=n>RED</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>DrawRectangleGradientH</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>2</span> <span class=o>-</span> <span class=mi>90</span><span class=p>,</span> <span class=mi>170</span><span class=p>,</span> <span class=mi>180</span><span class=p>,</span> <span class=mi>130</span><span class=p>,</span> <span class=n>MAROON</span><span class=p>,</span> <span class=n>GOLD</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>DrawRectangleLines</span><span class=p>(</span><span class=n>screenWidth</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>2</span> <span class=o>-</span> <span class=mi>40</span><span class=p>,</span> <span class=mi>320</span><span class=p>,</span> <span class=mi>80</span><span class=p>,</span> <span class=mi>60</span><span class=p>,</span> <span class=n>ORANGE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>EndDrawing</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>CloseWindow</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>通常渲染以一对<code>BeginDraw()</code>，<code>EndDrawing()</code>包括，里面有所有的渲染调用函数。</p><p>以<code>DrawCircle</code>为例，他的实现如下（最里面调用的是<code>DrawCircleSector</code>）：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=nf>DrawCircleSector</span><span class=p>(</span><span class=n>Vector2</span> <span class=n>center</span><span class=p>,</span> <span class=kt>float</span> <span class=n>radius</span><span class=p>,</span> <span class=kt>float</span> <span class=n>startAngle</span><span class=p>,</span> <span class=kt>float</span> <span class=n>endAngle</span><span class=p>,</span> <span class=kt>int</span> <span class=n>segments</span><span class=p>,</span> <span class=n>Color</span> <span class=n>color</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=p>...(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(SUPPORT_QUADS_DRAW_MODE)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=n>rlSetTexture</span><span class=p>(</span><span class=n>texShapes</span><span class=p>.</span><span class=n>id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>rlBegin</span><span class=p>(</span><span class=n>RL_QUADS</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// NOTE: Every QUAD actually represents two segments
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>segments</span><span class=o>/</span><span class=mi>2</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlColor4ub</span><span class=p>(</span><span class=n>color</span><span class=p>.</span><span class=n>r</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>g</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>b</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>a</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>rlTexCoord2f</span><span class=p>(</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>x</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>width</span><span class=p>,</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>y</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>height</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>rlTexCoord2f</span><span class=p>(</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>x</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>width</span><span class=p>,</span> <span class=p>(</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>height</span><span class=p>)</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>height</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>sinf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=n>angle</span><span class=p>)</span><span class=o>*</span><span class=n>radius</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>cosf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=n>angle</span><span class=p>)</span><span class=o>*</span><span class=n>radius</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>rlTexCoord2f</span><span class=p>((</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>width</span><span class=p>)</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>width</span><span class=p>,</span> <span class=p>(</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>height</span><span class=p>)</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>height</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>sinf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>cosf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>rlTexCoord2f</span><span class=p>((</span><span class=n>texShapesRec</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>width</span><span class=p>)</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>width</span><span class=p>,</span> <span class=n>texShapesRec</span><span class=p>.</span><span class=n>y</span><span class=o>/</span><span class=n>texShapes</span><span class=p>.</span><span class=n>height</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>sinf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=o>*</span><span class=mi>2</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>cosf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=o>*</span><span class=mi>2</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>angle</span> <span class=o>+=</span> <span class=p>(</span><span class=n>stepLength</span><span class=o>*</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// NOTE: In case number of segments is odd, we add one last piece to the cake
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=p>...(</span><span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>rlSetTexture</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=n>rlBegin</span><span class=p>(</span><span class=n>RL_TRIANGLES</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>segments</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlColor4ub</span><span class=p>(</span><span class=n>color</span><span class=p>.</span><span class=n>r</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>g</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>b</span><span class=p>,</span> <span class=n>color</span><span class=p>.</span><span class=n>a</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>sinf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=n>angle</span><span class=p>)</span><span class=o>*</span><span class=n>radius</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>cosf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=n>angle</span><span class=p>)</span><span class=o>*</span><span class=n>radius</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlVertex2f</span><span class=p>(</span><span class=n>center</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>sinf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>,</span> <span class=n>center</span><span class=p>.</span><span class=n>y</span> <span class=o>+</span> <span class=n>cosf</span><span class=p>(</span><span class=n>DEG2RAD</span><span class=o>*</span><span class=p>(</span><span class=n>angle</span> <span class=o>+</span> <span class=n>stepLength</span><span class=p>))</span><span class=o>*</span><span class=n>radius</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>angle</span> <span class=o>+=</span> <span class=n>stepLength</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>rlEnd</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p><code>(1)</code>处省略了一些针对扇形计算的代码。<code>(2)</code>处则省略了对特殊情况的处理。</p><p>我们主要看结构，可以看到首先会使用<code>rlSetTexture()</code>设置纹理，然后渲染代码总以一对<code>rlBegin(XXX)</code>,<code>rlEnd()</code>包裹，在里面通过<code>rlColor4ub()</code>,<code>rlVertex2f()</code>,<code>rlTexCoord2f()</code>指定顶点的数据。注意<code>rlVertex2f()</code>一定要在最后调用。因为<code>rlColor4ub()</code>和<code>rlTexCoord2f()</code>是将数据存在<code>RLGL</code>中。</p><h5 id=改变texture><a href=#改变texture class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:改变texture class=headings>改变texture</a></h5><p>改变texture会导致产生新drawcall：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Set current texture to use
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span> <span class=nf>rlSetTexture</span><span class=p>(</span><span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>id</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>id</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_11)
+</span></span></span><span class=line><span class=cl><span class=cp></span>        <span class=n>rlDisableTexture</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span>        <span class=c1>// NOTE: If quads batch limit is reached, we force a draw call and next batch starts
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>&gt;=</span>
+</span></span><span class=line><span class=cl>            <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>elementCount</span><span class=o>*</span><span class=mi>4</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlDrawRenderBatch</span><span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_11)
+</span></span></span><span class=line><span class=cl><span class=cp></span>        <span class=n>rlEnableTexture</span><span class=p>(</span><span class=n>id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>textureId</span> <span class=o>!=</span> <span class=n>id</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// Make sure current RLGL.currentBatch-&gt;draws[i].vertexCount is aligned a multiple of 4,
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=c1>// that way, following QUADS drawing will keep aligned with index processing
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=c1>// It implies adding some extra alignment vertex at the end of the draw,
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=c1>// those vertex are not processed but they are considered as an additional offset
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=c1>// for the next set of vertex to be drawn
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_LINES</span><span class=p>)</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>)</span><span class=o>?</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=nl>vertexCount</span> <span class=p>:</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>4</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_TRIANGLES</span><span class=p>)</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>)</span><span class=o>?</span> <span class=mi>1</span> <span class=o>:</span> <span class=p>(</span><span class=mi>4</span> <span class=o>-</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>4</span><span class=p>)));</span>
+</span></span><span class=line><span class=cl>                <span class=k>else</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexAlignment</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>                <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexAlignment</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>&gt;=</span> <span class=n>RL_DEFAULT_BATCH_DRAWCALLS</span><span class=p>)</span> <span class=n>rlDrawRenderBatch</span><span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>textureId</span> <span class=o>=</span> <span class=n>id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>22行在判断当前texture是否改变。如果改变了，24行的<code>if</code>内会计算alignment，然后35~41行会新增drawcall数据结构，43行时会将信息存入。</p><p>这里面的<code>rlDrawRenderBatch()</code>是真正进行batch rendering的地方。后面会说。</p><h5 id=开始进行渲染rlbegin><a href=#开始进行渲染rlbegin class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:开始进行渲染rlbegin class=headings>开始进行渲染rlBegin</a></h5><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Initialize drawing mode (how to organize vertex)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span> <span class=nf>rlBegin</span><span class=p>(</span><span class=kt>int</span> <span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Draw mode can be RL_LINES, RL_TRIANGLES and RL_QUADS
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// NOTE: In all three cases, vertex are accumulated over default internal vertex buffer
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>!=</span> <span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// Make sure current RLGL.currentBatch-&gt;draws[i].vertexCount is aligned a multiple of 4,
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// that way, following QUADS drawing will keep aligned with index processing
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// It implies adding some extra alignment vertex at the end of the draw,
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// those vertex are not processed but they are considered as an additional offset
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// for the next set of vertex to be drawn
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>rlDrawCall</span><span class=o>*</span> <span class=n>draw</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_LINES</span><span class=p>)</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=p>((</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexCount</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>)</span><span class=o>?</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=nl>vertexCount</span> <span class=p>:</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>4</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_TRIANGLES</span><span class=p>)</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=p>((</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexCount</span> <span class=o>&lt;</span> <span class=mi>4</span><span class=p>)</span><span class=o>?</span> <span class=mi>1</span> <span class=o>:</span> <span class=p>(</span><span class=mi>4</span> <span class=o>-</span> <span class=p>(</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>4</span><span class=p>)));</span>
+</span></span><span class=line><span class=cl>            <span class=k>else</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexAlignment</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexAlignment</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+=</span> <span class=n>draw</span><span class=o>-&gt;</span><span class=n>vertexAlignment</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>&gt;=</span> <span class=n>RL_DEFAULT_BATCH_DRAWCALLS</span><span class=p>)</span> <span class=n>rlDrawRenderBatch</span><span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>=</span> <span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>textureId</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>defaultTextureId</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>这里每一行都很重要:</p><p>第6行的<code>if</code>判断<code>mode</code>是否改变了。如果改变了，说明要新增一个drawcall了。</p><p>第8行的<code>if</code>及里面的代码是在算当前vertex的alignment，并存储得到<code>draw->vertexAlignment</code>中（说是alignment，倒不如说是padding，是当前数据到之前数据之间的空隙个数。所以<code>RLGL.State.vertexCounter</code>也要加上这个空隙个数）。</p><p>然后27行看一下<code>draws</code>是否已满，满了触发batch rendering，之后就将数据放入新的<code>draws</code>中。</p><h5 id=将数据存放入buffer中><a href=#将数据存放入buffer中 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:将数据存放入buffer中 class=headings>将数据存放入buffer中</a></h5><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Define one vertex (color)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span> <span class=nf>rlColor4ub</span><span class=p>(</span><span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>x</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>y</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>z</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>w</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorr</span> <span class=o>=</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorg</span> <span class=o>=</span> <span class=n>y</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorb</span> <span class=o>=</span> <span class=n>z</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colora</span> <span class=o>=</span> <span class=n>w</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// rlTexCoord2d()同理，不贴了
+</span></span></span></code></pre></td></tr></table></div></div></div><p>然后<code>rlVertex2f()</code>会将所有数据放入buffer中：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Define one vertex (position)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span> <span class=nf>rlVertex2f</span><span class=p>(</span><span class=kt>float</span> <span class=n>x</span><span class=p>,</span> <span class=kt>float</span> <span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>rlVertex3f</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentDepth</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Define one vertex (position)
+</span></span></span><span class=line><span class=cl><span class=c1>// NOTE: Vertex position data is the basic information required for drawing
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span> <span class=nf>rlVertex3f</span><span class=p>(</span><span class=kt>float</span> <span class=n>x</span><span class=p>,</span> <span class=kt>float</span> <span class=n>y</span><span class=p>,</span> <span class=kt>float</span> <span class=n>z</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>float</span> <span class=n>tx</span> <span class=o>=</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>float</span> <span class=n>ty</span> <span class=o>=</span> <span class=n>y</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>float</span> <span class=n>tz</span> <span class=o>=</span> <span class=n>z</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Transform provided vector if required
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transformRequired</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>tx</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m0</span><span class=o>*</span><span class=n>x</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m4</span><span class=o>*</span><span class=n>y</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m8</span><span class=o>*</span><span class=n>z</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m12</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>ty</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m1</span><span class=o>*</span><span class=n>x</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m5</span><span class=o>*</span><span class=n>y</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m9</span><span class=o>*</span><span class=n>z</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m13</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>tz</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m2</span><span class=o>*</span><span class=n>x</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m6</span><span class=o>*</span><span class=n>y</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m10</span><span class=o>*</span><span class=n>z</span> <span class=o>+</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>transform</span><span class=p>.</span><span class=n>m14</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// WARNING: We can&#39;t break primitives when launching a new batch.
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// RL_LINES comes in pairs, RL_TRIANGLES come in groups of 3 vertices and RL_QUADS come in groups of 4 vertices.
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// We must check current draw.mode when a new vertex is required and finish the batch only if the draw.mode draw.vertexCount is %2, %3 or %4
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>&gt;</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>elementCount</span><span class=o>*</span><span class=mi>4</span> <span class=o>-</span> <span class=mi>4</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_LINES</span><span class=p>)</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// Reached the maximum number of vertices for RL_LINES drawing
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// Launch a draw call but keep current state for next vertices comming
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=c1>// NOTE: We add +1 vertex to the check for security
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=mi>2</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> <span class=k>if</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_TRIANGLES</span><span class=p>)</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>3</span> <span class=o>==</span> <span class=mi>0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=mi>3</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> <span class=k>if</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_QUADS</span><span class=p>)</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>%</span><span class=mi>4</span> <span class=o>==</span> <span class=mi>0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=mi>4</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Add vertices
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>vertices</span><span class=p>[</span><span class=mi>3</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span><span class=p>]</span> <span class=o>=</span> <span class=n>tx</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>vertices</span><span class=p>[</span><span class=mi>3</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>ty</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>vertices</span><span class=p>[</span><span class=mi>3</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>2</span><span class=p>]</span> <span class=o>=</span> <span class=n>tz</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Add current texcoord
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>texcoords</span><span class=p>[</span><span class=mi>2</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>texcoordx</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>texcoords</span><span class=p>[</span><span class=mi>2</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>texcoordy</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// TODO: Add current normal
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// By default rlVertexBuffer type does not store normals
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Add current color
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>colors</span><span class=p>[</span><span class=mi>4</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>colors</span><span class=p>[</span><span class=mi>4</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>colors</span><span class=p>[</span><span class=mi>4</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>2</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colorb</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>colors</span><span class=p>[</span><span class=mi>4</span><span class=o>*</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=mi>3</span><span class=p>]</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>colora</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>上面代码中，16行那个<code>if</code>表示如果需要进行变换，会乘上变换矩阵。</p><p>26行那个<code>if</code>是在看<code>RLGL.currentBatch->vertexBuffer</code>能否容纳新加入的顶点。如果不能，就触发BatchRendering先将所有点绘制掉，然后清空以存储新点（这一过程在<code>rlCheckRenderBatchLimit(count)</code>中）：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>bool</span> <span class=nf>rlCheckRenderBatchLimit</span><span class=p>(</span><span class=kt>int</span> <span class=n>vCount</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=n>overflow</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=k>if</span> <span class=p>((</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>+</span> <span class=n>vCount</span><span class=p>)</span> <span class=o>&gt;=</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>elementCount</span><span class=o>*</span><span class=mi>4</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>overflow</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// Store current primitive drawing mode and texture id
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kt>int</span> <span class=n>currentMode</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>currentTexture</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>textureId</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>rlDrawRenderBatch</span><span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=p>);</span>    <span class=c1>// NOTE: Stereo rendering is checked inside
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Restore state of last batch so we can continue adding vertices
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>mode</span> <span class=o>=</span> <span class=n>currentMode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>RLGL</span><span class=p>.</span><span class=n>currentBatch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>-</span> <span class=mi>1</span><span class=p>].</span><span class=n>textureId</span> <span class=o>=</span> <span class=n>currentTexture</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>overflow</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>第6行在判断能否容纳。如果不行，15行会触发Batch Rendering（里面会置<code>RLGL.currentBatch->drawCounter</code>为1，就是清空<code>draws</code>），然后18-19行将数据存到<code>draws</code>中。</p><h5 id=真正的batch-renderingrldrawrenderbatch><a href=#真正的batch-renderingrldrawrenderbatch class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:真正的batch-renderingrldrawrenderbatch class=headings>真正的Batch Rendering：rlDrawRenderBatch()</a></h5><p>真正的Batch Rendering代码巨多，这里简化一下贴上来：</p><div class=highlight><div class=chroma><div class=table-container><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=nf>rlDrawRenderBatch</span><span class=p>(</span><span class=n>rlRenderBatch</span> <span class=o>*</span><span class=n>batch</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=c1>// Update batch vertex buffers
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//------------------------------------------------------------------------------------------------------------
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// NOTE: If there is not vertex data, buffers doesn&#39;t need to be updated (vertexCount &gt; 0)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// TODO: If no data changed on the CPU arrays --&gt; No need to re-update GPU arrays (change flag required)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Activate elements VAO
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>ExtSupported</span><span class=p>.</span><span class=n>vao</span><span class=p>)</span> <span class=n>glBindVertexArray</span><span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>vaoId</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>...(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// Unbind the current VAO
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>ExtSupported</span><span class=p>.</span><span class=n>vao</span><span class=p>)</span> <span class=n>glBindVertexArray</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//------------------------------------------------------------------------------------------------------------
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Draw batch vertex buffers (considering VR stereo if required)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//------------------------------------------------------------------------------------------------------------
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>Matrix</span> <span class=n>matProjection</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>projection</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Matrix</span> <span class=n>matModelView</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>modelview</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>eyeCount</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>stereoRender</span><span class=p>)</span> <span class=n>eyeCount</span> <span class=o>=</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>eye</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>eye</span> <span class=o>&lt;</span> <span class=n>eyeCount</span><span class=p>;</span> <span class=n>eye</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>eyeCount</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=p>...(</span><span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// Draw buffers
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>vertexCounter</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=p>...(</span><span class=mi>3</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>ExtSupported</span><span class=p>.</span><span class=n>vao</span><span class=p>)</span> <span class=n>glBindVertexArray</span><span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>vertexBuffer</span><span class=p>[</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=p>].</span><span class=n>vaoId</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>else</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=p>...(</span><span class=mi>4</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>...(</span><span class=mi>5</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=n>vertexOffset</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>drawCounter</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// Bind current draw call texture, activated as GL_TEXTURE0 and Bound to sampler2D texture0 by default
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=n>glBindTexture</span><span class=p>(</span><span class=n>GL_TEXTURE_2D</span><span class=p>,</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>textureId</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>((</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_LINES</span><span class=p>)</span> <span class=o>||</span> <span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>mode</span> <span class=o>==</span> <span class=n>RL_TRIANGLES</span><span class=p>))</span> <span class=n>glDrawArrays</span><span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>mode</span><span class=p>,</span> <span class=n>vertexOffset</span><span class=p>,</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexCount</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=k>else</span>
+</span></span><span class=line><span class=cl>                <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_33)
+</span></span></span><span class=line><span class=cl><span class=cp></span>                    <span class=c1>// We need to define the number of indices to be processed: elementCount*6
+</span></span></span><span class=line><span class=cl><span class=c1></span>                    <span class=c1>// NOTE: The final parameter tells the GPU the offset in bytes from the
+</span></span></span><span class=line><span class=cl><span class=c1></span>                    <span class=c1>// start of the index buffer to the location of the first index to process
+</span></span></span><span class=line><span class=cl><span class=c1></span>                    <span class=n>glDrawElements</span><span class=p>(</span><span class=n>GL_TRIANGLES</span><span class=p>,</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>6</span><span class=p>,</span> <span class=n>GL_UNSIGNED_INT</span><span class=p>,</span> <span class=p>(</span><span class=n>GLvoid</span> <span class=o>*</span><span class=p>)(</span><span class=n>vertexOffset</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>6</span><span class=o>*</span><span class=k>sizeof</span><span class=p>(</span><span class=n>GLuint</span><span class=p>)));</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#if defined(GRAPHICS_API_OPENGL_ES2)
+</span></span></span><span class=line><span class=cl><span class=cp></span>                    <span class=n>glDrawElements</span><span class=p>(</span><span class=n>GL_TRIANGLES</span><span class=p>,</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexCount</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>6</span><span class=p>,</span> <span class=n>GL_UNSIGNED_SHORT</span><span class=p>,</span> <span class=p>(</span><span class=n>GLvoid</span> <span class=o>*</span><span class=p>)(</span><span class=n>vertexOffset</span><span class=o>/</span><span class=mi>4</span><span class=o>*</span><span class=mi>6</span><span class=o>*</span><span class=k>sizeof</span><span class=p>(</span><span class=n>GLushort</span><span class=p>)));</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=n>vertexOffset</span> <span class=o>+=</span> <span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>+</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexAlignment</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>RLGL</span><span class=p>.</span><span class=n>ExtSupported</span><span class=p>.</span><span class=n>vao</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>glBindBuffer</span><span class=p>(</span><span class=n>GL_ARRAY_BUFFER</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=n>glBindBuffer</span><span class=p>(</span><span class=n>GL_ELEMENT_ARRAY_BUFFER</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>glBindTexture</span><span class=p>(</span><span class=n>GL_TEXTURE_2D</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>    <span class=c1>// Unbind textures
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>RLGL</span><span class=p>.</span><span class=n>ExtSupported</span><span class=p>.</span><span class=n>vao</span><span class=p>)</span> <span class=n>glBindVertexArray</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span> <span class=c1>// Unbind VAO
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>        <span class=n>glUseProgram</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>    <span class=c1>// Unbind shader program
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>...(</span><span class=mi>6</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Reset RLGL.currentBatch-&gt;draws array
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>RL_DEFAULT_BATCH_DRAWCALLS</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>mode</span> <span class=o>=</span> <span class=n>RL_QUADS</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>vertexCount</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>batch</span><span class=o>-&gt;</span><span class=n>draws</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>textureId</span> <span class=o>=</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>defaultTextureId</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Reset active texture units for next batch
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=n>RLGL</span><span class=p>.</span><span class=n>State</span><span class=p>.</span><span class=n>activeTextureId</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Reset draws counter to one draw for the batch
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>batch</span><span class=o>-&gt;</span><span class=n>drawCounter</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//------------------------------------------------------------------------------------------------------------
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Change to next buffer in the list (in case of multi-buffering)
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>batch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>batch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span> <span class=o>&gt;=</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>bufferCount</span><span class=p>)</span> <span class=n>batch</span><span class=o>-&gt;</span><span class=n>currentBuffer</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><p>这里<code>(1)</code>处是将顶点信息<code>vertices</code>,<code>texcoords</code>等的数据传入对应buffer。</p><p><code>(2)</code>处的<code>eyeCount</code>如果是2，代表要用VR（从两个眼睛处看物体，并绘制两幅图），做一些用于VR绘制的准备操作（主要是设置矩阵）。</p><p><code>(3)</code>处使用着色器，并初始化一些矩阵。</p><p><code>(4)</code>处，如果不能够绑定<code>VAO</code>（因为OpenGLES2不支持），那么会使用GLES2的方式处理各个Buffer以正确绑定（不过如果有<code>GL_ARB_vertex_array_object</code>拓展支持也可以绑定（也就是<code>RLGL.ExtSupported.vao</code>指定的事情））。</p><p><code>(5)</code>处设置一些着色器的<code>Uniform</code>变量。</p><p><code>(6)</code>处渲染已经完毕了，重置一些变量的值。</p><p>真正的渲染在53行处开始：如果是<code>RL_LINES</code>或<code>RL_TRIANGLES</code>，则调用<code>glDrawArray()</code>直接绘制。否则调用<code>glDrawElements</code>进行绘制。然后<code>vertexOffset</code>通过<code>vertexCount</code>和<code>vertexAlignment</code>指向下一批数据。</p><h2 id=总结><a href=#总结 class=anchor-link><svg viewBox="0 0 512 512" class="icon anchor-icon"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96.0-59.27-59.26-59.27-155.7.0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757.0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037.0 01-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482.0 0120.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96.0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454.0 0020.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037.0 00-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639.0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg></a><a href=#contents:总结 class=headings>总结</a></h2><ul><li><p>batch rendering的优点：减少数据送往GPU的次数，减少drawcall</p></li><li><p><code>raylib</code>的batch rendering做法：将数据尽可能地先存在本地，相同类型的绘制使用一个drawcall一次性绘制完毕。</p></li><li><p>导致新增drawcall的情况：</p><ul><li>改变了texture</li><li>改变了绘制类型</li></ul><p>这就说明，如果要利用到batch rendering，就需要相同类型，相同texture的元素放在一起绘制。这也就是为什么游戏引擎中会使用图集的原因：同一类UI全部使用一个texture，texture不变。UI中能使用矩形就使用矩形，减少绘制类型的改变次数，以充分利用batch rendering。</p></li></ul></div></article><div class=updated-badge-container><span title="Updated @ 2024-12-15 18:29:17 UTC" style=cursor:help><svg width="130" height="20" class="updated-badge"><linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="a"><rect width="130" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#a)"><path class="updated-badge-left" d="M0 0h55v20H0z"/><path class="updated-badge-right" d="M55 0h75v20H55z"/><path fill="url(#b)" d="M0 0h130v20H0z"/></g><g fill="#fff" text-anchor="middle" font-size="110"><text x="285" y="150" fill="#010101" fill-opacity=".3" textLength="450" transform="scale(.1)">updated</text><text x="285" y="140" textLength="450" transform="scale(.1)">updated</text><text x="915" y="150" fill="#010101" fill-opacity=".3" textLength="650" transform="scale(.1)">2024-12-15</text><text x="915" y="140" textLength="650" transform="scale(.1)">2024-12-15</text></g></svg></span></div><div class=post-share><div class=share-items><div class="share-item facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/&amp;hashtag=%23%e5%9b%be%e5%bd%a2%e5%ad%a6" title target=_blank rel=noopener><svg viewBox="0 0 512 512" class="icon facebook-icon"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14.0 55.52 4.84 55.52 4.84v61h-31.28c-30.8.0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"/></svg></a></div><div class="share-item mastodon"><a href="/fedishare.html#title=Raylib%e7%9a%84BatchRendering&amp;description=%e6%9c%ac%e6%96%87%e5%88%86%e6%9e%90%e4%ba%86%e5%bc%80%e6%ba%90%e6%b8%b8%e6%88%8f%e6%a1%86%e6%9e%b6Raylib%20v4.5.0%e4%b8%ad%e7%9a%84batch%20rendering%e5%ae%9e%e7%8e%b0%e3%80%82%0a&amp;url=https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/" title target=_blank rel=noopener><svg viewBox="0 0 448 512" class="icon mastodon-icon"><path d="M433 179.11c0-97.2-63.71-125.7-63.71-125.7-62.52-28.7-228.56-28.4-290.48.0.0.0-63.72 28.5-63.72 125.7.0 115.7-6.6 259.4 105.63 289.1 40.51 10.7 75.32 13 103.33 11.4 50.81-2.8 79.32-18.1 79.32-18.1l-1.7-36.9s-36.31 11.4-77.12 10.1c-40.41-1.4-83-4.4-89.63-54a102.54 102.54.0 01-.9-13.9c85.63 20.9 158.65 9.1 178.75 6.7 56.12-6.7 105-41.3 111.23-72.9 9.8-49.8 9-121.5 9-121.5zm-75.12 125.2h-46.63v-114.2c0-49.7-64-51.6-64 6.9v62.5h-46.33V197c0-58.5-64-56.6-64-6.9v114.2H90.19c0-122.1-5.2-147.9 18.41-175 25.9-28.9 79.82-30.8 103.83 6.1l11.6 19.5 11.6-19.5c24.11-37.1 78.12-34.8 103.83-6.1 23.71 27.3 18.4 53 18.4 175z"/></svg></a></div><div class="share-item fediverse"><a href="/fedishare.html#title=Raylib%e7%9a%84BatchRendering&amp;description=%e6%9c%ac%e6%96%87%e5%88%86%e6%9e%90%e4%ba%86%e5%bc%80%e6%ba%90%e6%b8%b8%e6%88%8f%e6%a1%86%e6%9e%b6Raylib%20v4.5.0%e4%b8%ad%e7%9a%84batch%20rendering%e5%ae%9e%e7%8e%b0%e3%80%82%0a&amp;url=https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/" title target=_blank rel=noopener><svg viewBox="64 163 873 873" class="icon fediverse-icon"><defs><linearGradient id="fediverse-gradient"><stop offset="0" stop-color="#ff0101"/><stop offset="10%" stop-color="#9501ff"/><stop offset="50%" stop-color="#ffca01"/><stop offset="75%" stop-color="#01a3ff"/><stop offset="100%" stop-color="#65ff01"/></linearGradient></defs><path d="M539 176q-32 0-55 22t-25 55 20.5 58 56 27 58.5-20.5 27-56-20.5-59T544 176h-5zm-87 95-232 118q20 20 25 48l231-118q-19-20-24-48zm167 27q-13 25-38 38l183 184q13-25 39-38zM477 320 342 585l40 40 143-280q-28-5-48-25zm104 16q-22 11-46 10l-8-1 21 132 56 9zM155 370q-32 0-55 22.5t-25 55 20.5 58 56.5 27 59-21 26.5-56-21-58.5-55.5-27h-6zm90 68q1 9 1 18-1 19-10 35l132 21 26-50zm225 36-26 51 311 49q-1-8-1-17 1-19 10-36zm372 6q-32 1-55 23t-24.5 55 21 58 56 27 58.5-20.5 27-56.5-20.5-59-56.5-27h-6zM236 493q-13 25-39 38l210 210 51-25zm-40 38q-21 11-44 10l-9-1 40 256q21-10 45-9l8 1zm364 22 48 311q21-10 44-9l10 1-46-294zm195 23-118 60 8 56 135-68q-20-20-25-48zm26 49-119 231q28 5 48 25l119-231q-28-5-48-25zM306 654l-68 134q28 5 48 25l60-119zm262 17-281 143q19 20 24 48l265-135zM513 771l-51 25 106 107q13-25 39-38zM222 795q-32 0-55.5 22.5t-25 55 21 57.5 56 27 58.5-20.5 27-56-20.5-58.5-56.5-27h-5zm89 68q2 9 1 18-1 19-9 35l256 41q-1-9-1-18 1-18 10-35zm335 0q-32 0-55 22.5t-24.5 55 20.5 58 56 27 59-21 27-56-20.5-58.5-56.5-27h-6z"/></svg></a></div><div class="share-item twitter"><a href="https://twitter.com/share?url=https://visualgmq.github.io/posts/raylib%E7%9A%84batchrendering/&amp;text=Raylib%e7%9a%84BatchRendering&amp;hashtags=%e5%9b%be%e5%bd%a2%e5%ad%a6,%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb,&amp;via=VisualGMQ" title target=_blank rel=noopener><svg viewBox="0 0 512 512" class="icon twitter-icon"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645.0 138.72-105.583 298.558-298.558 298.558-59.452.0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055.0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421.0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391.0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04.0-57.828 46.782-104.934 104.934-104.934 30.213.0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg></a></div></div></div><div class=related-posts><h2 class=related-title><svg viewBox="0 0 512 512" class="icon related-icon"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6.0-12-5.4-12-12v-92h-92c-6.6.0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6.0 12 5.4 12 12v92h92c6.6.0 12 5.4 12 12v56z"/></svg></h2><ul class=related-list><li class=related-item><a href=/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%9B%9B/ class=related-link>EnTT源码分析【四】：storage</a></li><li class=related-item><a href=/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%89/ class=related-link>EnTT源码分析【三】：sparse set</a></li><li class=related-item><a href=/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%8C/ class=related-link>EnTT源码分析【二】：Entity</a></li><li class=related-item><a href=/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/ class=related-link>EnTT源码分析【一】：什么是ECS</a></li><li class=related-item><a href=/posts/%E4%BD%BF%E7%94%A8brdf%E5%AE%9A%E4%B9%89%E6%9D%90%E8%B4%A8/ class=related-link>使用BRDF定义材质</a></li></ul></div><div class=post-tags><a href=/tags/%E5%9B%BE%E5%BD%A2%E5%AD%A6/ rel=tag class=post-tags-link><svg viewBox="0 0 512 512" class="icon tag-icon"><path d="M0 252.118V48C0 21.49 21.49.0 48 0h204.118a48 48 0 0133.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137.0 67.882L293.823 497.941c-18.745 18.745-49.137 18.745-67.882.0L14.059 286.059A48 48 0 010 252.118zM112 64c-26.51.0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z"/></svg>图形学</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/ rel=tag class=post-tags-link><svg viewBox="0 0 512 512" class="icon tag-icon"><path d="M0 252.118V48C0 21.49 21.49.0 48 0h204.118a48 48 0 0133.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137.0 67.882L293.823 497.941c-18.745 18.745-49.137 18.745-67.882.0L14.059 286.059A48 48 0 010 252.118zM112 64c-26.51.0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z"/></svg>源码阅读</a></div><ul class=post-nav><li class=post-nav-prev><a href=/posts/entt%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%9B%9B/ rel=prev>&lt; EnTT源码分析【四】：storage</a></li><li class=post-nav-next><a href=/posts/%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0%E5%92%8C%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91/ rel=next>引用折叠和完美转发 ></a></li></ul><div id=utterances></div></div></main><div id=back-to-top class=back-to-top><a href=#><svg viewBox="0 0 448 512" class="icon arrow-up"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6.0-33.9L207 39c9.4-9.4 24.6-9.4 33.9.0l194.3 194.3c9.4 9.4 9.4 24.6.0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3.0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg></a></div><footer id=footer class=footer><div class=footer-inner><div class=site-info><span class=copyleft-symbol>🄯</span>&nbsp;©&nbsp;2022–2024&nbsp;<svg viewBox="0 0 512 512" class="icon footer-icon"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3.0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg></div><div class=powered-by>Powered by <a href=https://github.com/gohugoio/hugo target=_blank rel=noopener>Hugo</a> | Theme is <a href=https://github.com/reuixiy/hugo-theme-meme target=_blank rel=noopener>MemE</a></div><div class=site-copyright><a href=https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh target=_blank rel=noopener>CC BY-NC-SA 4.0</a></div><ul class=socials><li class=socials-item><a href=/rss.xml target=_blank rel="external noopener" title=RSS><svg viewBox="0 0 24 24" class="icon social-icon"><path d="M19.199 24C19.199 13.467 10.533 4.8.0 4.8V0c13.165.0 24 10.835 24 24h-4.801zM3.291 17.415c1.814.0 3.293 1.479 3.293 3.295.0 1.813-1.485 3.29-3.301 3.29C1.47 24 0 22.526.0 20.71s1.475-3.294 3.291-3.295zM15.909 24h-4.665c0-6.169-5.075-11.245-11.244-11.245V8.09c8.727.0 15.909 7.184 15.909 15.91z"/></svg></a></li><li class=socials-item><a href=2142587070@qq.com target=_blank rel="external noopener" title=Email><svg viewBox="0 0 512 512" class="icon social-icon"><path d="M464 64H48C21.49 64 0 85.49.0 112v288c0 26.51 21.49 48 48 48h416c26.51.0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 4e2V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V4e2H48z"/></svg></a></li><li class=socials-item><a href=https://github.com/VisualGMQ target=_blank rel="external noopener" title=GitHub><svg viewBox="0 0 24 24" class="icon social-icon"><path d="M12 .297c-6.63.0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577.0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93.0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176.0.0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22.0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22.0 1.606-.015 2.896-.015 3.286.0.315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a></li></ul></div></footer></div><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.css><script>if(typeof renderMathInElement=="undefined"){const e=e=>{const t=document.createElement("script");t.defer=!0,t.crossOrigin="anonymous",Object.keys(e).forEach(n=>{t[n]=e[n]}),document.body.appendChild(t)};e({src:"https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.js",onload:()=>{e({src:"https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/contrib/mhchem.min.js",onload:()=>{e({src:"https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/contrib/auto-render.min.js",onload:()=>{renderKaTex()}})}})}})}else renderKaTex();function renderKaTex(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"\\[",right:"\\]",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1}]})}</script><script>typeof MathJax=="undefined"?(window.MathJax={loader:{load:["[tex]/mhchem"]},tex:{inlineMath:{"[+]":[["$","$"]]},tags:"ams",packages:{"[+]":["mhchem"]}}},function(){const e=document.createElement("script");e.src="https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js",e.defer=!0,document.head.appendChild(e)}()):(MathJax.texReset(),MathJax.typeset())</script><script src=https://cdn.jsdelivr.net/npm/mermaid@8.8.3/dist/mermaid.min.js></script><script>Array.from(document.getElementsByClassName("language-mermaid")).forEach(e=>{e.parentElement.outerHTML=`<div class="mermaid">${e.innerText}</div>`});const mermaidConfig={startOnLoad:!0,flowchart:{useMaxWidth:!1,htmlLabels:!0},theme:"dark"};mermaid.initialize(mermaidConfig)</script><script>function loadComments(){(function(){const t=document.getElementById("utterances");if(!t)return;const e=document.createElement("script");e.src="https://utteranc.es/client.js",e.async=!0,e.crossOrigin="anonymous",e.setAttribute("repo","VisualGMQ/myblog-utterances-comment"),e.setAttribute("issue-term","pathname");const n=getCurrentTheme()==="dark";n?e.setAttribute("theme","gruvbox-dark"):e.setAttribute("theme","gruvbox-dark"),e.setAttribute("label","评论"),t.appendChild(e)})()}</script><script src=https://cdn.jsdelivr.net/npm/medium-zoom@latest/dist/medium-zoom.min.js></script><script>let imgNodes=document.querySelectorAll("div.post-body img");imgNodes=Array.from(imgNodes).filter(e=>e.parentNode.tagName!=="A"),mediumZoom(imgNodes,{background:"hsla(var(--color-bg-h), var(--color-bg-s), var(--color-bg-l), 0.95)"})</script><script src=https://cdn.jsdelivr.net/npm/instant.page@5.1.0/instantpage.min.js type=module defer></script><script async src=https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script></body></html>
