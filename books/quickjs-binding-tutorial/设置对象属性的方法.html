@@ -220,6 +220,23 @@ int JS_DefinePropertyGetSet(JSContext *ctx, JSValueConst this_obj, JSAtom prop, 
 <li><code>JS_PROP_THROW</code>：如果<code>JS_SetPropertyXXX</code>或<code>JS_DefinePropertyXXX</code>产生了非法行为，抛出一个异常。</li>
 <li><code>JS_PROP_THROW_STRICT</code>：在严格模式下判断是否非法并抛出异常</li>
 </ul>
+<h2 id="js_setpropertyfunctionlist"><a class="header" href="#js_setpropertyfunctionlist">JS_SetPropertyFunctionList</a></h2>
+<p>可以通过这个函数一次性绑定多个属性：</p>
+<pre><code class="language-cpp">const JSCFunctionListEntry entries[] = {
+    // bind member function
+    JS_CFUNC_DEF("introduce", 0, IntroduceBinding),
+	
+    // bind getter/settrer
+    JS_CGETSET_DEF("name", NameGetter, NameSetter),
+    JS_CGETSET_DEF("bmi", BMIBinding, nullptr),
+};
+
+JS_SetPropertyFunctionList(ctx, proto, entries, std::size(entries));
+</code></pre>
+<p>首先构造一个<code>JSCFunctionListEntry</code>数组，然后使用一些方便的宏就可以进行绑定。</p>
+<p>只需要将我们的绑定函数的函数指针传给宏即可，不需要担心函数类型不一致，宏会自动帮你处理（也就不需要<code>JSCFunctionType</code>）</p>
+<p>最后使用<code>JS_SetPropertyFunctionList</code>即可完成。</p>
+<p><strong>缺点：</strong><code>JSCFunctionListEntry[]</code>是传指针进去的。也就是说你需要保证此数组在<code>JS_Eval</code>之前是有效的。</p>
 <h2 id="删除属性"><a class="header" href="#删除属性">删除属性</a></h2>
 <p>使用<code>JS_DeleteProperty</code>函数。</p>
 <h2 id="js_setproperty和js_defineproperty的区别"><a class="header" href="#js_setproperty和js_defineproperty的区别">JS_SetProperty和JS_DefineProperty的区别</a></h2>
@@ -236,6 +253,9 @@ int JS_DefinePropertyGetSet(JSContext *ctx, JSValueConst this_obj, JSAtom prop, 
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="绑定模块.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -247,6 +267,9 @@ int JS_DefinePropertyGetSet(JSContext *ctx, JSValueConst this_obj, JSAtom prop, 
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="绑定模块.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
