@@ -1,6 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>VisualGMQ的博客</title><link>https://visualgmq.github.io/</link><description>VisualGMQ——一个游戏开发混子的博客</description><generator>Hugo 0.139.4 https://gohugo.io/</generator><language>zh-CN</language><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Mon, 17 Aug 2026 20:44:38 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://visualgmq.github.io/rss.xml"/><item><title>GinoGJK论文解析</title><link>https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</guid><pubDate>Mon, 17 Aug 2026 21:11:40 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>本文是《A Fast Robust GJK Implementation for Collision Detection of Convex Object》&lt;sup id="fnref:1">&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:1" class="footnote-ref" role="doc-noteref">[1]&lt;/a>&lt;/sup>论文的解读。&lt;/p>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>VisualGMQ的博客</title><link>https://visualgmq.github.io/</link><description>VisualGMQ——一个游戏开发混子的博客</description><generator>Hugo 0.139.4 https://gohugo.io/</generator><language>zh-CN</language><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 18 Aug 2026 13:51:39 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://visualgmq.github.io/rss.xml"/><item><title>EPA论文解析</title><link>https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</guid><pubDate>Tue, 18 Aug 2026 03:57:13 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>本文是Gino van den Bergen写的EPA&lt;sup id="fnref:1">&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:1" class="footnote-ref" role="doc-noteref">[1]&lt;/a>&lt;/sup>论文解析。&lt;/p>
+&lt;p>GJK算法只能获得两个不相交物体之间的距离以及最近点对，或者判断两个物体是否相交。但在相交时无法确定穿透深度和挤出距离。使用EPA可以解决这个问题。&lt;/p>
+&lt;p>本论文的大部分前置知识都基于&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">Gino之前写的GJK优化论文&lt;/a>。建议先看。此论文中也有对这些知识的回顾，但本文不再赘述。&lt;/p>
+&lt;h2 id="解析">&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#解析" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#contents:解析" class="headings">解析&lt;/a>&lt;/h2>
+&lt;p>整篇论文最核心的只有第四章述说了EPA算法。其他章节几乎都是对GinoGJK的回顾。&lt;/p>
+&lt;p>定义CSO(configuration space obstacle)为两个物体$A$,$B$的Minkowski差$A - B$。&lt;/p>
+$$
+p(A, B) = \inf \{||\vec{x}||:\vec{x} \in A - B\}
+$$&lt;p>
+这里$\inf$是infimum（下确界）的意思。&lt;/p>
+$$
+p(A, B) = \min \{||\vec{x}|| : \vec{x} \in \operatorname{co}(A - B)\}
+$$&lt;p>
+其实就是Minkowski差中边距离原点最近的距离。&lt;/p>
+&lt;p>接下来是计算穿透深度：&lt;/p>
+&lt;p>算法的输入是GJK的结果：一个包含原点的Simplex。&lt;/p>
+&lt;p>算法是迭代完成的。每次迭代中，选择距离原点最近的面上，指向原点的反方向$\vec{v}$作为支撑点查找方向找到新支撑点$\vec{w} = S_{A-B}(\vec{v})$。&lt;/p>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/GinoEPA%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/EPA%E6%B5%81%E7%A8%8B.png" alt="EPA流程">&lt;/p>
+&lt;p>新增点时，最短的边分裂成两条新边（2D情况）&lt;/p>
+&lt;p>在$R^3$下新增点时，旧面不仅要删除使用新的三个面替代，原始的polyhedron有可能因为此操作变为凹的。这时要删除其他面直到变为凸的，然后使用其他面的边和新点$\vec{w}$进行缝合(Suture)构造新polyhedron：&lt;/p>
+&lt;p>下图展示了构建新面时可能导致多个面被删除的情况（一般发生于球或球扫略体和凸几何体之间，纯粹的凸几何体之间不会发生）：&lt;/p>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/GinoEPA%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/EPA%E5%AF%BC%E8%87%B4%E5%A4%9A%E4%B8%AA%E9%9D%A2%E5%88%A0%E9%99%A4.png" alt="凸体中的EPA">&lt;/p>
+&lt;p>这里左图中上面两个面都会被删除。&lt;/p>
+&lt;p>而如何选择距离原点最近的边/面呢？这里可以用到优先队列，使用最近距离排序。每次都使用队头的边/面即可。&lt;/p>
+&lt;p>那么算法何时停止呢？对于Polyhedron之间的操作，只需要当新支撑点仍旧在当前Polyhedron中就行。这说明已经找不到新点了，算法结束。&lt;/p>
+$$
+|\vec{v}| \lt r \lt \vec{v}\frac{\vec{w}}{|\vec{v}|}
+$$$$
+\vec{v}\frac{\vec{w}}{|\vec{v}|} - |\vec{v}| \le \epsilon
+$$&lt;p>
+即可。这里$\epsilon$是用户给定的容差值。&lt;/p>
+&lt;p>实现中为了避免开方，一般比较这两者的平方值。&lt;/p>
+&lt;p>注意，这里$\vec{v}$是原点到当前支撑点的向量，长度不是1。&lt;/p>
+&lt;p>上下界的差值，其实就是CSO中边到原点最近距离，减去 当前膨胀的Simplex的边到原点距离。这个距离会随着算法的每步逐渐减小，直到等于0（polyhedron情况）或者小于容差$\epsilon$（二次曲线情况）。&lt;/p>
+&lt;p>所以这里不需要像GinoGJK那样保存历史上所有迭代步骤中的最大下界和最小上界。就用当前步骤中的值就行。&lt;/p>
+&lt;h3 id="3d情况下的优化">&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#3d情况下的优化" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#contents:3d情况下的优化" class="headings">3D情况下的优化&lt;/a>&lt;/h3>
+&lt;p>在3D情况下且含有二次曲面时，每次加新点时，需要将一个三角面分裂成3个新三角面。这不太好，因为：&lt;/p>
+&lt;ul>
+&lt;li>反复分列三角面后，整体的膨胀Simplex会呈现出长条形。这就有可能导致数值精度问题（详见GinoGJK论文和GJK原始论文）&lt;/li>
+&lt;li>由于三角形的边永远不会断裂（总是在原有边上连接新点变成面），当穿透深度接近初始多面体的边缘时，算法将很难接近表面。新增的点$\vec{w}$可能落到膨胀Simplex的某个边上。这可能导致之后的新点$\vec{w}_i = \vec{w}$从而导致算法死循环。&lt;/li>
+&lt;/ul>
+&lt;p>论文的处理方法是分裂三角面的时候同时分裂他们所在的边。对每条边$e$，使用边上离原点最近的点$\vec{v_e}$作为支撑点搜索方向找到$\vec{w_e} = S_{A-B}(\vec{v_e})$。然后用此点将边分裂成两条：&lt;/p>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/GinoEPA%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/%E5%88%86%E8%A3%82%E8%BE%B9.png" alt="分裂边.png">&lt;/p>
+&lt;p>但是，如果边已经是CSO的边界了就不需要拆分了（当CSO有扁面时就会发生）。这种情况当且仅当$\vec{v_e}\cdot \vec{w_e} = ||\vec{v_e}||^2$时会发生。所以如果检测到这个条件，就不要拆分边。&lt;/p>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/GinoEPA%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/%E4%B8%8D%E6%8B%86%E5%88%86%E7%9A%84%E8%BE%B9.png" alt="不拆分的边.png">&lt;/p>
+&lt;p>但实际操作中不会使用这个算法，而是使用前面说的面缝合方法更好（本质上也是打破旧边）。&lt;/p>
+&lt;h3 id="接触点对contact-points">&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#接触点对contact-points" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#contents:接触点对contact-points" class="headings">接触点对(Contact Points)&lt;/a>&lt;/h3>
+$$
+\vec{v} = a - b. a \in A, b \in B
+$$&lt;p>
+这两个点可以作为接触点返回给物理引擎。&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>&lt;a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/van-den-bergen.pdf" target="_blank" rel="noopener">Proximity Queries and Penetration Depth Computation on 3D Game Objects&lt;/a>&amp;#160;&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fnref:1" class="footnote-backref" role="doc-backlink">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon">&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/>&lt;/svg>&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>GinoGJK论文解析</title><link>https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/</guid><pubDate>Mon, 17 Aug 2026 21:11:40 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>本文是《A Fast Robust GJK Implementation for Collision Detection of Convex Object》&lt;sup id="fnref:1">&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:1" class="footnote-ref" role="doc-noteref">[1]&lt;/a>&lt;/sup>论文的解读。&lt;/p>
 &lt;p>此论文基于GJK原始论文&lt;sup id="fnref:2">&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:2" class="footnote-ref" role="doc-noteref">[2]&lt;/a>&lt;/sup>。阅读本文前也可阅读原始论文，或阅读我&lt;a href="https://visualgmq.github.io/posts/gjk%E5%8E%9F%E5%A7%8B%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">这篇&lt;/a>的原始论文解析。&lt;/p>
-&lt;p>由于这篇论文是Gino Van Den Berge写的。我后文中就称其为GinoGJK。&lt;/p>
+&lt;p>由于这篇论文是Gino Van Den Bergen写的。我后文中就称其为GinoGJK。&lt;/p>
 &lt;p>GinoGJK是目前游戏物理引擎中广泛采用的GJK实现。此论文的代码在Github&lt;sup id="fnref:3">&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:3" class="footnote-ref" role="doc-noteref">[3]&lt;/a>&lt;/sup>。几乎是现代GJK的标准实现。十分建议参考。本论文也是偏工程向的，看起来比原始GJK论文舒服很多。&lt;/p>
 &lt;p>本论文的算法假定在$R^3$下。但可以推广到$R^n$。&lt;/p>
 &lt;p>Gino Van Den Berge这个人也有著作《Collision Detection in Interactive 3D Environments》&lt;sup id="fnref:4">&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/#fn:4" class="footnote-ref" role="doc-noteref">[4]&lt;/a>&lt;/sup>。里面详细描述了此论文的GJK实现（以及后续他发布的带有Margin的GJK和EPA的论文实现）。&lt;/p>
@@ -931,7 +989,168 @@ $$&lt;p>
 &lt;p>&lt;a href="https://web.archive.org/web/20190411040123/http://aigamedev.com/open/article/clearance-based-pathfinding/" target="_blank" rel="noopener">Clearance-based Pathfinding and Hierarchical Annotated A* Search | AiGameDev.com&lt;/a>&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E5%AF%BB%E8%B7%AF%E4%B8%80/#fnref:6" class="footnote-backref" role="doc-backlink">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon">&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/>&lt;/svg>&lt;/a>&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E5%AF%BB%E8%B7%AF%E4%B8%80/#fnref1:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/div></description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E5%AF%BB%E8%B7%AF%E5%92%8Cai/">寻路和AI</category></item><item><title>从0开始制作游戏物理引擎（四）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</guid><pubDate>Sun, 19 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>这一章描述了判交和MTD算法，包括SAT等。&lt;/p>
+&lt;/div></description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E5%AF%BB%E8%B7%AF%E5%92%8Cai/">寻路和AI</category></item><item><title>从0开始制作游戏物理引擎（五）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/</guid><pubDate>Sun, 19 Jul 2026 23:24:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>这一章描述了GJK和EPA算法。首先描述了市面上大部分资料说明的通俗的GJK和EPA算法。然后给出了GJK论文的解析。&lt;/p>
+&lt;h2 id="gjk算法">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#gjk算法" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:gjk算法" class="headings">GJK算法&lt;/a>&lt;/h2>
+&lt;h3 id="minkowski和与差">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#minkowski和与差" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:minkowski和与差" class="headings">Minkowski和与差&lt;/a>&lt;/h3>
+&lt;p>首先定义“Minkowski和”与“Minkowski差”：&lt;/p>
+&lt;p>设有任意两个几何体（对凹凸性不作要求）$P_1$, $P_2$。&lt;/p>
+$$
+P_1 \oplus P_2 = \{p_1 + p_2 | p_1 \in P_1, p_2 \in P_2 \}
+$$&lt;p>
+即两个几何体中所有点&lt;strong>和&lt;/strong>的集合。&lt;/p>
+&lt;p>而Minkowski差则相反：&lt;/p>
+$$
+P_1 \ominus P_2 = \{p_1 - p_2 | p_1 \in P_1, p_2 \in P_2 \}
+$$&lt;p>
+即两个几何体中所有点&lt;strong>差&lt;/strong>的集合。&lt;/p>
+&lt;p>这两个定义在碰撞检测中十分有用。Minkowski和会在后面扫略体算法中广泛使用。而Minkowski差则在GJK中被使用。&lt;/p>
+&lt;p>Minkowski差有三个性质：&lt;/p>
+&lt;blockquote>
+&lt;p>如果两个物体相交，其Minkowski差一定包含原点&lt;/p>
+&lt;/blockquote>
+&lt;p>显然，总可以在两个物体上分别找到两个点，他们在相交区域内且坐标相同，那么他们的Minkowski差就是原点。&lt;/p>
+&lt;blockquote>
+&lt;p>如果两个物体不相交，其距离为Minkowski差到原点的距离&lt;/p>
+&lt;/blockquote>
+&lt;p>因为距离的定义是$||\vec{a} - \vec{b}||$而Minkowski差为$\vec{a} - \vec{b}$。那么两几何体的距离显然是$\min(||\vec{a} - \vec{b}||) = \min(||(\vec{a}-\vec{b}) - (0, 0, 0)||)$为最后的Minkowski差中到原点的距离。&lt;/p>
+&lt;blockquote>
+&lt;p>凸体的Minkowski和/差也是凸体&lt;/p>
+&lt;/blockquote>
+$$
+\begin{aligned}
+&amp; \forall x_1,x_2 \in Polygon \Rightarrow \\
+&amp; x = \lambda x_1 + (1 - \lambda) x_2 \in Polygon, \lambda \in [0, 1]
+\end{aligned}
+$$$$
+\begin{aligned}
+&amp; \forall a_1, a_2 \in Polygon_1, \forall b_1, b_2 \in Polygon_2 \\
+&amp; a_1 - b_1 = p_1 \in Polygon_1 \oplus Polygon_2 \\
+&amp; a_2 - b_2 = p_2 \in Polygon_1 \oplus Polygon_2 \\
+&amp; 且 \\
+&amp; \lambda p_1 + (1-\lambda) p_2 = \lambda(a_1 + b_1) + (1 - \lambda)(a_2 + b_2) = [\lambda a_1 + (1-\lambda)a_2] + [\lambda b_1 + (1-\lambda)b_2] = a^* + b^* \in Polygon_1 \oplus Polygon_2
+\end{aligned}
+$$&lt;p>
+正如上面所写，$Polygon_1 \oplus Polygon_2$内的点满足凸体定义，那么$Polygon_1 \oplus Polygon_2$就是凸体。&lt;/p>
+&lt;p>Minkowski差也同理可证。&lt;/p>
+&lt;p>有了这些性质，我们就可以有构造两个凸体的Minkowski和/差的算法（这个算法的动画过程可以看“参考3”）。Minkowski和的构造是：&lt;/p>
+&lt;p>按一定顺序（比如顺时针），在凸体的中心朝其顶点的方向（两个凸体都要），找$Polygon_1$和$Polygon_2$的Support点，将其做Minkowski和。最后得到的点集全部在$Polygon_1 \oplus Polygon_2$所成凸体的顶点。并且这些顶点也是按照指定顺序（这里是顺时针）排列。这样我们按顺序将这些点连起来就找到最后的凸体了。&lt;/p>
+&lt;p>这算法很容易理解：Support点是两个凸体某个方向最远的点，所以他们的和一定在这个方向最大，从而构成Minkowski和凸体中的顶点。而只找凸体中心朝顶点的方向是为了让算法在有限步骤内完成。&lt;/p>
+&lt;p>那么Minkowski差只是反过来：&lt;/p>
+&lt;p>按一定顺序，在凸体的中心朝其顶点的方向（设为$\vec{d}$），找$Polygon_1$中在$\vec{d}$上的Support点以及和$Polygon_2$在$-\vec{d}$的Support点，将其做Minkowski差。最后得到的点集全部在$Polygon_1 \ominus Polygon_2$所成凸体的顶点。并且这些顶点也是按照指定顺序排列。这样我们按顺序将这些点连起来就找到最后的凸体了。&lt;/p>
+&lt;p>&lt;strong>小注意点&lt;/strong>：严格来说，这里找Support点是隐含了用上一节说的Support点算法寻找。因为从数学意义上来说，Support点不一定是凸体端点（比如垂直于边的方向找到的点是在边上），从而两个点相加不构成最终凸体的顶点。&lt;/p>
+&lt;p>但我们也不会真的用这个算法求出最终的凸体，然后算原点到凸体的距离。GJK只用了这里面的思想。&lt;/p>
+&lt;h3 id="gjk算法-1">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#gjk算法-1" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:gjk算法-1" class="headings">GJK算法&lt;/a>&lt;/h3>
+&lt;p>先说明2D GJK算法，3D的只是其扩展：&lt;/p>
+&lt;ol>
+&lt;li>随意选取一个方向，找到此方向上Support点的Minkowski差$P_1$&lt;/li>
+&lt;li>然后选取朝向原点的方向$\vec{P_1O}$，找到这个方向上Support点的Minkowski差$P_2$&lt;/li>
+&lt;li>以$P_1$和$P_2$构成的线段的&lt;strong>朝向原点方向&lt;/strong>的法线为新方向，找到此方向上Support点的Minkowski差$P_3$&lt;/li>
+&lt;li>此时，$P_1,P_2,P_3$构成一个2D Simplex（也就是三角形）。判断此Simplex是否包含原点。如果包含，则两物体相交&lt;/li>
+&lt;li>如果不包含原点，找到三角形中离原点最近的边（假设为$P_1,P_2$），以此边&lt;strong>朝向原点方向&lt;/strong>的垂线作为新方向，找到此方向上的Support点的Minkowski差$P_4$&lt;/li>
+&lt;li>$P_1,P_2,P_4$会构成新的Simplex（这时$P_3$被丢弃）。使用此Simplex回到步骤4&lt;/li>
+&lt;li>如果构造新Simplex时，新找的Support点已经在原本的Simplex中了，此时说明原点总是在Minkowski差外，那么两物体不相交&lt;/li>
+&lt;/ol>
+&lt;p>可以看到。GJK算法的核心是“贪心地”构造Simplex，直到无法构造。&lt;/p>
+&lt;p>3D GJK算法一样，先如法炮制找到三个点构成一个三角形。后面的步骤不再找线到原点的垂线，而是用三角面朝向原点那侧的法线作为新方向，从而构造3D的Simplex（四面体）。然后判断原点是否在四面体内。&lt;/p>
+&lt;p>GJK中较为迷惑的是为什么总要取朝向原点的方向，因为相交要求Minkowski差包含原点，所以他不停地往原点的方向构造Simplex。算是一种贪心算法（其实是迭代下降法）&lt;/p>
+&lt;p>GJK的优点：&lt;/p>
+&lt;ol>
+&lt;li>大部分时候不需要遍历两个物体的所有顶点&lt;/li>
+&lt;li>算法仅要求能够找到两个物体在某方向上的Support点。不需要物体顶点，面法线等乱七八糟信息。严格意义上来说GJK的输入参数是两个Support点获取函数。&lt;/li>
+&lt;/ol>
+&lt;h4 id="gjk的退化">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#gjk的退化" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:gjk的退化" class="headings">GJK的退化&lt;/a>&lt;/h4>
+&lt;p>通过GJK的步骤可以看到，他是先构建点，再构建线段，再是三角面再是四面体。那如果其中任意一个构建中，新找到的Support点无法支持构建下一步的Simplex，这要怎么办呢？或者在还没构建出完整Simplex时，新点就已经在旧的Simplex上又要怎么处理呢。这种就是GJK的退化。&lt;/p>
+&lt;p>退化的处理在Gino的GJK论文中有说。我也有写&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">解析文章&lt;/a>。&lt;/p>
+&lt;h2 id="epa算法">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#epa算法" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:epa算法" class="headings">EPA算法&lt;/a>&lt;/h2>
+&lt;p>GJK能够告诉我们物体是否相交。但对于计算MTD来说，我们还想要知道两个物体的挤出深度（相交深度）和挤出方向。&lt;/p>
+&lt;p>某些引擎中，会使用Simplex到原点的距离以及对应垂线方向作为挤出深度和挤出方向。这是一种近似做法。因为最后的Simplex不一定在Minkowski差所产生的多边形的边上。理论上，只有边上离原点的距离才是最正确的：&lt;/p>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/GJK%E5%88%86%E7%A6%BB%E5%90%91%E9%87%8F.png" alt="GJK退化成线段">&lt;/p>
+&lt;p>这里Simplex是$\Delta_{BGE}$。分离向量是$\vec{OH}$，距离为$\sqrt{2}$。但$GE$边并不在Minkowski差的几何体边上。这意味着这条边并不是正确的。因为相交深度一定是可以将两个几何体刚好分开的长度，而此长度会导致物体的边和边刚好分开。在Minkowski差中就是差的几何体上的边到原点的方向和大小才对。&lt;/p>
+&lt;p>而EPA算法正是解决此问题的关键。他通过不停扩充Simplex为新的多边形（多面体）来逐步逼近到Minkowski差的几何体边。&lt;/p>
+&lt;p>其输入时GJK返回的Simplex。以及两个几何体寻找Support点的函数。&lt;/p>
+&lt;ol>
+&lt;li>首先找到Simplex中离原点最近的边（记为$E$）&lt;/li>
+&lt;li>找到$E$的外法线（从原点指向边的垂直方向，如图中${OH}$），在这个方向寻找新Support点的Minkowski差（记为$P$）&lt;/li>
+&lt;li>将$P$加入Simplex扩充Simplex为多面体&lt;/li>
+&lt;li>重复步骤1~3，直到没有新Support点加入。此时，距离原点最近的边的法线和长度就是挤出深度和相交深度&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://visualgmq.github.io/assets/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/EPA%E6%B5%81%E7%A8%8B.png" alt="EPA流程">&lt;/p>
+&lt;p>注意：图中画的扩展Simplex是多边形。实际上是使用多个三角形表示此多边形。&lt;/p>
+&lt;p>这里比较棘手的地方是，当增加新点时，如何增加对应的新面。&lt;/p>
+&lt;p>各家物理引擎的做法都差不多，使用面缝合(Suture)方法。假设当找到某个面$S$法线方向的Support点$P$:&lt;/p>
+&lt;ol>
+&lt;li>删除$S$&lt;/li>
+&lt;li>找到$S$相邻的所有面$C_i$，然后判断$P$在$C_i$的外侧还是内侧
+&lt;ol>
+&lt;li>如果在内侧，用$P$和$S$面留下的边连起来构建三个新的面，扩展结束。&lt;/li>
+&lt;li>如果在外侧，说明$S_i$也需要被删除，那么做一样的事情：删除$S_i$，判断$P$是否在所有和$S_i$相邻的面的内或外。这样递归地构建直到无面可删。此时将剩下的边和$P$点连接构成新面&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;p>那么这里看一下经典的EPA扩展Simplex存储结构：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;div class="table-container">&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">struct&lt;/span> &lt;span class="nc">EPAPolyhedron&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">using&lt;/span> &lt;span class="n">uint_type&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">SmallestUInt&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">EPA_MAX_FACE_COUNT&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">struct&lt;/span> &lt;span class="nc">Face&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Vector3&lt;/span> &lt;span class="n">m_normal&lt;/span>&lt;span class="p">{};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">real&lt;/span> &lt;span class="n">m_dist&lt;/span>&lt;span class="p">{};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">uint_type&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">m_vertices&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">uint_type&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">m_adj_facets&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// neighbor facet indices
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">uint_type&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">m_adj_edges&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// which edge in each neighbor
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kt">bool&lt;/span> &lt;span class="n">m_obsolete&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">false&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">Vector3&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">static_cast&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">size_t&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">EPA_MAX_FACE_COUNT&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">4&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.5&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">m_pts&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">array&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">Face&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">EPA_MAX_FACE_COUNT&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">m_faces&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">uint_type&lt;/span> &lt;span class="n">m_vertex_count&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">uint_type&lt;/span> &lt;span class="n">m_face_count&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>&lt;/div>
+&lt;/div>
+&lt;/div>&lt;p>这里&lt;code>Face::m_obsolete&lt;/code>用于标记面是否被删除。我们在删除面的时候不会移动面在&lt;code>EPAPolyhedron::m_faces&lt;/code>里面的位置。只是简单标记为删除。新面也是直接加到&lt;code>m_faces&lt;/code>后面。这样可能会更快一些。&lt;/p>
+&lt;p>而这里面没有任何的内存分配，用&lt;code>EPA_MAX_FACE_COUNT&lt;/code>指定了最大的面上限（这里是128（抄的PhysX，Bullet是64，Jolt是动态分配内存的不定大小））。&lt;/p>
+&lt;p>这个面上限是个经验数字。达到上限之后就直接返回离&lt;code>EPAPolyhedron&lt;/code>最近面的方向作为挤出方向就行（近似结果）。所以大部分物理引擎都不支持顶点数特别多的Convex（PhysX是256个顶点256个面）。&lt;/p>
+&lt;h2 id="gjk和epa论文解析">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#gjk和epa论文解析" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:gjk和epa论文解析" class="headings">GJK和EPA论文解析&lt;/a>&lt;/h2>
+&lt;p>GJK和EPA的论文非常值得一看。里面记录的方法并不是现代广为流传的重心坐标法（但数学上是等价的）。&lt;/p>
+&lt;p>我写了一些论文解析文章，请按顺序阅读：&lt;/p>
+&lt;ol>
+&lt;li>&lt;a href="https://visualgmq.github.io/posts/gjk%E5%8E%9F%E5%A7%8B%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">GJK原始论文解析&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://visualgmq.github.io/posts/ginogjk%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">GinoGJK论文解析&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://visualgmq.github.io/posts/epa%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/">EPA论文解析&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="参考">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#参考" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:参考" class="headings">参考&lt;/a>&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://book.douban.com/subject/4861957/" target="_blank" rel="noopener">实时碰撞检测算法技术 (豆瓣)&lt;/a>&lt;/li>
+&lt;li>公式大全：&lt;a href="https://www.geometrictools.com/Books/GeometricTools/AboutTheBook.html" target="_blank" rel="noopener">Geometric Tools: About Geometric Tools for Computer Graphics&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=ajv46BSqcK4" target="_blank" rel="noopener">A Strange But Elegant Approach to a Surprisingly Hard Problem (GJK Algorithm)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://graphics.stanford.edu/courses/cs164-09-spring/Handouts/paper_GJKoriginal.pdf" target="_blank" rel="noopener">GJK原始论文：A fast procedure for computing the distance between complex objects in three-dimensional space - Robotics and Automation&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://solid.sourceforge.net/jgt98convex.pdf" target="_blank" rel="noopener">改良GJK论文：A fast and robust GJK implementation for collision detection of convec objects&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank" rel="noopener">dyn4j-GJK explain&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://winter.dev/articles/epa-algorithm/" target="_blank" rel="noopener">EPA explain&lt;/a>&lt;/li>
+&lt;/ol></description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（四）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</guid><pubDate>Sun, 19 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p>这一章描述了判交和MTD算法，包括SAT等。&lt;/p>
 &lt;h2 id="sat算法">&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#sat算法" class="anchor-link">&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon">&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/>&lt;/svg>&lt;/a>&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:sat算法" class="headings">SAT算法&lt;/a>&lt;/h2>
 &lt;p>分离轴定律（Separate Axis Theory）是常见的判断两个凸多面体是否相交，同时可以求出最小挤出向量（MTD, Minimal Translation Direction）的算法。和GJK作为两大求解MTD算法。&lt;/p>
 &lt;p>分离轴定律基于一个事实：用一束平行光照射两个凸体，如果存在一个光的朝向，使他们在墙上（墙垂直于光）的投影不相交，那么这两个物体就不相交。&lt;/p>
