@@ -1,4 +1,456 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>VisualGMQ的博客</title><link>https://visualgmq.github.io/</link><description>VisualGMQ——一个游戏开发混子的博客</description><generator>Hugo 0.159.1 https://gohugo.io/</generator><language>zh-CN</language><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 26 Aug 2026 07:07:15 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://visualgmq.github.io/rss.xml"/><item><title>从0开始制作游戏物理引擎（六）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/</guid><pubDate>Tue, 25 Aug 2026 16:27:21 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;本文解释了EPA算法及其常见实现。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>VisualGMQ的博客</title><link>https://visualgmq.github.io/</link><description>VisualGMQ——一个游戏开发混子的博客</description><generator>Hugo 0.159.1 https://gohugo.io/</generator><language>zh-CN</language><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Sun, 30 Aug 2026 09:32:23 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://visualgmq.github.io/rss.xml"/><item><title>从0开始制作游戏物理引擎（七）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/</guid><pubDate>Thu, 27 Aug 2026 10:44:58 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;本章说明了射线检测Raycast算法。&lt;/p&gt;
+&lt;p&gt;大部分Raycast都是使用向量方程的数值解直接得出，这种的公式大全&lt;sup id="fnref:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:1" class="footnote-ref" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;都有记载不再赘述。&lt;/p&gt;
+&lt;p&gt;本文主要叙述射线与凸多面体求交的Slab方法(Cyrus-Beck, Liang-Barsky和Kay-Kajiya)以及Gino编写的对任意凸体的Raycat算法的论文&lt;sup id="fnref:2"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:2" class="footnote-ref" role="doc-noteref"&gt;[2]&lt;/a&gt;&lt;/sup&gt;解释。&lt;/p&gt;
+&lt;h2 id="射线与三角形求交"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#射线与三角形求交" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#contents:射线与三角形求交" class="headings"&gt;射线与三角形求交&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;使用Möller–Trumbore算法&lt;sup id="fnref:3"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:3" class="footnote-ref" role="doc-noteref"&gt;[3]&lt;/a&gt;&lt;/sup&gt;，源于《Fast Minimum Storage Ray-Triangle Intersection》：&lt;/p&gt;
+&lt;p&gt;一般的做法是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;求射线与三角形所在平面的交点$p$&lt;/li&gt;
+&lt;li&gt;看$p$在不在三角形内（可使用重心坐标法）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;而Möller–Trumbore算法等于是将两步并做一步，并且论文中给了实现，此实现将所有的变量延后到需要计算的时候才算，并且给出了剔除三角形背面相交和双面三角形相交的。论文说对于TriangleMesh，可以减少25%~50%的内存（取决于顶点共享形式）。此算法可以同时得到交点和交点在三角面上的UV。&lt;/p&gt;
+&lt;p&gt;对于射线$O + tD$以及三角形$V_1,V_2,V_3$来说，其公共点为（三角形用重心坐标表示）：
+&lt;/p&gt;
+$$
+O + tD = (1 - u - v)V_0+ uV_1 + vV_2
+$$&lt;p&gt;
+用矩阵表示为：
+&lt;/p&gt;
+$$
+\begin{bmatrix}
+-D &amp; V_1 - V_0 &amp; V_2 - V_0
+\end{bmatrix}
+\begin{bmatrix}
+t \\
+u \\
+v
+\end{bmatrix}
+= O - V_0
+$$&lt;p&gt;然后令$E_1 = V_1 - V_0, E_2 = V_2 - V_0, T = O - V_0$。根据Cramer法则&lt;sup id="fnref:4"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:4" class="footnote-ref" role="doc-noteref"&gt;[4]&lt;/a&gt;&lt;/sup&gt;可得：
+&lt;/p&gt;
+$$
+\begin{bmatrix}
+t \\
+u \\
+v \\
+\end{bmatrix}
+= \frac{1}{\begin{vmatrix}-D &amp; E_1 &amp; E_2\end{vmatrix}}
+\begin{bmatrix}
+\begin{vmatrix}
+T &amp; E_1 &amp; E_2
+\end{vmatrix}\\
+\begin{vmatrix}
+-D &amp; T &amp; E_2
+\end{vmatrix}\\
+\begin{vmatrix}
+-D &amp; E_1 &amp; T
+\end{vmatrix}
+\end{bmatrix}
+$$&lt;p&gt;
+又由线性代数中:
+&lt;/p&gt;
+$$
+\begin{vmatrix}
+A &amp; B &amp; C
+\end{vmatrix}
+= -(A\times C)\cdot B = -(C \times B)\cdot A
+$$&lt;p&gt;
+可以将上式变化为：
+&lt;/p&gt;
+$$
+\begin{bmatrix}
+t \\
+u \\
+v \\
+\end{bmatrix}
+= \frac{1}{(D\times E_2)\cdot E_1}
+\begin{bmatrix}
+(T\times E_1)\cdot E_2 \\
+(D\times E_2)\cdot T \\
+(T\times E_1)\cdot D \\
+\end{bmatrix}
+= \frac{1}{P \cdot E_1}
+\begin{bmatrix}
+Q\cdot E_2 \\
+P\cdot T \\
+Q\cdot D \\
+\end{bmatrix}
+$$&lt;p&gt;
+这里$P = (D\times E_2), Q = T \times E_1$。&lt;/p&gt;
+&lt;p&gt;之后就是使用这些变量进行计算。论文中给出了详细代码，十分通俗易懂，这里就不再细说了。&lt;/p&gt;
+&lt;p&gt;注：剔除背面的算法中，默认规定在右手系下，顶点顺时针（CW）绕序的一侧是背面。&lt;/p&gt;
+&lt;h2 id="射线与aabb求交"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#射线与aabb求交" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#contents:射线与aabb求交" class="headings"&gt;射线与AABB求交&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;其实是图形学里面的方法，用于做线段裁切的。但在物理引擎求线段/射线/直线和凸体交点也很好用。&lt;/p&gt;
+&lt;p&gt;本文一共有如下算法：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;由Cyrus-Beck在&lt;em&gt;Generalized Two- and Three-Dimensional Clipping&lt;/em&gt;中编写的通用凸体裁剪方法&lt;/li&gt;
+&lt;li&gt;Kay-Kajiya于1986年在SIGGRAPH上发布的&lt;em&gt;Ray Tracing Complex Scenes&lt;/em&gt;中提出的基于Cyrus-Beck算法的优化版本&lt;sup id="fnref:5"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:5" class="footnote-ref" role="doc-noteref"&gt;[5]&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;而Kay-Kayjiya算法由Amy Williams在&lt;em&gt;An Efficient and Robust Ray–Box Intersection Algorithm&lt;/em&gt;&lt;sup id="fnref:6"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:6" class="footnote-ref" role="doc-noteref"&gt;[6]&lt;/a&gt;&lt;/sup&gt;中提出一种更高效更鲁棒的实现，Github上也有代码&lt;sup id="fnref:7"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:7" class="footnote-ref" role="doc-noteref"&gt;[7]&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;下文中使用的定义：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;定义射线为$\vec{s} + \vec{d}t$。其中$\vec{s}$为起点，$\vec{d}$为方向&lt;/li&gt;
+&lt;li&gt;半空间$H_i(\vec{n}, \vec{p})$：$\vec{p}$为平面上一点，$\vec{n}$为法向量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="cyrus-beck算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#cyrus-beck算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#contents:cyrus-beck算法" class="headings"&gt;Cyrus-Beck算法&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;将凸体的各个面视为半空间（朝向内侧视为正半空间），于是凸体变为这些半空间$H_i(\vec{n}, \vec{p})$的交集。&lt;/p&gt;
+&lt;p&gt;首先看射线射入半空间是“射入”还是“射出”。只需要看$\vec{d}$与$\vec{n}$是否同向。如果同向就是射入，反向就是射出。&lt;/p&gt;
+&lt;p&gt;论文的思想是：通过裁切射线，只保留射入和射出这一段，对所有半空间做完后，如果射线没有全被裁切完，那显然就和凸体相交。&lt;/p&gt;
+&lt;p&gt;首先计算射线和半空间平面的所有交点，以射入和射出进行分类。但由于交点都在射线上，那么只需求得$t$即可，于是有
+&lt;/p&gt;
+$$
+t_{in_i},t_{out_i}
+$$&lt;p&gt;
+那么显然，我最后裁切的线段一定满足$t \in [\max \{t_{in_i}\}, \min \{t_{out_i}\}]$。&lt;/p&gt;
+&lt;p&gt;那么只要
+&lt;/p&gt;
+$$
+\max \{t_{in_i}\} \lt \min \{t_{out_i}\}
+$$&lt;p&gt;
+就说明射线和凸体相交了。&lt;/p&gt;
+&lt;p&gt;而交点则是$\max \{t_{in_i}\}$和$\min \{t_{out_i}\}$这两个$t$所在点。&lt;/p&gt;
+&lt;p&gt;真正实现中有两个提前退出算法的小技巧：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;只要发现任意$t_{in_i} \ge t_{out_i}$就直接退出，不需要真的算出全部$t$&lt;/li&gt;
+&lt;li&gt;当射线起点在平面外侧，且方向远离平面，说明射线永远不可能射入平面，那么肯定不相交，直接返回
+&lt;ul&gt;
+&lt;li&gt;先判断点是否在平面半空间$H(\vec{n}, \vec{p})$外：$(\vec{d} - \vec{p}) \cdot \vec{n} \le 0$&lt;/li&gt;
+&lt;li&gt;再看方向是否远离：$\vec{d} \cdot \vec{n} \le 0$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="kay-kajiya算法和williams的无分支版本"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#kay-kajiya算法和williams的无分支版本" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#contents:kay-kajiya算法和williams的无分支版本" class="headings"&gt;Kay-Kajiya算法和Williams的无分支版本&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;是Cyrus-Beck算法在3D空间中对盒体的特化。现在广泛用于图形学光线追踪中计算射线和BVH的交点（物理这边也会用到BVH）。&lt;/p&gt;
+&lt;p&gt;由于提出Slab概念，又叫Slab算法。&lt;/p&gt;
+&lt;p&gt;算法中只考虑射线与AABB盒子相交。与OBB相交可以通过仿射变换变成与AABB相交问题。&lt;/p&gt;
+&lt;p&gt;Slab就是：盒体的一对对面所夹的空间。所以盒体由三个slab的交集构成，每个轴各有两个垂直于此轴的Slab。我们称沿着负轴更的Slab为$Slab^-$，而沿着正轴更远的那个为$Slab^+$。&lt;/p&gt;
+&lt;p&gt;其算法理论就是Cyrus-Beck的理论，而其在Cyrus-Beck算法上的优化是工程上的。假设AABB盒子的中心是$\vec{c}$，半长为$\vec{hl}$。我们不需要再通过计算判断射线是射入面还是射出面：对于一对Slab，只需看$\vec{c} - \vec{s}$的$x,y,z$分量的符号，如果是正的，表示是从$Slab^-$射入$Slab^+$射出。负的就是反过来。&lt;/p&gt;
+&lt;p&gt;Kay-Kajiya算法的性能上的突破在于一条射线和许多AABB判交的场景下。&lt;/p&gt;
+&lt;p&gt;接下来看一下Williams的实现&lt;sup id="fnref1:7"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:7" class="footnote-ref" role="doc-noteref"&gt;7&lt;/a&gt;&lt;/sup&gt;。注意：Williams论文中并没有给出SIMD写法，他只是提了一嘴说可以利用SIMD。但PhysX，JoltPhysics中都有SIMD版本。SIMD版本主要用于一条射线和多个AABB（一般是4个因为SSE指令只有4-lane）求交，一般用于BVH空间划分算法而非Raycast中（这个后面要用到再看吧，裸SIMD指令看着也费劲）。如果只和一个AABB求交一般还是用标量版本。&lt;/p&gt;
+&lt;p&gt;首先是&lt;code&gt;Ray&lt;/code&gt;的实现，里面缓存了一些信息：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;div class="table-container"&gt;&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Ray&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;public&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Ray&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Ray&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Vector3&lt;/span&gt; &lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Vector3&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;origin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;direction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 注意：这里没判断d的各个分量是不是0，这是故意的！
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 这是Williams实现的核心设计：如果分量为0，结果是+/-inf（IEEE754标准规定）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;inv_direction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Vector3&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Ray&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;Ray&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;origin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;direction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;direction&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;inv_direction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Vector3&lt;/span&gt; &lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Vector3&lt;/span&gt; &lt;span class="n"&gt;direction&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Vector3&lt;/span&gt; &lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;// direction中各分量的倒数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt; &lt;span class="c1"&gt;// direction中各分量的符号
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;然后是判交算法：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;div class="table-container"&gt;&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;span class="lnt"&gt;26
+&lt;/span&gt;&lt;span class="lnt"&gt;27
+&lt;/span&gt;&lt;span class="lnt"&gt;28
+&lt;/span&gt;&lt;span class="lnt"&gt;29
+&lt;/span&gt;&lt;span class="lnt"&gt;30
+&lt;/span&gt;&lt;span class="lnt"&gt;31
+&lt;/span&gt;&lt;span class="lnt"&gt;32
+&lt;/span&gt;&lt;span class="lnt"&gt;33
+&lt;/span&gt;&lt;span class="lnt"&gt;34
+&lt;/span&gt;&lt;span class="lnt"&gt;35
+&lt;/span&gt;&lt;span class="lnt"&gt;36
+&lt;/span&gt;&lt;span class="lnt"&gt;37
+&lt;/span&gt;&lt;span class="lnt"&gt;38
+&lt;/span&gt;&lt;span class="lnt"&gt;39
+&lt;/span&gt;&lt;span class="lnt"&gt;40
+&lt;/span&gt;&lt;span class="lnt"&gt;41
+&lt;/span&gt;&lt;span class="lnt"&gt;42
+&lt;/span&gt;&lt;span class="lnt"&gt;43
+&lt;/span&gt;&lt;span class="lnt"&gt;44
+&lt;/span&gt;&lt;span class="lnt"&gt;45
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// Box只有一个成员变量Vector3 parameters[2]，其中parameters[0]存储min点，parameters[1]存储max点
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 这里参数t0和t1是射线自身的有效参数区间。通过这两个t可以处理所有直线类型的求交：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// * 直线：t0 = -FLT_MAX, t1 = FLT_MAX
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// * 射线：t0 = 0, t1 = FLT_MAX
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// * 线段: t0 = 0, t1 = 1（或射线长度）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kt"&gt;bool&lt;/span&gt; &lt;span class="n"&gt;Box&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;intersect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;Ray&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;tmin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tmax&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tymin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tymax&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tzmin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tzmax&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 求射线到x轴Slab的t
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 这里一行解决了三种情况：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 1. r.origin在左Slab左边或者右边，这里都能算得最小值而不用判断射线方向
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 2. 如果r.direction平行于面，那inv_direction.x()是+inf，那么：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 1. origin.x &amp;lt; min.x：tmin = +inf, tmax = +inf
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 2. origin.x &amp;gt; max.x: tmin = -inf, tmax = -inf
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 2. origin.x在slab内: tmin = -inf, tmax = +inf
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 3. 如果r.direction.x()是inf，而乘法左边是0，那么tmin = tmax = NaN
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 求射线到y轴Slab的t
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tymin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tymax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 提前退出，无论值是inf, NaN还是正常值都能正确处理，可以自己试一试
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tymax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tymin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tmax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tymin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tmin&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tymin&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tymax&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;tmax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tymax&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 再求z轴Slab的t
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tzmin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tzmax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parameters&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sign&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]].&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;origin&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inv_direction&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 继续判断
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tzmax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tzmin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tmax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tzmin&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;tmin&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tzmin&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tzmax&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;tmax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;tmax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tzmax&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tmin&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tmax&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这就是为什么说Williams的算法是鲁棒的，他可以处理任意的数值。&lt;/p&gt;
+&lt;h2 id="gino的论文解释"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#gino的论文解释" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#contents:gino的论文解释" class="headings"&gt;Gino的论文解释&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Gino在论文&lt;sup id="fnref1:2"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fn:2" class="footnote-ref" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;中提出了一种基于GJK的，针对任意凸体的射线检测算法。但此算法只能得到$t$最小的那个交点及对应法线。&lt;/p&gt;
+&lt;p&gt;为了和论文统一下面还是使用论文的符号。&lt;/p&gt;
+&lt;p&gt;定义射线$R = \{ \vec{s} + \lambda \vec{r} : \lambda \ge 0\}$。其中$\vec{s}$是起点，$\vec{r}$是方向。&lt;/p&gt;
+&lt;p&gt;用$C$表示任意凸体。注意凸体上某点的法线不一定是唯一的（比如凸多面体顶点处法线）。只有某个点$\vec{p}$附近光滑（或者用分析的说法是可微）的此点的法线才是唯一的。&lt;/p&gt;
+&lt;p&gt;通过法线定义可以得到如下方程：
+&lt;/p&gt;
+$$
+\vec{n} \cdot (\vec{x} - \vec{p}) \le 0, \forall \vec{x} \in C
+$$&lt;p&gt;
+那么反过来就是所有不在$C$中的点$\vec{x}$可以定义为：
+&lt;/p&gt;
+$$
+\begin{aligned}
+&amp; \vec{n} \cdot (\vec{x} - \vec{p}) \le 0 &amp; &amp;(1)
+\end{aligned}
+$$&lt;p&gt;
+那么将$\vec{x}$换成射线上任意点$\vec{x} = \vec{s} + \lambda \vec{r}$，就可以得到既在射线上又不在$C$上的点的条件：
+&lt;/p&gt;
+$$
+\begin{aligned}
+\lambda \vec{n} \cdot \vec{r} \gt \vec{n} \cdot (\vec{p} - \vec{s}) &amp; &amp; (2)
+\end{aligned}
+$$&lt;p&gt;
+显然，射线与$C$的交点也满足这个方程，或者说的更明确一些：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;如果$\vec{n} \cdot \vec{r} \gt 0$，那么所有满足$\lambda \gt \frac{\vec{n}\cdot(\vec{p} - \vec{s})}{\vec{n}\cdot \vec{r}}$的点就都不是交点。此时$\frac{\vec{n}\cdot(\vec{p} - \vec{s})}{\vec{n}\cdot \vec{r}}$是$\lambda$的上界&lt;/li&gt;
+&lt;li&gt;如果$\vec{n} \cdot \vec{r} \lt 0$，那么所有满足$\lambda \lt \frac{\vec{n}\cdot(\vec{p} - \vec{s})}{\vec{n}\cdot \vec{r}}$的点就都不是交点。此时$\frac{\vec{n}\cdot(\vec{p} - \vec{s})}{\vec{n}\cdot \vec{r}}$是$\lambda$的下界&lt;/li&gt;
+&lt;li&gt;如果$\vec{n} \cdot \vec{r} = 0$且$\vec{n} \cdot (\vec{p} - \vec{s}) \lt 0$，那么这条射线就不和$C$相交&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;然后Gino又使用他的经典逼近思路：通过不停地裁切$\lambda$可能取值的区间，将交点不可能存在的区间从中移除，直到找到交点。逼近的方法如下：&lt;/p&gt;
+&lt;p&gt;假设现在的$\lambda$下界是$\lambda_i$，那么有点$\vec{x_i} = \vec{s} + \lambda_i \vec{r}$。此时$\lambda \in [0, \lambda_i)$的所有点就被排除了。然后令$\vec{c_i} \in C$是距离$\vec{x_i}$的最近点。那么显然：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;如果$\vec{c_i} = \vec{x_i}$，那么最近点就是$\vec{c_i}$（算法结束条件）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果$\vec{c_i}$只是$C$边界上一点，那么$\vec{n_i} = \vec{x_i} - \vec{c_i}$是$\vec{c_i}$这一点的法线。那么满足$(2)$式：
+&lt;/p&gt;
+$$
+\begin{aligned}
+&amp; \lambda \vec{n_i} \cdot \vec{r} \gt \vec{n_i} \cdot (\vec{c_i} - \vec{s}) \\
+&amp; \lambda \vec{n_i} \cdot \vec{r} \gt \lambda_i \vec{n_i} \cdot \vec{r_i} - ||\vec{n_i}^2|| \\
+\end{aligned}
+$$&lt;p&gt;
+那么：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;如果$\vec{n_i} \cdot \vec{r} = 0$，那么射线就不和$C$相交（因为不等式右边只有$-||\vec{n}_i||^2 \le 0$恒成立）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果$\vec{n}\cdot\vec{r} \ne 0$。令$\lambda_{i+1} = \lambda_i - \frac{||\vec{n}_i||^2}{\vec{n_i}\cdot \vec{r}}$。此时：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;若$\vec{n} \cdot \vec{r} \gt 0$，显然$\lambda_{i+1} \lt \lambda_i$，那么根据假设$\lambda \in [0, \lambda_i)$中的点都不是交点，所以$\lambda_{i+1}$早已被剔除，此时射线和$C$就没有交点。&lt;/li&gt;
+&lt;li&gt;若$\vec{n} \cdot \vec{r} \lt 0$，显然$\lambda_{i+1} \gt \lambda_i$，那么$\lambda_{i+1}$等于是更大的$\lambda$下界，这样就增大了下界。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;那么就可以通过不停迭代$\lambda_i$来不停增大下界，直到$\vec{x_i} = \vec{c_i}$找到交点或判断根本不相交。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;于是算法流程就是：
+&lt;/p&gt;
+$$
+\begin{aligned}
+&amp; \lambda = 0 \\
+&amp; \vec{x} = \vec{s} \\
+&amp; \vec{n} = \vec{0} \\
+&amp; \vec{c} = \text{"the point of C closest to }\vec{x}\text{"} \\
+&amp; \text{while not "}\vec{x} \text{ is not close enough to }\vec{c}\text{" do} \\
+&amp; \text{begin} \\
+&amp; \quad \vec{n} = \vec{x} - \vec{c} \\
+&amp; \quad \text{if }\vec{n} \cdot \vec{r} \ge 0 \text{ then return false} \\
+&amp; \quad \text{else} \\
+&amp; \quad \text{begin} \\
+&amp; \qquad \lambda = \lambda - \frac{||\vec{n}||^2}{\vec{n}\cdot \vec{r}} \\
+&amp; \qquad \vec{x} = \vec{s} + \lambda \vec{r} \\
+&amp; \qquad \vec{c} = \text{"the point of C closest to }\vec{x}\text{"} \\
+&amp; \quad \text{end} \\
+&amp; \text{end} \\
+\end{aligned}
+$$&lt;p&gt;
+原论文随后证明了$\lambda_i \lt \lambda_{i+1} \le \lambda_{hit}$是全局收敛的充要条件。这里就不写了。&lt;/p&gt;
+&lt;p&gt;$\vec{x_i}$足够接近$\vec{c_i}$的条件可以使用他两的距离去判断，而每轮迭代中找到$\vec{c}$就可以使用GJK。&lt;/p&gt;
+&lt;p&gt;但每轮迭代都要从头算GJK，这是一个很慢的事。Gino随后将GJK与这整个算法合并得到一个更高效的形式：&lt;/p&gt;
+&lt;p&gt;首先，$\vec{n_i} = \vec{x_i} - \vec{c_i}$可以改成用Minkowski差和支撑映射的计算方式：$\vec{n_i} = v(\{\vec{x_i}\} - C)$。&lt;/p&gt;
+&lt;p&gt;然后，可以看到原算法并不能给出点$\vec{c_i}$处的法线（他只是靠法线逐渐逼近）。但我们可以通过每一步迭代出的$\vec{v}_k$逐渐逼近$\vec{n_i}$。此处$\vec{v_k}$是Simplex上距离原点最近点，那么通过此点找到的支撑点记为$\vec{p_k} = s_C(\vec{v_k})$。显然，$\vec{v_k}$是$\vec{p_k}$的法线，因为其满足$(1)$式中对法线的定义$\vec{v_k} \cdot (x - \vec{p_k}) \le 0$。那么将其带入$(2)$式就可以得到被排除的点的新条件：
+&lt;/p&gt;
+$$
+\lambda \vec{v_k}\cdot \vec{r} \gt \vec{v_k} \cdot (\vec{p_k} - \vec{s})
+$$&lt;p&gt;
+令$\vec{x_i} = \vec{s} + \lambda_i \vec{r}$是目前最大下界，那么将$\vec{s} = \vec{x_i} - \lambda_i \vec{r}$带入上式可得：
+&lt;/p&gt;
+$$
+\begin{aligned}
+&amp; \lambda \vec{v_k}\cdot \vec{r} \gt \lambda_i \vec{v_k}\cdot \vec{r} -\vec{v_k}\cdot \vec{w_k} \\
+&amp; 其中\vec{w_k} = s_{\{x_i\} - C}(-\vec{v_k}) = \vec{x_i} - \vec{p_k}
+\end{aligned}
+$$&lt;p&gt;
+那么如法炮制对$\vec{v_k}\cdot \vec{r}$进行分析：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;$\vec{v_k}\cdot \vec{r} = 0$且$\vec{v_k}\cdot \vec{w_k} \gt 0$，那么射线无交点&lt;/li&gt;
+&lt;li&gt;$\vec{v_k}\cdot \vec{r} \gt 0$那么$\lambda_i - \frac{\vec{v_k}\cdot \vec{w_k}}{\vec{v_k}\cdot \vec{r}}$同样位于不相交区间。那么此时射线无交点&lt;/li&gt;
+&lt;li&gt;$\vec{v_k}\cdot \vec{r} \lt 0$那么$\lambda_i - \frac{\vec{v_k}\cdot \vec{w_k}}{\vec{v_k}\cdot \vec{r}}$就是新下界。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;那么现在算法就变成（这里要对照GinoGJK的论文过程看一下可能才能看明白怎么融合的）：
+&lt;/p&gt;
+$$
+\begin{aligned}
+&amp; \lambda = 0 \\
+&amp; \vec{x} = \vec{s} \\
+&amp; \vec{n} = \vec{0} \\
+&amp; \vec{v} = \vec{x} - \vec{p}, \text{any } \vec{p} \in C \\
+&amp; P = \emptyset \\
+&amp; \text{while } ||\vec{v}||^2 \gt \epsilon^2 \text{ do} \\
+&amp; \text{begin} \\
+&amp; \quad \vec{p} = s_C(\vec{v}) \\
+&amp; \quad \vec{w} = \vec{x} - \vec{p} \\
+&amp; \quad \text{if } \vec{v}\cdot \vec{w} \gt 0 \text{ then} \\
+&amp; \quad \text{begin} \\
+&amp; \qquad \text{if } \vec{v} \cdot \vec{r} \ge 0 \text{ then return false} \\
+&amp; \qquad \text{else} \\
+&amp; \qquad \text{begin} \\
+&amp; \qquad \quad \lambda = \lambda - \frac{\vec{v}\cdot \vec{w}}{\vec{v} \cdot \vec{r}} \\
+&amp; \qquad \quad \vec{x} = \vec{s} + \lambda \vec{r} \\
+&amp; \qquad \quad \vec{n} = \vec{v} \\
+&amp; \qquad \text{end} \\
+&amp; \quad \text{end} \\
+&amp; \quad Y = P \cup \{\vec{p}\} \\
+&amp; \quad \vec{v} = v(\operatorname{co}(\{\vec{x}\} - Y)) \\
+&amp; \quad P = \text{"smallest }X \subseteq Y \text{ such that } \vec{v} \in \operatorname{co}(\{\vec{x}\} - X) \\
+&amp; \text{end} \\
+&amp; \text{return true} \\
+\end{aligned}
+$$&lt;p&gt;
+论文最后提到还能做如下优化：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;原始GJK中，同一支撑点在多次迭代中有可能重复出现（ill condition），而本算法不能再依赖于这个检查。Gino在32位单精度实现中发现不需要再进行这个检查。&lt;/li&gt;
+&lt;li&gt;在Johnson子距离算法中，行列式$\Delta_i(Y)$可能由于数值精度问题出错。此时就直接退出循环，将当前算出的$\vec{x}$作为结果返回（类似GinoGJK中的处理方法）&lt;/li&gt;
+&lt;li&gt;终止容差$\epsilon$（第6行的那个）可以用相对容差$||v_k|^2 \le \epsilon_{tol} \max \{||\vec{x} - \vec{p}||^2: \vec{p} \in P_k\}$，其中$\epsilon_{tol}$是&lt;code&gt;std::numeric_limits&amp;lt;float&amp;gt;::epsilon() * 10&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;算法可以提前退出：在Raycast中射线都是有长度的，一旦$\lambda$超过长度$\lambda_{max}$就直接退出算法，表示无交点&lt;/li&gt;
+&lt;li&gt;帧间相关性：判断不相交时返回的$\vec{v}$是射线和$C$的分离轴，若物体连续移动，则可以作为下帧的热启动（这在连续碰撞检测中有用）。注意此时$\vec{v_0}$不一定在$\vec{x_0} - C$内，所以得跳过第一轮的$while$判断。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="footnotes" role="doc-endnotes"&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id="fn:1"&gt;
+&lt;p&gt;&lt;a href="https://www.geometrictools.com/Books/GeometricTools/AboutTheBook.html" target="_blank" rel="noopener"&gt;Geometric Tools: About Geometric Tools for Computer Graphics&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:2"&gt;
+&lt;p&gt;&lt;a href="http://www.dtecta.com/papers/unpublished04raycast.pdf" target="_blank" rel="noopener"&gt;Ray Casting against General Convex Objects with Application to Continuous Collision Detection&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:2" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref1:2" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:3"&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm" target="_blank" rel="noopener"&gt;Möller–Trumbore intersection algorithm - Wikipedia&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:3" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:4"&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Cramer's_rule" target="_blank" rel="noopener"&gt;Cramer's rule - Wikipedia&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:4" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:5"&gt;
+&lt;p&gt;&lt;a href="https://dl.acm.org/doi/10.1145/15886.15916" target="_blank" rel="noopener"&gt;Kay-Kajiya: Ray Tracing Complex Scenes&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:5" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:6"&gt;
+&lt;p&gt;&lt;a href="https://perso.univ-lyon1.fr/jean-claude.iehl/Public/educ/M1IMAGE/williams_box.pdf" target="_blank" rel="noopener"&gt;An Efficient and Robust Ray–Box Intersection Algorithm&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:6" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:7"&gt;
+&lt;p&gt;&lt;a href="https://github.com/erich666/jgt-code/blob/master/Volume_10/Number_1/Williams2005/box.cc" target="_blank" rel="noopener"&gt;jgt-code/Volume_10/Number_1/Williams2005/box.cc at master · erich666/jgt-code&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref:7" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/#fnref1:7" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（六）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/</guid><pubDate>Tue, 25 Aug 2026 16:27:21 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;本文解释了EPA算法及其常见实现。&lt;/p&gt;
 &lt;p&gt;EPA算法由Gino van den Bergen首次提出于其论文&lt;sup id="fnref:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/#fn:1" class="footnote-ref" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;。作为基于GJK的，用于找到穿透深度的扩展算法。&lt;/p&gt;
 &lt;h2 id="临近查询proximity-query"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/#临近查询proximity-query" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/#contents:临近查询proximity-query" class="headings"&gt;临近查询(Proximity Query)&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;表示对两个物体进行如下查询：&lt;/p&gt;
@@ -333,13 +785,6 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;span class="lnt"&gt;292
 &lt;/span&gt;&lt;span class="lnt"&gt;293
 &lt;/span&gt;&lt;span class="lnt"&gt;294
-&lt;/span&gt;&lt;span class="lnt"&gt;295
-&lt;/span&gt;&lt;span class="lnt"&gt;296
-&lt;/span&gt;&lt;span class="lnt"&gt;297
-&lt;/span&gt;&lt;span class="lnt"&gt;298
-&lt;/span&gt;&lt;span class="lnt"&gt;299
-&lt;/span&gt;&lt;span class="lnt"&gt;300
-&lt;/span&gt;&lt;span class="lnt"&gt;301
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kt"&gt;bool&lt;/span&gt; &lt;span class="nf"&gt;penDepth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;DT_GJK&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;gjk&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;DT_Convex&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;DT_Convex&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
@@ -493,7 +938,7 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 使用面的正负法线找到支撑点，以构成一个含有五个点的双四面体
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 这是一个聪明的做法，原始GJK结束时，原点在数值上应该是得在三角面内。这时如果只是构建一个四面体，
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 那么面到原点最近点向量就是0，这样就无法找到新的支撑点，算法会死循环。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 那我不如直接构建一个六面体，原点肯定在此六面体内。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 那我不如直接构建一个六面体，原点肯定在此六面体内而且不再边上，就避免了这个问题。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;MT_Vector3&lt;/span&gt; &lt;span class="n"&gt;v1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;MT_Vector3&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;MT_Vector3&lt;/span&gt; &lt;span class="n"&gt;vv&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cross&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
@@ -552,8 +997,6 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// at least one triangle on the heap.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Triangle&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;MT_Scalar&lt;/span&gt; &lt;span class="n"&gt;upper_bound2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MT_INFINITY&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -567,16 +1010,14 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;pop_heap&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;triangleHeap&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;triangleHeap&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;num_triangles&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;triangleComp&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;num_triangles&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 判断面还有效。TriangleStore里面有一个静态200个元素大小的数组，为了性能考虑，删除面并不是真的删除而是标记为obsolete
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 判断面是否还有效。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// TriangleStore里面有一个静态200个元素大小的数组，为了性能考虑，删除面并不是真的删除而是标记为obsolete
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;isObsolete&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 到达支持上限（200个点），失败
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num_verts&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;MaxSupportPoints&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#ifdef DEBUG
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;cout&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;Ouch, no convergence!!!&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;endl&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#endif
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;assert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;assert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
@@ -596,15 +1037,16 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;GEN_set_min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;upper_bound2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;far_dist2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 算法终止条件判断：
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 1.上下界之差为 e|v|。
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 2.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 这里为了防止摄入误差，还给了一个保底容差tolerance
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 1.上下界之差为 e|v|。这里为了防止舍入误差，还给了一个保底容差tolerance
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 2.新点就是三角形顶点。这是一个严格判定。可以看到源码他也用#ifdef 1圈起来了，说明这个判断不是必须的。但建议还是写上因为这是个硬兜底。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;MT_Scalar&lt;/span&gt; &lt;span class="n"&gt;error&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;far_dist&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;getDist2&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;GEN_max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DT_Accuracy&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;rel_error2&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;far_dist&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tolerance&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#ifdef 1
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;yBuf&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#endif
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
@@ -633,10 +1075,6 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num_triangles&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;triangleHeap&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;getDist2&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;upper_bound2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#ifdef DEBUG
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;cout&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;#triangles left = &amp;#34;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;num_triangles&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;endl&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;#endif
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 返回对应值
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;getClosest&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;pa&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;getClosestPoint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pBuf&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
@@ -678,14 +1116,10 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;span class="lnt"&gt;28
 &lt;/span&gt;&lt;span class="lnt"&gt;29
 &lt;/span&gt;&lt;span class="lnt"&gt;30
-&lt;/span&gt;&lt;span class="lnt"&gt;31
-&lt;/span&gt;&lt;span class="lnt"&gt;32
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class="lntd"&gt;
 &lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kt"&gt;bool&lt;/span&gt; &lt;span class="n"&gt;Triangle&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;silhouette&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;MT_Vector3&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;verts&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Index_t&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TriangleStore&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;triangleStore&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;//assert(isVisibleFrom(verts, index));
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;first&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;triangleStore&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getFree&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 要缝合的面肯定是已经被遗弃的，直接删除
@@ -810,8 +1244,8 @@ $$&lt;p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;else&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 新点在面外侧，删除当前面，
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;m_triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;setObsolete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="c1"&gt;// Triangle is visible
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;m_triangle&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;setObsolete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;backup&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;triangleStore&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getFree&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="c1"&gt;// 递归地，对其另外条边都做缝合操作。这个if和后面else if都是一样的操作只是对不同的边
@@ -1268,7 +1702,6 @@ $$
 $$&lt;p&gt;线性无关，那么就叫$X$仿射无关。&lt;/p&gt;
 &lt;p&gt;仿射无关的几何意义是，集合中没有多余的点落在此集合构成的凸包内（面上可以）。也就是说，集合内所有点共同支棱起一个凸包。&lt;/p&gt;
 &lt;h4 id="支撑映射support-mapping"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#支撑映射support-mapping" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:支撑映射support-mapping" class="headings"&gt;支撑映射(Support Mapping)&lt;/a&gt;&lt;/h4&gt;
-&lt;p&gt;首先定义支撑点：&lt;/p&gt;
 &lt;p&gt;对于集合$X$，其某个方向$d$的支撑距离为&lt;/p&gt;
 $$
 h_X(d) = \max \{x \cdot d: x \in X\}
@@ -1803,7 +2236,7 @@ $$&lt;p&gt;其中$\epsilon$是一个用户给定的极小值。&lt;/p&gt;
 &lt;p&gt;而如果你使用Gino的终止条件，则无需做任何调整。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;在做Johnson距离子算法时，可能会由于反复的浮点数计算导致所有子集中$\Delta(Y_s) \gt 0, \Delta_i(Y_s) \gt 0,\Delta_j(Y_s \cup \{y_j\}) &lt; 0$的判断失效，从而导致算法异常退出（这也是Gino所说的ill-condition：当Simplex退化成平面时的情况）。原始论文解决的方法是采用一个兜底程序（Backup Procedure）：暴力遍历所有子集，找到满足$\Delta(Y_s) \gt 0, \Delta_i(Y_s) \gt 0$的距离原点的最近点作为返回值。这总是可以找到的（比如只含有一个点的集合）。这个方法叫Johnson Robust。&lt;/p&gt;
+&lt;p&gt;在做Johnson距离子算法时，可能会由于反复的浮点数计算导致所有子集中$\Delta(Y_s) \gt 0, \Delta_i(Y_s) \gt 0,\Delta_j(Y_s \cup \{y_j\}) &lt; 0$的判断失效，从而导致算法异常退出。原始论文解决的方法是采用一个兜底程序（Backup Procedure）：暴力遍历所有子集，找到满足$\Delta(Y_s) \gt 0, \Delta_i(Y_s) \gt 0$的距离原点的最近点作为返回值。这总是可以找到的（比如只含有一个点的集合）。这个方法叫Johnson Robust。&lt;/p&gt;
 &lt;p&gt;但Gino在他的论文中说，他发现每次触发兜底程序返回的$v(K)$，几乎就是上一帧找到的$v_k$。所以他建议直接就返回上一帧的$v_k$不要再跑这个笨重的兜底程序。&lt;/p&gt;
 &lt;p&gt;或者直接报错（但在我个人的实践中，这种情况在刚体不旋转的情况下还是较为常见的，所以我不建议直接报错）&lt;/p&gt;
 &lt;/li&gt;
@@ -1835,7 +2268,7 @@ $$&lt;p&gt;注意这里的$\vec{v}$不再是CSO上的任意顶点的方向，而
 &lt;h3 id="帧间一致性frame-coherence热启动warm-start"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#帧间一致性frame-coherence热启动warm-start" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:帧间一致性frame-coherence热启动warm-start" class="headings"&gt;帧间一致性(Frame coherence)/热启动(Warm start)&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;指实时模拟中相邻两帧之间物体只移动/旋转了一点点，几何配置变化很小——所以上一帧的结果（分离轴、支撑点、最近特征等）在本帧大概率仍然有效或非常接近，可以作为本帧迭代的热启动起点。&lt;/p&gt;
 &lt;p&gt;在游戏物理引擎中也叫做热启动。&lt;/p&gt;
-&lt;p&gt;GinoGJK中就提出了帧间一致性：当Polytope使用爬山法构造时（爬山法详见上一篇文章），可以利用上一帧最后找支撑点的方向作为下一帧的开始方向查找，一般会大大减少爬山法搜索的时长。&lt;/p&gt;
+&lt;p&gt;GinoGJK中就提出了帧间一致性：当Polytope使用爬山法构造时（爬山法详见“从0开始制作游戏物理引擎（二）”），可以利用上一帧最后找支撑点的方向作为下一帧的开始方向查找，一般会大大减少爬山法搜索的时长。&lt;/p&gt;
 &lt;p&gt;而在使用GJK进行相交测试时，由于$\vec{v}$的初值可以是任意值。那么我们可以利用上一帧找到的分离轴作为方向来加速查找。这样也能加快GJK的执行。&lt;/p&gt;
 &lt;h2 id="solid3中的gjk实现"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#solid3中的gjk实现" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#contents:solid3中的gjk实现" class="headings"&gt;SOLID3中的GJK实现&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;接下来阅读Gino的GJK实现&lt;sup id="fnref2:3"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/#fn:3" class="footnote-ref" role="doc-noteref"&gt;3&lt;/a&gt;&lt;/sup&gt;。主要是&lt;a href="https://github.com/dtecta/solid3/blob/878a9c87986553b4549816881d20fb853a34a149/src/convex/DT_Convex.h#L52" target="_blank" rel="noopener"&gt;intersect&lt;/a&gt;和&lt;a href="https://github.com/dtecta/solid3/blob/878a9c87986553b4549816881d20fb853a34a149/src/convex/DT_Convex.h#L56" target="_blank" rel="noopener"&gt;closest_points&lt;/a&gt;两个函数。其他的函数需要EPA算法支持。&lt;/p&gt;
@@ -2050,6 +2483,12 @@ $$&lt;p&gt;注意这里的$\vec{v}$不再是CSO上的任意顶点的方向，而
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（四）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/</guid><pubDate>Sun, 19 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;这一章描述了判交和MTD算法，包括SAT等。&lt;/p&gt;
+&lt;p&gt;大部分的判交算法都在公式大全&lt;sup id="fnref:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fn:1" class="footnote-ref" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;中有推导。这里只记录一些难理解的。&lt;/p&gt;
+&lt;h2 id="moller的三角形判交算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#moller的三角形判交算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:moller的三角形判交算法" class="headings"&gt;Moller的三角形判交算法&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;源于Tomas Moller的论文《A Fast Triangle-Triangle Intersection Test》&lt;sup id="fnref:2"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fn:2" class="footnote-ref" role="doc-noteref"&gt;[2]&lt;/a&gt;&lt;/sup&gt;。&lt;/p&gt;
+&lt;p&gt;思路是既然两个三角形相交，那么他们不是平行就是所在面相交。对于后者，算法首先计算共面的线，然后通过此线和两个三角形相交得到相交区间，然后判断相交区间是否重叠。&lt;/p&gt;
+&lt;p&gt;这种算法有个优点是可以得到两三角形的Contact点（就是相交区间的两端点）。&lt;/p&gt;
+&lt;p&gt;不过现在物理引擎里面大部分还是SAT或GJK。PhysX5的三角形判交&lt;code&gt;GuIntersectionTriangleTriangle&lt;/code&gt;是走的这个算法。&lt;/p&gt;
 &lt;h2 id="sat算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#sat算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:sat算法" class="headings"&gt;SAT算法&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;分离轴定律（Separate Axis Theory）是常见的判断两个凸多面体是否相交，同时可以求出最小挤出向量（MTD, Minimal Translation Direction）的算法。和GJK作为两大求解MTD算法。&lt;/p&gt;
 &lt;p&gt;分离轴定律基于一个事实：用一束平行光照射两个凸体，如果存在一个光的朝向，使他们在墙上（墙垂直于光）的投影不相交，那么这两个物体就不相交。&lt;/p&gt;
@@ -2068,7 +2507,7 @@ $$&lt;p&gt;注意这里的$\vec{v}$不再是CSO上的任意顶点的方向，而
 &lt;li&gt;每两对边（3x3 = 9）个轴（去掉朝向一样/相反的轴）&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;所以一共是15次测试。&lt;/p&gt;
-&lt;p&gt;这里有个问题：为什么要对边的叉乘结果也进行测试？参考&lt;sup id="fnref:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fn:1" class="footnote-ref" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;说的很清楚。简单来说就是存在某些情况，面法线全部判定为相交，但其实两个物体不相交的情况。&lt;/p&gt;
+&lt;p&gt;这里有个问题：为什么要对边的叉乘结果也进行测试？详见此回答&lt;sup id="fnref:3"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fn:3" class="footnote-ref" role="doc-noteref"&gt;[3]&lt;/a&gt;&lt;/sup&gt;。&lt;/p&gt;
 &lt;h2 id="support点"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#support点" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:support点" class="headings"&gt;Support点&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;支撑点是指：给定某一个方向，找到这个方向上几何体中最远的点。&lt;/p&gt;
 &lt;p&gt;在概念上，经常用支撑点来描述SAT算法：给出一个投影轴，在这个轴的正方向和负方向上找到物体的支撑点。然后算两个物体各自支撑点所包含的区域是否相交。&lt;/p&gt;
@@ -2082,7 +2521,7 @@ $$&lt;p&gt;注意这里的$\vec{v}$不再是CSO上的任意顶点的方向，而
 &lt;li&gt;计算凸体需要面法线，那你必须将面法线提前记录下来，因为得知道哪些顶点构成面。或者你使用凸体的拓扑形式，这样可以知道所有面然后根据边算面法线。但就算这样，要计算的面法线也越来越多&lt;/li&gt;
 &lt;li&gt;随着凸体边数增多，要计算两边叉乘产生的轴也越来越多（理论上是$V_{num1} * V_{num2}$是一个平方数量级），这导致投影操作大大增加&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;所以基本上除了OBB和OBB的判交可以用SAT（此时SAT和GJK+EPA的差别不大，但是更好写），所有的凸体算法中SAT都要比GJK+EPA慢。很多物理引擎中（比如PhysX，Bullet）都是AABB之间和OBB之间的MTD算法使用SAT。其他都使用GJK+EPA&lt;/p&gt;
+&lt;p&gt;所以基本上除了OBB和OBB的判交可以用SAT（此时SAT和GJK+EPA的差别不大，但是更好写），以及空间中三角形和三角形判断用SAT之外，所有的凸体算法中SAT都要比GJK+EPA慢。很多物理引擎中（比如PhysX，Bullet）都是AABB之间和OBB之间的MTD算法使用SAT。其他都使用GJK+EPA。&lt;/p&gt;
 &lt;h2 id="obb和obb的sat特化算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#obb和obb的sat特化算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:obb和obb的sat特化算法" class="headings"&gt;OBB和OBB的SAT特化算法&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;由于OBB“方方正正”的特性（邻边互相垂直，对边互相平行），可以不对OBB的每个顶点进行投影。而是对轴进行投影。通过将每个轴投影，找到正向/反向最远的值作为支撑点在此轴上的坐标即可。这样大大简化了需要投影的点的个数（投影轴是15个，投影点本来是(8 + 8) * 15。现在是(3 + 3) * 15）。&lt;/p&gt;
 &lt;h2 id="凸体和球体的sat"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#凸体和球体的sat" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:凸体和球体的sat" class="headings"&gt;凸体和球体的SAT&lt;/a&gt;&lt;/h2&gt;
@@ -2093,7 +2532,7 @@ $$&lt;p&gt;注意这里的$\vec{v}$不再是CSO上的任意顶点的方向，而
 &lt;/ol&gt;
 &lt;p&gt;但不会有人在球和凸体上用SAT的。还是投影轴太多。&lt;/p&gt;
 &lt;h3 id="工程中使用的凸体和球体的判交mtd算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#工程中使用的凸体和球体的判交mtd算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:工程中使用的凸体和球体的判交mtd算法" class="headings"&gt;工程中使用的凸体和球体的判交/MTD算法&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;对于判交，工程中一把直接化成最近点算法：找到球体和凸体的最近点，然后看最近点是否在球体内。&lt;/p&gt;
+&lt;p&gt;对于判交，工程中直接化成最近点算法：找到球体和凸体的最近点，然后看最近点是否在球体内。&lt;/p&gt;
 &lt;p&gt;MTD算法则直接使用GJK+EPA。但对于球体和OBB的MTD计算，可以先算最近点，然后看最近点是不是在OBB内。如果不在，可以一步算出MTD：&lt;/p&gt;
 $$
 \begin{aligned}
@@ -2105,7 +2544,7 @@ $$&lt;p&gt;如果在内部。那就得使用点到面距离来判断离四个面
 &lt;p&gt;&lt;img src="https://visualgmq.github.io/assets/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/%E5%88%B0%E8%BE%B9%E7%9A%84%E8%B7%9D%E7%A6%BB%E6%80%BB%E6%98%AF%E6%AF%94%E5%88%B0%E9%9D%A2%E7%9A%84%E8%B7%9D%E7%A6%BB%E9%95%BF.png" alt="到边的距离总是比到面的距离长"&gt;&lt;/p&gt;
 &lt;p&gt;判断球体到四面体也是一样的方法。但这个时候就要判断到边的距离了（因为四面体不那么“方正”）&lt;/p&gt;
 &lt;h2 id="其他mtd求解方法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#其他mtd求解方法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:其他mtd求解方法" class="headings"&gt;其他MTD求解方法&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;全部使用GJK。等到GJK的章节再说。&lt;/p&gt;
+&lt;p&gt;大部分使用GJK。等到GJK的章节再说。其他的参考公式大全&lt;sup id="fnref1:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;。&lt;/p&gt;
 &lt;h2 id="参考"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#参考" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#contents:参考" class="headings"&gt;参考&lt;/a&gt;&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -2119,28 +2558,34 @@ $$&lt;p&gt;如果在内部。那就得使用点到面距离来判断离四个面
 &lt;hr&gt;
 &lt;ol&gt;
 &lt;li id="fn:1"&gt;
-&lt;p&gt;&lt;a href="https://gamedev.stackexchange.com/questions/44500/how-many-and-which-axes-to-use-for-3d-obb-collision-with-sat" target="_blank" rel="noopener"&gt;separating axis theorem - How many and which axes to use for 3D OBB collision with SAT - Game Development Stack Exchange&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.geometrictools.com/Books/GeometricTools/AboutTheBook.html" target="_blank" rel="noopener"&gt;Geometric Tools: About Geometric Tools for Computer Graphics&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fnref1:1" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:2"&gt;
+&lt;p&gt;&lt;a href="https://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/pubs/tritri.pdf" target="_blank" rel="noopener"&gt;Tomas Moller: A Fast Triangle-Triangle Intersection Test&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fnref:2" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:3"&gt;
+&lt;p&gt;&lt;a href="https://gamedev.stackexchange.com/questions/44500/how-many-and-which-axes-to-use-for-3d-obb-collision-with-sat" target="_blank" rel="noopener"&gt;separating axis theorem - How many and which axes to use for 3D OBB collision with SAT - Game Development Stack Exchange&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/#fnref:3" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（三）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/</guid><pubDate>Sat, 18 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;这一章描述了各种几何体的最近点计算&lt;/p&gt;
-&lt;p&gt;大部分的算法在参考一节的公式大全中都有详细推导。我只记录一些较难理解的。&lt;/p&gt;
+&lt;p&gt;大部分的算法在公式大全&lt;sup id="fnref:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fn:1" class="footnote-ref" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;中都有详细推导。我只记录一些较难理解的。&lt;/p&gt;
 &lt;h2 id="最近点计算"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#最近点计算" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:最近点计算" class="headings"&gt;最近点计算&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;最近点计算通过给入一个点$p$和一个几何体$D$，要求找到$D$上距离$p$的最近点。&lt;/p&gt;
 &lt;p&gt;我们假定$p$在几何体外部。内部点某些算法可能会得到不正确的结果。&lt;/p&gt;
-&lt;p&gt;大部分的最近点算法都很简单。可以直接看“参考”一节的工具书。我这里只记录一些有巧思的和比较复杂的。&lt;/p&gt;
+&lt;p&gt;大部分的最近点算法都很简单。可以直接看Ericson的书&lt;sup id="fnref:2"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fn:2" class="footnote-ref" role="doc-noteref"&gt;[2]&lt;/a&gt;&lt;/sup&gt;或公式大全&lt;sup id="fnref1:1"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;。我这里只记录一些有巧思的和比较复杂的。&lt;/p&gt;
 &lt;h3 id="到obb的最近点"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#到obb的最近点" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:到obb的最近点" class="headings"&gt;到OBB的最近点&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;一般的想法是将点旋转成相对于OBB的位置，将问题转换为求点到AABB最近点问题。然后算出最近点后再旋转回去。&lt;/p&gt;
 &lt;p&gt;但其实可以通过OBB的轴直接计算：&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://visualgmq.github.io/assets/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/%E7%82%B9%E5%88%B0OBB%E6%9C%80%E8%BF%91%E7%82%B9%E8%AE%A1%E7%AE%97.png" alt="点到OBB的最近点"&gt;&lt;/p&gt;
-&lt;p&gt;对于点$P$，直接计算$\vec{CP}$投影到$\vec{u_1}, \vec{u_2}$的距离$d_1, d_2$。然后将$d_1, d_2$都clamp在OBB的半长内：&lt;/p&gt;
+&lt;p&gt;对于点$P$，直接计算$\vec{CP}$投影到$\vec{u_0}, \vec{u_1}$的距离$d_0, d_1$。然后将$d_0, d_1$都clamp在OBB的半长内：&lt;/p&gt;
 $$
 \begin{cases}
-d^{'}_1 = clamp(d_1, -e_0, e_0) \\
-d^{'}_2 = clamp(d_2, -e_1, e_1) \\
+d^{'}_0 = clamp(d_0, -e_0, e_0) \\
+d^{'}_1 = clamp(d_1, -e_1, e_1) \\
 \end{cases}
 $$&lt;p&gt;这样就得到相对于OBB局部坐标的最近点位置了，然后转换成全局坐标即可：&lt;/p&gt;
 $$
-P_{nearest} = (d^{'}_1 \vec{u_1}, d^{'}_2 \vec{u_2})
+P_{nearest} = (d^{'}_0 \vec{u_0}, d^{'}_1 \vec{u_1})
 $$&lt;h3 id="到三角形的最近点"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#到三角形的最近点" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:到三角形的最近点" class="headings"&gt;到三角形的最近点&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;需要通过Barycentric计算得到。首先推导Barycentric的计算公式：&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://visualgmq.github.io/assets/%E9%87%8D%E5%BF%83%E5%9D%90%E6%A0%87%EF%BC%8C%E9%9D%A2%E7%A7%AF%E6%B3%95%E8%AE%A1%E7%AE%97.png" alt="面积法计算重心坐标"&gt;&lt;/p&gt;
@@ -2160,7 +2605,7 @@ $$
 \gamma \ge 0
 \end{cases}
 $$&lt;p&gt;注意到$(1)$式中可以使用任意两个量表示另外一个量。所以重心坐标本质上只需要两个量就可以了。&lt;/p&gt;
-&lt;p&gt;使用面积计算的缺点是，当点在三角形外时，无法知道其在三角形的哪个voronoi域中。但我们通过选取按照特定顺序的向量计算来获取这个信息：&lt;/p&gt;
+&lt;p&gt;使用面积计算的缺点是，当点在三角形外时，无法知道其在三角形的哪个Voronoi域中。但我们通过选取按照特定顺序的向量计算来获取这个信息：&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://visualgmq.github.io/assets/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/%E5%B8%A6%E6%9C%89Voronoi%E5%9F%9F%E7%9A%84%E9%87%8D%E5%BF%83%E5%9D%90%E6%A0%87.png" alt="带有Voronoi域的重心坐标"&gt;&lt;/p&gt;
 &lt;p&gt;我们首先需要计算$\vec{D} = \vec{AB} \times \vec{BC}$（注意是按照顶点顺序，代码上是&lt;code&gt;cross(pts[1]-pts[0], pts[2]-pts[1])&lt;/code&gt;。这个向量后面帮我们判断三角形面积的符号。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;我们假设$\vec{D}\ne 0$。&lt;/strong&gt;&lt;/p&gt;
@@ -2190,10 +2635,10 @@ $$&lt;p&gt;这样得到的重心坐标会带有符号（注意$\alpha$的计算�
 &lt;li&gt;如果在边的Voronoi域中，直接求P到此边（线段）的最近点&lt;/li&gt;
 &lt;li&gt;如果在角的Voronoi域中，那最近点就是这个角&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;其实真正实现上，如果P在边的Voronoi域中（即只要找到任意一个$S_i \lt 0$），那么直接求这个边的最近点即可。因为角的最近点可以退化成求和这个角连接的任意一条边的临近点。这样算法可能可以提前退出，减少运算量。&lt;/p&gt;
+&lt;p&gt;其实真正实现上，如果P在边的Voronoi域中（即只要找到任意一个$S_i \lt 0$），那么直接求这个边的最近点即可。因为此情况包含了角Voronoi域的判断（角的最近点可以退化成求和这个角连接的任意一条边的临近点）。这样算法可能可以提前退出，减少运算量。&lt;/p&gt;
 &lt;p&gt;那么对于三维空间中任意点到三角形的最近点。首先将点投影到三角形所在平面上，然后用上述方法找最近点即可。&lt;/p&gt;
 &lt;h3 id="四面体tetrahedron最近点算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#四面体tetrahedron最近点算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:四面体tetrahedron最近点算法" class="headings"&gt;四面体(Tetrahedron)最近点算法&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;可以对每个三角面做一次三角形最近点算法，在结果中取取最近点。&lt;/p&gt;
+&lt;p&gt;可以对每个三角面做一次三角形最近点算法，在结果中取最近点。&lt;/p&gt;
 &lt;p&gt;但更好的方法是使用推广到3D中的Barycentric公式，配合推广的三角形最近点算法得到：&lt;/p&gt;
 &lt;p&gt;假设四棱锥顶点为ABCD，求到P点的最近点。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;首先必须假定：从外部看，所有三角面的顶点顺序是一致的（CW或CCW）&lt;/strong&gt;&lt;/p&gt;
@@ -2249,7 +2694,7 @@ $$
 $$&lt;p&gt;有了前三个和$A$点相关的子四面体的面积，我们可以得到前三个重心坐标。最后一个利用公式：&lt;/p&gt;
 $$
 \lambda_4 = 1 - \lambda_1 - \lambda_2 - \lambda_3
-$$&lt;p&gt;可以得到&lt;/p&gt;
+$$&lt;p&gt;可以得到。&lt;/p&gt;
 &lt;p&gt;知道在哪个Voronoi域中，我们就可以选择和这个域相邻的某个面。此时，算法就退化成点P到三角形的情况。&lt;/p&gt;
 &lt;p&gt;在实际计算时，只要存在$\lambda_i &lt; 0$，就用对应三角面做点P到三角面的最近点算法就行。&lt;/p&gt;
 &lt;h3 id="重心坐标的退化"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#重心坐标的退化" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:重心坐标的退化" class="headings"&gt;重心坐标的退化&lt;/a&gt;&lt;/h3&gt;
@@ -2263,8 +2708,18 @@ $$&lt;p&gt;可以得到&lt;/p&gt;
 &lt;h3 id="一般凸多面体最近点算法"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#一般凸多面体最近点算法" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:一般凸多面体最近点算法" class="headings"&gt;一般凸多面体最近点算法&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;使用GJK算法。这个算法很重要，得后面单独开一章说。&lt;/p&gt;
 &lt;h2 id="距离计算"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#距离计算" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:距离计算" class="headings"&gt;距离计算&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;绝大部分距离计算都可以转换为到最近点的距离问题。变相地将问题化简为最近点问题&lt;/p&gt;
-&lt;h2 id="参考"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#参考" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#contents:参考" class="headings"&gt;参考&lt;/a&gt;&lt;/h2&gt;</description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（二）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/</guid><pubDate>Fri, 17 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;这一章描述了各种几何体表示法，以及BV构建。&lt;/p&gt;
+&lt;p&gt;绝大部分距离计算都可以转换为点到几何体最近点的距离问题（或几何体到几何体最近点的距离问题）。变相地将问题化简为最近点问题（或寻找两物体上的最近点对问题）。&lt;/p&gt;
+&lt;div class="footnotes" role="doc-endnotes"&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id="fn:1"&gt;
+&lt;p&gt;公式大全：&lt;a href="https://www.geometrictools.com/Books/GeometricTools/AboutTheBook.html" target="_blank" rel="noopener"&gt;Geometric Tools: About Geometric Tools for Computer Graphics&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fnref1:1" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id="fn:2"&gt;
+&lt;p&gt;&lt;a href="https://book.douban.com/subject/4861957/" target="_blank" rel="noopener"&gt;实时碰撞检测算法技术 (豆瓣)&lt;/a&gt;&amp;#160;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/#fnref:2" class="footnote-backref" role="doc-backlink"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="icon footnote-icon"&gt;&lt;path d="M177 159.7l136 136c9.4 9.4 9.4 24.6 0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9 0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9 0L7 329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description><category domain="https://visualgmq.github.io/categories/game-development/">Game Development</category><category domain="https://visualgmq.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/">游戏开发</category><category domain="https://visualgmq.github.io/tags/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</category></item><item><title>从0开始制作游戏物理引擎（二）</title><link>https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/</link><guid isPermaLink="true">https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/</guid><pubDate>Fri, 17 Jul 2026 01:12:56 +0800</pubDate><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;p&gt;这一章描述了各种几何体表示法，以及BV构建。&lt;/p&gt;
 &lt;h2 id="几何体表示"&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/#几何体表示" class="anchor-link"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon anchor-icon"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;a href="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/#contents:几何体表示" class="headings"&gt;几何体表示&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;首先要确定几何体的表示。某些几何体有多种表示，不同表示法适用于不同的情景。需要根据场景选择。&lt;/p&gt;
 &lt;p&gt;一般都会使用向量形式而非数学上的方程形式。向量形式计算非常方便，很多算法也是基于向量形式的。&lt;/p&gt;
