@@ -1,0 +1,367 @@
+<!doctype html><html lang=zh-cn dir=ltr class=scroll-smooth data-default-appearance=dark data-auto-appearance=true><head><meta charset=utf-8><meta http-equiv=content-language content="zh-cn"><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=theme-color><title>分析力学小记 &#183; VisualGMQ的博客</title><meta name=title content="分析力学小记 &#183; VisualGMQ的博客"><meta name=description content="VisualGMQ的博客"><meta name=keywords content="物理,"><link rel=canonical href=https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/><meta name=author content="VisualGMQ"><link href=https://github.com/VisualGMQ rel=me><link href=https://space.bilibili.com/256768793 rel=me><meta property="og:url" content="https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/"><meta property="og:site_name" content="VisualGMQ的博客"><meta property="og:title" content="分析力学小记"><meta property="og:description" content="本文是一份用于游戏物理引擎的分析力学快速入门文章。"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-10-01T00:45:27+08:00"><meta property="article:modified_time" content="2026-10-01T00:45:27+08:00"><meta property="article:tag" content="物理"><meta name=twitter:card content="summary"><meta name=twitter:title content="分析力学小记"><meta name=twitter:description content="本文是一份用于游戏物理引擎的分析力学快速入门文章。"><link type=text/css rel=stylesheet href=/css/main.bundle.min.3ea5e9ae4f69e8960432a2dc45e8304f9c268908ca0c20747f7d863eba62703a2b12b572a03107e931b38752098408ee8864f4d682d1bdb86f60537573d70d6b.css integrity="sha512-PqXprk9p6JYEMqLcRegwT5wmiQjKDCB0f32GPrpicDorErVyoDEH6TGzh1IJhAjuiGT01oLRvbhvYFN1c9cNaw=="><script type=text/javascript src=/js/appearance.min.11183536302aa30e374452803c0154673009b5a4995c7f6559d1c935544cc591b599a5f2adfaeda41e1cc865bd62bdace9b0672a75294ce49d185f0f82b98cbe.js integrity="sha512-ERg1NjAqow43RFKAPAFUZzAJtaSZXH9lWdHJNVRMxZG1maXyrfrtpB4cyGW9Yr2s6bBnKnUpTOSdGF8PgrmMvg=="></script><script defer src=/lib/zoom/zoom.min.umd.a527109b68c082a70f3697716dd72a9d5aa8b545cf800cecbbc7399f2ca6f6e0ce3e431f2062b48bbfa47c9ea42822714060bef309be073f49b9c0e30d318d7b.js integrity="sha512-pScQm2jAgqcPNpdxbdcqnVqotUXPgAzsu8c5nyym9uDOPkMfIGK0i7+kfJ6kKCJxQGC+8wm+Bz9JucDjDTGNew=="></script><script defer src=/js/medium-zoom.67b71ecf7eecce38673a92244d1ffd93edb5f1aeedd12e725d0f67fe901828fa3562f6a6d64ad290b36b7d7034b8ea16e63486d75d957bcf6a2732923e5d46e6.js integrity="sha512-Z7cez37szjhnOpIkTR/9k+218a7t0S5yXQ9n/pAYKPo1Yvam1krSkLNrfXA0uOoW5jSG112Ve89qJzKSPl1G5g=="></script><script type=text/javascript src=/js/reading-progress.min.5d84577898a2dc0e1ed36baf2acb508e94e0c0f59a7fdeef67c1aa264029d9a17ccaff47182411b19d9de2eec2d6ac67f610f61bd938aa18af177ed66030cff1.js integrity="sha512-XYRXeJii3A4e02uvKstQjpTgwPWaf97vZ8GqJkAp2aF8yv9HGCQRsZ2d4u7C1qxn9hD2G9k4qhivF37WYDDP8Q=="></script><script defer type=text/javascript id=script-bundle src=/js/main.bundle.min.5b9ed082c219834880b0f2f41c608591e2581b1c718be2934d6e188412f3e9597b08940996c3a6bd5fb20ded8594a05aeb5a0a07370f6026452bd2655b6013bd.js integrity="sha512-W57QgsIZg0iAsPL0HGCFkeJYGxxxi+KTTW4YhBLz6Vl7CJQJlsOmvV+yDe2FlKBa61oKBzcPYCZFK9JlW2ATvQ==" data-copy=复制 data-copied=已复制></script><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><script type=application/ld+json>[{"@context":"https://schema.org","@type":"Article","articleSection":"Posts","name":"分析力学小记","headline":"分析力学小记","inLanguage":"zh-cn","url":"https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/","author":{"@type":"Person","name":"VisualGMQ","image":"https://visualgmq.github.io/icons/logo.png","sameAs":["https://github.com/VisualGMQ","https://space.bilibili.com/256768793"]},"copyrightYear":"2026","dateCreated":"2026-10-01T00:45:27\u002b08:00","datePublished":"2026-10-01T00:45:27\u002b08:00","dateModified":"2026-10-01T00:45:27\u002b08:00","keywords":["物理"],"mainEntityOfPage":"https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/","wordCount":2235}]</script><script>window.MathJax={tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"],ignoreHtmlClass:"no-mathjax"},chtml:{scale:1}}</script><script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.js></script></head><body class="flex flex-col h-screen m-auto leading-7 max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32 text-lg bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral bf-scrollbar"><div id=the-top class="absolute flex self-center"><a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600" href=#main-content><span class="font-bold text-primary-600 pe-2 dark:text-primary-400">&darr;</span>
+跳过正文</a></div><header><div class="main-menu flex items-center w-full gap-2 p-1 pl-0"><div><a href=/ class=flex><span class=sr-only>VisualGMQ的博客</span>
+<img src=/icons/logo.png width=320 height=320 class="logo max-h-20 max-w-20 object-scale-down object-left nozoom" alt></a></div><a href=/ class="text-base font-medium truncate min-w-0 shrink">VisualGMQ的博客</a><div class="flex items-center ms-auto"><div class="hidden md:flex"><nav aria-label class="flex items-center gap-x-5 h-12"><a href=/posts/ class="flex items-center bf-icon-color-hover" aria-label=文章 title=Posts><span class="text-sm font-medium break-normal">文章
+</span></a><a href=/categories/ class="flex items-center bf-icon-color-hover" aria-label=分类 title=Categories><span class="text-sm font-medium break-normal">分类
+</span></a><a href=/tags/ class="flex items-center bf-icon-color-hover" aria-label=标签 title=Tags><span class="text-sm font-medium break-normal">标签
+</span></a><a href=/about/ class="flex items-center bf-icon-color-hover" aria-label=关于我 title=关于我><span class="text-sm font-medium break-normal">关于我
+</span></a><a href=/videos/ class="flex items-center bf-icon-color-hover" aria-label=视频集 title><span class="text-sm font-medium break-normal">视频集</span></a><div class="flex items-center"><button id=appearance-switcher aria-label=切换为深色模式 type=button class="text-sm bf-icon-color-hover" title=切换为深色模式><div class="flex items-center justify-center dark:hidden"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="items-center justify-center hidden dark:flex"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button></div><button id=search-button aria-label="搜索 (/)" class="flex items-center gap-2 rounded-lg border bf-border-color bf-border-color-hover bg-neutral-100/50 px-2 py-1 text-sm text-neutral-500 transition-colors hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:text-primary-400" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span><kbd id=search-shortcut-hint class="pointer-events-none font-sans text-xs text-neutral-500 dark:text-neutral-400" aria-hidden=true>⌘K</kbd></button></nav></div><div class="flex md:hidden"><div class="mobile-header-row relative flex items-center h-14 gap-4"><button id=appearance-switcher-mobile type=button aria-label=切换为深色模式 title=切换为深色模式 class="flex items-center justify-center text-neutral-900 hover:text-primary-600 dark:text-neutral-200 dark:hover:text-primary-400"><div class=dark:hidden><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="hidden dark:block"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button>
+<button id=search-button-mobile aria-label="搜索 (/)" class="flex items-center justify-center bf-icon-color-hover" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span></button>
+<input type=checkbox id=mobile-menu-toggle autocomplete=off class="hidden peer">
+<label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog aria-label class="flex items-center justify-center cursor-pointer bf-icon-color-hover"><span class="relative block icon"><svg viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416c17.7.0 32 14.33 32 32 0 17.7-14.3 32-32 32H32C14.33 128 0 113.7.0 96zM0 256c0-17.7 14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32H32c-17.67.0-32-14.3-32-32zM416 448H32c-17.67.0-32-14.3-32-32s14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32z"/></svg></span></label><div id=mobile-menu-dialog role=dialog aria-modal=true aria-label style=scrollbar-gutter:stable class="z-50 invisible overflow-y-auto opacity-0 transition-[opacity,visibility] duration-300 peer-checked:visible peer-checked:opacity-100
+fixed inset-0 px-6 py-20 bg-neutral-50/97 dark:bg-neutral-900/99
+bf-scrollbar"><label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog class="fixed end-8 top-5 z-50 h-12 w-12 rounded-full flex items-center justify-center cursor-pointer select-none bf-icon-color-hover border bf-border-color bf-border-color-hover bg-neutral-50 dark:bg-neutral-900"><span class=sr-only></span>
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></label><nav aria-label class="mx-auto max-w-md space-y-6"><div class=px-2><div class="flex items-center gap-4"><a href=/posts/ aria-label=文章 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Posts class="text-2xl font-bold tracking-tight">文章</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/categories/ aria-label=分类 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Categories class="text-2xl font-bold tracking-tight">分类</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/tags/ aria-label=标签 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Tags class="text-2xl font-bold tracking-tight">标签</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/about/ aria-label=关于我 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=关于我 class="text-2xl font-bold tracking-tight">关于我</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/videos/ aria-label=视频集 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title class="text-2xl font-bold tracking-tight">视频集</span></a></div></div></nav></div></div></div></div></div></header><div class="relative flex flex-col grow"><main id=main-content class=grow><div id=reading-progress class="fixed left-0 top-0 z-100 h-1 w-0 bg-primary-500 dark:bg-primary-400 print:hidden" aria-hidden=true></div><article><header id=single_header class="mt-5 max-w-prose"><h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">分析力学小记</h1><div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden"><div class="flex flex-row flex-wrap items-center"><time datetime=2026-10-01T00:45:27+08:00>1 October 2026</time><span class="px-2 text-primary-500">&#183;</span><span>2235 字</span><span class="px-2 text-primary-500">&#183;</span><span title=预计阅读>11 分钟</span></div></div></header><section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row"><div class="order-first lg:ms-auto px-0 lg:order-last lg:ps-8 lg:max-w-2xs"><div class="toc ps-5 print:hidden lg:sticky lg:top-10"><details open id=TOCView class="toc-right mt-0 overflow-y-auto overscroll-contain bf-scrollbar rounded-lg -ms-5 ps-5 pe-2 hidden lg:block"><summary class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="min-w-[220px] py-2 border-dotted border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContents aria-label=目录><ul><li><a href=#质点运动学与动力学>质点运动学与动力学</a><ul><li><a href=#单质点运动学与动力学>单质点运动学与动力学</a></li><li><a href=#功与能量>功与能量</a><ul><li><a href=#随时间改变的势能>随时间改变的势能</a></li></ul></li><li><a href=#守恒律>守恒律</a></li><li><a href=#守恒律的意义>守恒律的意义</a></li><li><a href=#多质点动力学>多质点动力学</a></li></ul></li><li><a href=#分析力学>分析力学</a><ul><li><a href=#广义坐标和约束>广义坐标和约束</a><ul><li><a href=#广义坐标>广义坐标</a></li><li><a href=#约束>约束</a></li></ul></li><li><a href=#拉格朗日方程>拉格朗日方程</a><ul><li><a href=#虚功原理>虚功原理</a></li><li><a href=#dalembert原理达朗伯原理>D&rsquo;Alembert原理（达朗伯原理）</a></li><li><a href=#拉格朗日方程-1>拉格朗日方程</a></li></ul></li><li><a href=#哈密顿原理与欧拉-拉格朗日方程>哈密顿原理与欧拉-拉格朗日方程</a><ul><li><a href=#哈密顿原理>哈密顿原理</a></li><li><a href=#变分法和欧拉-拉格朗日方程>变分法和欧拉-拉格朗日方程</a></li></ul></li><li><a href=#哈密顿力学>哈密顿力学</a></li></ul></li><li><a href=#刚体动力学>刚体动力学</a><ul><li><a href=#刚体自由度>刚体自由度</a></li><li><a href=#一般转动>一般转动</a><ul><li><a href=#欧拉角proper-eular-angles>欧拉角（Proper Eular Angles）</a></li><li><a href=#泰特布莱恩角taitbryan-angles>泰特–布莱恩角（Tait–Bryan angles）</a></li><li><a href=#四元数表示法>四元数表示法</a></li><li><a href=#轴-角-表示法>轴-角 表示法</a></li><li><a href=#定点转动的欧拉定理>定点转动的欧拉定理</a></li></ul></li><li><a href=#无限小转动分析>无限小转动分析</a><ul><li><a href=#刚体运动的分解>刚体运动的分解</a></li><li><a href=#欧拉角表示无限小转动>欧拉角表示无限小转动</a></li></ul></li><li><a href=#刚体动力学方程>刚体动力学方程</a><ul><li><a href=#惯性张量inertia-tensor>惯性张量(Inertia Tensor)</a></li><li><a href=#转动惯量moment-of-inertia>转动惯量(Moment of inertia)</a></li><li><a href=#主轴定理>主轴定理</a></li><li><a href=#沙勒定理chasles-theorem>沙勒定理(Chasles Theorem)</a></li><li><a href=#欧拉动力学方程>欧拉动力学方程</a></li></ul></li><li><a href=#刚体能量>刚体能量</a></li><li><a href=#刚体静力学>刚体静力学</a><ul><li></li></ul></li></ul></li></ul></nav></div></details><details class="toc-inside mt-0 overflow-hidden rounded-lg -ms-5 ps-5 lg:hidden"><summary class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="py-2 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContentsMobile aria-label=目录><ul><li><a href=#质点运动学与动力学>质点运动学与动力学</a><ul><li><a href=#单质点运动学与动力学>单质点运动学与动力学</a></li><li><a href=#功与能量>功与能量</a><ul><li><a href=#随时间改变的势能>随时间改变的势能</a></li></ul></li><li><a href=#守恒律>守恒律</a></li><li><a href=#守恒律的意义>守恒律的意义</a></li><li><a href=#多质点动力学>多质点动力学</a></li></ul></li><li><a href=#分析力学>分析力学</a><ul><li><a href=#广义坐标和约束>广义坐标和约束</a><ul><li><a href=#广义坐标>广义坐标</a></li><li><a href=#约束>约束</a></li></ul></li><li><a href=#拉格朗日方程>拉格朗日方程</a><ul><li><a href=#虚功原理>虚功原理</a></li><li><a href=#dalembert原理达朗伯原理>D&rsquo;Alembert原理（达朗伯原理）</a></li><li><a href=#拉格朗日方程-1>拉格朗日方程</a></li></ul></li><li><a href=#哈密顿原理与欧拉-拉格朗日方程>哈密顿原理与欧拉-拉格朗日方程</a><ul><li><a href=#哈密顿原理>哈密顿原理</a></li><li><a href=#变分法和欧拉-拉格朗日方程>变分法和欧拉-拉格朗日方程</a></li></ul></li><li><a href=#哈密顿力学>哈密顿力学</a></li></ul></li><li><a href=#刚体动力学>刚体动力学</a><ul><li><a href=#刚体自由度>刚体自由度</a></li><li><a href=#一般转动>一般转动</a><ul><li><a href=#欧拉角proper-eular-angles>欧拉角（Proper Eular Angles）</a></li><li><a href=#泰特布莱恩角taitbryan-angles>泰特–布莱恩角（Tait–Bryan angles）</a></li><li><a href=#四元数表示法>四元数表示法</a></li><li><a href=#轴-角-表示法>轴-角 表示法</a></li><li><a href=#定点转动的欧拉定理>定点转动的欧拉定理</a></li></ul></li><li><a href=#无限小转动分析>无限小转动分析</a><ul><li><a href=#刚体运动的分解>刚体运动的分解</a></li><li><a href=#欧拉角表示无限小转动>欧拉角表示无限小转动</a></li></ul></li><li><a href=#刚体动力学方程>刚体动力学方程</a><ul><li><a href=#惯性张量inertia-tensor>惯性张量(Inertia Tensor)</a></li><li><a href=#转动惯量moment-of-inertia>转动惯量(Moment of inertia)</a></li><li><a href=#主轴定理>主轴定理</a></li><li><a href=#沙勒定理chasles-theorem>沙勒定理(Chasles Theorem)</a></li><li><a href=#欧拉动力学方程>欧拉动力学方程</a></li></ul></li><li><a href=#刚体能量>刚体能量</a></li><li><a href=#刚体静力学>刚体静力学</a><ul><li></li></ul></li></ul></li></ul></nav></div></details></div></div><div class="min-w-0 min-h-0 max-w-fit"><div class="article-content max-w-prose mb-20"><p>本文是一份用于游戏物理引擎的分析力学快速入门文章。</p><p>主要是为了编写物理引擎而记录的相关知识。和物理引擎关联不大的知识不做记录（混沌系统，相对论，哈密顿力学等）。</p><p>分析力学的教程推荐看B站任延宇的《理论力学》<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>。书籍则是Goldstain的《Classical Mechanics》<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>。但GoldStain的书写的一拖四，下定义的时候从来不说定义，并且刚体动力学那一章说的一坨。建议先看视频搞清楚整体脉络再看书。</p><p>另外推荐一本Taylor的《Classical Mechanics》<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>。是一本很老的书，补充了很多牛顿力学中的知识。就是内容太啰嗦，适合完全没学过物理的人看。可以没事看看用来查漏补缺。</p><h2 class="relative group">质点运动学与动力学<div id=质点运动学与动力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e8%b4%a8%e7%82%b9%e8%bf%90%e5%8a%a8%e5%ad%a6%e4%b8%8e%e5%8a%a8%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h2><h3 class="relative group">单质点运动学与动力学<div id=单质点运动学与动力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8d%95%e8%b4%a8%e7%82%b9%e8%bf%90%e5%8a%a8%e5%ad%a6%e4%b8%8e%e5%8a%a8%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h3><p>定义空间中的原点$O$。这样，$O$到空间中任意一点的位置构成一个矢量，称为位矢(radius vector)$\pmb{r}$，其表明了物体的位置。</p><p>而位置对时间的导数是速度：</p>$$
+\pmb{v} = \frac{d\pmb{r}}{dt} = \dot{\pmb{r}}
+$$<p>速度对时间的导数是加速度：</p>$$
+\pmb{a} = \frac{d\pmb{v}}{dt} = \dot{\pmb{v}} = \ddot{\pmb{r}}
+$$<p>牛顿第二定律表示：</p>$$
+\pmb{F} = m\pmb{a}
+$$<p>其实有一个等价的，使用动量描述的公式：</p>$$
+\begin{aligned}
+\pmb{p} &= m\pmb{v} \\
+\pmb{F} &= \dot{\pmb{p}}
+\end{aligned}
+$$<p>定义角动量为：</p>$$
+\pmb{L} = \pmb{r} \times \pmb{p}
+$$<p>这也称为角动量矩。因为矩的定义是$\pmb{r} \times \cdot$</p><p>所以力矩就是$\pmb{N} = \pmb{r} \times \pmb{F}$</p><p>而力矩与角动量的关系则是：</p>$$
+\pmb{N} = \dot{\pmb{L}}
+$$<p>注意：单质点下的角动量，是指质点绕着$O$点移动的运动度量。单个质点本身显然没有旋转。</p><h3 class="relative group">功与能量<div id=功与能量 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8a%9f%e4%b8%8e%e8%83%bd%e9%87%8f aria-label=锚点>#</a></span></h3><p>功是能量变化的度量。做功会传递能量。</p><p>功的计算式为力沿着路径的第二类曲线积分：</p>$$
+W = \int_{L} \pmb{F} d\pmb{r}
+$$<p>注意：以下情况会导致能量变化：</p><ol><li>做功</li><li>热传递</li><li>质量迁移：物质带着能量进出系统</li><li>辐射：电磁波将能量带入/出</li></ol><p>做功只是其中一种方式。只是在经典力学中，只研究功对能量的改变。</p><p>动能：通过功的定义式直接得出：</p>$$
+\begin{aligned}
+W = \int_1^2 \pmb{F} d\pmb{r} = m\int_1^2 \frac{d\pmb{v}}{dt}\cdot \pmb{v}dt = \frac{1}{2}m(v_2^2 - v_1^2)
+\end{aligned}
+$$<p>这里$T = \frac{1}{2}mv^2$就是<strong>动能(KE - Kinetic Energy)</strong>。而这条公式就是<strong>动能定理</strong>，即：</p><blockquote><p>功是动能的改变量</p></blockquote><p>接下来是 <strong>保守力(Conservation Force)</strong> 的定义：</p><blockquote><p>沿环路做功为0的力为保守力，即：</p>$$
+\oint_L \pmb{F_{cons}}d\pmb{r} = 0
+$$</blockquote><p>而 <strong>势能(PE - Potential Energy)</strong> 则是由保守力定义的：</p><blockquote><p>势能是只和位置有关的函数，用$V(\pmb{r})$表示。保守力是势能的梯度：</p>$$
+\pmb{F}_{cons} = -\nabla{V(\pmb{r})}
+$$</blockquote><p>研究势能时，必须先选取<strong>势能零点(zero level of PE)</strong>，这是势能为0的点。</p><p>势能零点可以任意选取。比如重力势能的势能零点一般就选取在地球表面。</p><p>由势能定义我们知道：</p>$$
+\begin{aligned}
+& \pmb{F}_{cons} = -\frac{\partial V}{\partial d\pmb{s}} \\
+& \Rightarrow \\
+& \pmb{F}_{cons} d\pmb{r} = -dV \\
+W &= \int \pmb{F}_{cons}d\pmb{r} = V_1 - V_2
+\end{aligned}
+$$<p>所以保守力做正功，势能反而会减少。</p><p>只有保守力做功的系统称为<strong>保守系统(Conservation System)</strong>。</p><p>在保守系统中，保守力做功同时也会改变动能。这意味着动能的改变量和势能的改变量是一样的，于是有：</p>$$
+\begin{aligned}
+& T_2 - T_1 = V_1 - V_2 \\
+& \Rightarrow \\
+& T_1 + V_1 = T_2 + V_2
+\end{aligned}
+$$<p>这意味着任意时刻，动能和势能的总和是不变的。这就是<strong>机械能守恒定律</strong>。</p><p>机械能就是动能加势能。</p><p>也就是说：<strong>只有保守力做功时，机械能守恒</strong>。</p><p>注意此时系统内能量依然有流动（如果保守力做正功，能量从势能流到动能），只是总能量不变。</p><h4 class="relative group">随时间改变的势能<div id=随时间改变的势能 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e9%9a%8f%e6%97%b6%e9%97%b4%e6%94%b9%e5%8f%98%e7%9a%84%e5%8a%bf%e8%83%bd aria-label=锚点>#</a></span></h4><p>有些势能是随时间改变的（$V(\pmb{r}, t)$）。比如两个电荷，其中一个电荷的电量随时间流逝，那么另一个电荷受到的电势能也会随之改变。</p><p>在经典力学中，<strong>只考虑不随时间改变的势能</strong>。</p><h3 class="relative group">守恒律<div id=守恒律 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%ae%88%e6%81%92%e5%be%8b aria-label=锚点>#</a></span></h3><p>除了能量守恒还有如下守恒率：</p><blockquote><p>合力为0($\sum \pmb{F}_i = 0$)时，动量守恒</p></blockquote><blockquote><p>合力矩为0($\sum \pmb{N}_i = 0$)时，角动量守恒</p></blockquote><h3 class="relative group">守恒律的意义<div id=守恒律的意义 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%ae%88%e6%81%92%e5%be%8b%e7%9a%84%e6%84%8f%e4%b9%89 aria-label=锚点>#</a></span></h3><p>物理学中，绝大部分时间都在求解微分方程。而守恒率可以帮助我们降低方程的阶数，从而更方便地求解。</p><p>守恒率比起牛顿定律适用范围更广。比如牛顿第三定律在电场中就不正确：</p><p>假设有垂直向上的电场，电场中有两个电荷沿着互相垂直的方向移动。那么电场给两个电荷的力就不满足牛顿第三定律。但是动量守恒依旧满足。</p><p>不过经典力学也不研究场。</p><h3 class="relative group">多质点动力学<div id=多质点动力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%a4%9a%e8%b4%a8%e7%82%b9%e5%8a%a8%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h3><p>多质点下，主要研究 N 个质点在内力 + 外力作用下的整体运动，核心是把复杂系统"简化 + 找守恒量“。</p><p>定义质心为：</p><blockquote><p>$M = \frac{\sum m_i \pmb{r}_i}{\sum m_i}$</p></blockquote><p>由于牛顿第三定律，系统内部的作用力可以两两抵消，动量守恒变成：</p><blockquote><p>合外力为0时，动量守恒</p></blockquote><p>而角动量则变成质心本身的角动量+相对质心的质点的角动量，变成：</p><blockquote><p>合力矩为0时，角动量守恒</p></blockquote><p>动能则变成：</p><blockquote><p>$T = \frac{1}{2}Mv_{cm}^2 + \frac{1}{2}\sum m_i v_i^{&lsquo;2}$</p></blockquote><p>其中$v_i^{&rsquo;}$是质点相对质心的速度。即动能变成质心本身的动能+其他质点相对质心的动能。</p><p>而势能则相对复杂，一般只是对所有质点自己的势能求和得到系统势能。</p><p>因为势能分为：</p><ol><li>内势：系统内各个质点之间的势能</li><li>外势能：整个系统的势能。如果在均匀场且耦合正比于质量，可以视为质心的势能，否则不行</li></ol><p>所以没有一个通用计算方式，只能逐点势能计算后求和。</p><p>而机械能守恒依旧是：</p><blockquote><p>系统只有保守力做功时机械能守恒</p></blockquote><h2 class="relative group">分析力学<div id=分析力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h2><p>指用<strong>广义坐标、能量等标量函数和变分原理</strong>来研究力学的一整套方法，与"用矢量和力"的牛顿力学相对。</p><p>使用数学分析的方式重构牛顿力学。本质上还是牛顿力学，但提供了更好的数学工具，这些工具有更好的普适性（在非牛顿力学，比如量子力学，相对论等中都有作用）。</p><p>现在的教程中一般会按照这个路径去</p><h3 class="relative group">广义坐标和约束<div id=广义坐标和约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b9%bf%e4%b9%89%e5%9d%90%e6%a0%87%e5%92%8c%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h3><h4 class="relative group">广义坐标<div id=广义坐标 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b9%bf%e4%b9%89%e5%9d%90%e6%a0%87 aria-label=锚点>#</a></span></h4><blockquote><p>能唯一确定系统位置的一组任意参数，这些参数彼此独立</p></blockquote><p>比如在笛卡尔坐标系中自由运动的小球，其广义坐标就是笛卡尔坐标中的$x,y,z$。</p><p>但在有约束的情况下（比如一个滑块从斜面上滑下来），其不需要使用整个笛卡尔坐标系表示。因为滑块总是紧贴斜面，所以完全可以用“滑块到斜面顶端的距离”这一个量就能表示滑块的位置（即使用图中绿色坐标轴建系）。</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=广义坐标示例 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%b9%bf%e4%b9%89%e5%9d%90%e6%a0%87%e7%a4%ba%e4%be%8b.png></figure><p>或者另一种情况：一个硬杆的一段被固定在天花板上。此时只需要杆到天花板的角度$\theta$即可描述。</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=广义坐标示例 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%b9%bf%e4%b9%89%e5%9d%90%e6%a0%87%e7%a4%ba%e4%be%8b2.png></figure><p>也就是说，在很多时候，描述系统的坐标系可能不是固定的（可能是球坐标系，笛卡尔坐标系或者甚至是一维的），甚至量也不是同一的（比如上面例子中，一个是距离一个是角度）。这种就叫做<strong>广义坐标</strong>。</p><p>广义坐标使用$q$表示。一组广义坐标就是$(q_1,q_2, \cdots, q_i)$。注意：$q_i$之间不需要在一个坐标系下（比如$q_1$是角度，$q_2$是长度，$q_3$又是其他什么量）。只要这些量组合起来能唯一确定系统的位置就行。</p><p>那么广义坐标对时间的导数就是广义速度，记为$(\dot{q_1}, \dot{q_1}, \cdots, \dot{q_i})$。同理还有广义加速度。</p><p>而“彼此独立”是指一个广义坐标不能被其他广义坐标表示。其实就是不能有冗余坐标。</p><h4 class="relative group">约束<div id=约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h4><blockquote><p>对系统运动的限制。它规定哪些位置/速度是可能的，哪些是不可能的</p></blockquote><p>比如上面例子中“物体总是紧贴斜面”就是一种约束。而“连杆的一头固定在天花板”又是一种约束。</p><p>约束方程：</p><blockquote><p>即约束的方程，其固定了一些广义坐标的取值范围</p></blockquote><p>约束有很多分类方法：</p><ul><li>完整(holonomic)/非完整(nonholonomic)约束：只和位置有关，可能和时间有关的约束$f(q_1,q_2,\cdots,q_i, t)$。这也是我们最常见，最需要研究的约束。
+本质上来说，完整约束就是此约束对应的微分方程可解。非完整约束就是不可解。</li><li>定常/时变约束：是否和时间相关</li><li>几何约束/微分约束：<ul><li>几何约束就是只和位置有关，可能和时间有关（其实就是完整约束）</li><li>微分约束就是还和速度有关。此时是微分方程，如果此方程不可解就是非完整约束，否则其实可以变成几何约束，所以依旧是完整约束</li></ul></li></ul><p>其实只需要记住完整/非完整约束即可。</p><h3 class="relative group">拉格朗日方程<div id=拉格朗日方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%8b%89%e6%a0%bc%e6%9c%97%e6%97%a5%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h3><p>历史上有两个拉格朗日方程：</p><ol><li>力学的拉格朗日方程：直接从虚功原理和达郎贝尔原理出发推导出来，没有变分法</li><li>欧拉-拉格朗日方程：最早是欧拉和拉格朗日通过变分法发展出的一个数学方程，没什么物理意义。但后来哈密顿发展他的力学时发现，从最小作用量原理可以直接得到这个方程，赋予了他物理意义。</li></ol><p>只是后来发现1中的方程就是2中的特例，所以后面统一叫欧拉-拉格朗日方程。</p><p>并且现在的教程路径都是先说哈密顿原理，然后直接从哈密顿原理，经过变分法推导出欧拉-拉格朗日方程。</p><h4 class="relative group">虚功原理<div id=虚功原理 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e8%99%9a%e5%8a%9f%e5%8e%9f%e7%90%86 aria-label=锚点>#</a></span></h4><p>是处理静力学的一种方法。</p><p>首先定义虚位移：</p><blockquote><p>一个假象的，很小的位移。用$\delta \pmb{r}$表示</p></blockquote><p>注意：<strong>虚位移并没有真的移动物体。而是假设移动了一点点。</strong></p><p>那么，在虚位移上做的功就是虚功。整个系统的虚功和就是：</p>$$
+\delta W = \sum{(\pmb{F}_a + \pmb{F}_c}) \cdot \delta \pmb{r}
+$$<p>这里$\pmb{F}_c$是约束力，$\pmb{F}_a$是主动力（即除了约束力之外的力）。</p><p>接下来定义理想约束：</p><blockquote><p>&ldquo;约束力在<strong>系统允许的</strong>任意虚位移上做的<strong>总功</strong>为零"的约束。即：</p>$$
+\sum \pmb{F}_c \cdot \delta \pmb{r} = 0
+$$</blockquote><p>这就是说，要么约束力垂直于允许的位移，要么总约束力大小刚好抵消。</p><p>接下来定义理想系统：</p><blockquote><p>只有理想约束的系统称为理想系统</p></blockquote><p>那么就可以定义虚功原理：</p><blockquote><p>理想约束下的静止系统保持平衡的充要条件为<strong>主动力在虚位移上所做虚功总和为零</strong>，即</p>$$
+\sum \pmb{F}_a \cdot \delta \pmb{r} = 0
+$$</blockquote><p>即无论你往哪个方向挪动一点点物体，物体的主动力都不作功，那么此时系统肯定是平衡的（静止或做匀速直线运动，不过一般只关注静止情况）。</p><p>接下来了解广义坐标下的虚功原理。对于任意广义坐标$\pmb{r} = \pmb{r}(q_1, q_2, \cdots, q_n)$，其虚位移为：</p>$$
+\delta \pmb{r} = \sum \frac{\partial \pmb{r}}{\partial q_i} \delta q_i
+$$<p>求虚位移其实只是对$\pmb{r}$进行全微分。</p><p>那么虚功原理变为：</p>$$
+\sum (\pmb{F}_a \cdot \frac{\partial \pmb{r}}{\partial q_i}) \delta q_i = 0
+$$<p>即</p>$$
+\pmb{F}_a \cdot \frac{\partial \pmb{r}}{\partial q_i} = 0
+$$<h4 class="relative group">D&rsquo;Alembert原理（达朗伯原理）<div id=dalembert原理达朗伯原理 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#dalembert%e5%8e%9f%e7%90%86%e8%be%be%e6%9c%97%e4%bc%af%e5%8e%9f%e7%90%86 aria-label=锚点>#</a></span></h4><p>其实只是数学上的一个变换。由牛顿第二定律$\pmb{F} = \dot{\pmb{p}}$，我们将等式右边挪到左边就有：</p>$$
+\pmb{F} - \dot{\pmb{p}} = 0
+$$<p>那么就将一个动力学问题变成了一个静力学问题。那么利用虚功原理，就有：</p>$$
+\begin{aligned}
+& \sum{(\pmb{F} - \dot{\pmb{p}})} \cdot \delta \pmb{r} = 0 \\
+& \Rightarrow \\
+& \sum{(\pmb{F}_a + \pmb{F}_c - \dot{\pmb{p}})} \cdot \delta \pmb{r} = 0 \\
+& \Rightarrow \\
+& \sum{(\pmb{F}_a - \dot{\pmb{p}})} \cdot \delta \pmb{r} = 0 \\
+\end{aligned}
+$$<h4 class="relative group">拉格朗日方程<div id=拉格朗日方程-1 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%8b%89%e6%a0%bc%e6%9c%97%e6%97%a5%e6%96%b9%e7%a8%8b-1 aria-label=锚点>#</a></span></h4><p>从达郎贝尔原理可以推导出拉格朗日方程。主要的公式是：</p>$$
+\begin{cases}
+& \sum{(\pmb{F}_a - \dot{\pmb{p}})} \cdot \delta \pmb{r} = 0 \\
+& \delta \pmb{r} = \sum \frac{\partial \pmb{r}}{\partial q_i} \delta q_i \\
+& \pmb{v} = \sum \frac{\partial \pmb{r}}{\partial q_i}\dot{q_i} + \frac{\partial \pmb{r}}{\partial t}
+\end{cases}
+$$<p>利用这些公式联立，最后可以得到拉格朗日方程：</p><blockquote>$$
+\begin{aligned}
+& \frac{d}{dt}(\frac{\partial T}{\partial \dot{q_i}}) - \frac{\partial T}{\partial q_i} = Q_i \\
+& Q_i = \sum \pmb{F}_i\cdot \frac{\partial \pmb{r}}{\partial q_i}
+\end{aligned}
+$$<p>其中$T$是动能。</p></blockquote><p>而如果系统<strong>只有保守力</strong>，那么就有$\pmb{F}_i = -\nabla_i V(\pmb{r})$。那么就有：</p>$$
+Q_i = -\sum \nabla_i V(\pmb{r}) \cdot \frac{\partial \pmb{r}}{\partial q_i} = -\frac{\partial V}{\partial q_i}
+$$<p>那么移到拉格朗日方程左边，就有：</p>$$
+\frac{d}{dt}(\frac{\partial T}{\partial \dot{q_i}}) - \frac{\partial (T - V)}{\partial q_i} = 0
+$$<p>而我们假设势能不随时间改变，所以左边的$\frac{d}{dt}\frac{\partial T}{\partial \dot{q}_i}$也可以加一个$V$得到$\frac{d}{dt}\frac{\partial (T-V)}{\partial \dot{q}_i}$。那么整个式子就是：</p>$$
+\frac{d}{dt}(\frac{\partial (T - V)}{\partial \dot{q_i}}) - \frac{\partial (T - V)}{\partial q_i} = 0
+$$<p>令$L = T -V$，最后的拉格朗日方程就是：</p><blockquote>$$
+\frac{d}{dt}(\frac{\partial L}{\partial \dot{q_i}}) - \frac{\partial L}{\partial q_i} = 0
+$$</blockquote><p>其中$L$称为“拉格朗日量”。</p><p>注意：拉格朗日方程有两个形式，一个是带广义力$Q_i$的，一个是不带广义力的简洁版。</p><p>另外，利用“循环坐标”可以从拉格朗日方程推导出动量守恒。而当$L$不显含时间$t$的话，还能推导出能量守恒。这里不再赘述。</p><h3 class="relative group">哈密顿原理与欧拉-拉格朗日方程<div id=哈密顿原理与欧拉-拉格朗日方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%93%88%e5%af%86%e9%a1%bf%e5%8e%9f%e7%90%86%e4%b8%8e%e6%ac%a7%e6%8b%89-%e6%8b%89%e6%a0%bc%e6%9c%97%e6%97%a5%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h3><h4 class="relative group">哈密顿原理<div id=哈密顿原理 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%93%88%e5%af%86%e9%a1%bf%e5%8e%9f%e7%90%86 aria-label=锚点>#</a></span></h4><blockquote><p>在固定时间区间内，系统从初始位形$q(t_1)$到最终位形$q(t_2)$的运动路径，是使下面作用量泛函取驻值(stationary value)的结果：</p>$$
+S = \int_{t_1}^{t_2} L(q, \dot{q}, t)dt
+$$</blockquote><p>所谓泛函就是：输入是<strong>函数</strong>，输出是数值的函数。</p><p>其中函数$S$就是<strong>作用量</strong>。</p><p>此定理也叫<strong>最小作用量原理</strong>。</p><p>哈密顿原理是一种假设。是从最速降线问题进行一般化推广而来。</p><p>此原理不仅作用于经典力学。对于任意的领域，只要能找到对应的函数$L$，就能直接套这个方法解决。</p><h4 class="relative group">变分法和欧拉-拉格朗日方程<div id=变分法和欧拉-拉格朗日方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8f%98%e5%88%86%e6%b3%95%e5%92%8c%e6%ac%a7%e6%8b%89-%e6%8b%89%e6%a0%bc%e6%9c%97%e6%97%a5%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h4><p>变分法是一种找到哈密顿原理中作用量$S$的驻点的一种方法。本质上是数学上的一种手段。</p><p>驻点，从实函数来说，就是指函数的导数/偏导数为0的点。或者更一般地，就是让函数$f(x_1, x_2, \cdots, x_n)$的微分$df=0$的点。</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=变分法 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%8f%98%e5%88%86%e6%b3%95.png></figure><p>那么，对于泛函也是一样的操作：我们需要找到某个函数，让作用量$S$的微分$\delta S = 0$。</p><p>那么对于泛函$S[y(x)]$，我们可以找一个距离他很接近的函数$\bar{y(x)}$，然后做差来得到他的微分。不过由于$S$是泛函，我们需要换一个称呼：“变分”，用$\delta$表示：</p><p>&ldquo;变分"主要是指&rdquo;<strong>函数（整条曲线/路径）的无穷小改变</strong>"——即 $\delta y$。它和"微分"是<strong>平行的两件事</strong>：微分管"自变量的改变&rdquo;，变分管"函数的改变"。</p><p>而$\delta S$就是“作用量的变分“。</p>$$
+\begin{aligned}
+\delta S &= S[\bar{y(x)}] - S[(y(x))] \\
+& = \int_{x_1}^{x_2}L(x, \bar{y},\bar{y}^{'})dx - \int_{x_1}^{x_2}L(x, y, y^{'})dx = 0
+\end{aligned}
+$$<p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=变分法2 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%8f%98%e5%88%86%e6%b3%952.png></figure></p><p>注：研究变分的过程中，$x$没有发生改变（是固定值），即$\delta x = 0$。</p><p>同时，显然在$x_1$和$x_2$处，两函数值是相同的（因为起始状态和最终状态肯定是确定的），所以有：</p>$$
+\delta y(x_1) = \delta y(x_2) = 0
+$$<p>接下来，对$S[\bar{y(x)}]$做多元函数泰勒展开，展开到一阶（其余高阶项可以忽略）：</p>$$
+S[\bar{y(x)}] = \int_{x_1}^{x_2}(L(x, y, y^{'}) + \frac{\partial L}{\partial y}\delta y + \frac{\partial L}{\partial y^{'}}\delta y^{'})dx
+$$<p>这样，$S[\bar{y(x)}] - S[y(x)]$就变成：</p>$$
+\delta S = \int_{x_1}^{x_2} (\frac{\partial L}{\partial y}\delta y + \frac{\partial L}{\partial y^{'}}\delta y^{'})dx = 0
+$$<p>数学上可以证明，变分$\delta y^{&rsquo;}=\frac{d}{dx}(\delta y)$，所以有：</p>$$
+\delta S = \int_{x_1}^{x_2} (\frac{\partial L}{\partial y}\delta y + \frac{\partial L}{\partial y^{'}}\frac{d}{dx}(\delta y))dx = 0
+$$<p>然后将加号后面那一半变成：</p>$$
+\frac{d}{dx}(\frac{\partial L}{\partial y^{'}}\delta y) - \delta y \frac{d}{dx}(\frac{\partial L}{\partial y^{'}})
+$$<p>这样$\delta S$就是：</p>$$
+\begin{aligned}
+\delta S &= \int_{x_1}^{x_2} (\frac{\partial L}{\partial y}\delta y + \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}\delta y) - \delta y \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}))dx \\
+&= \int_{x_1}^{x_2} \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}\delta y) dx + \int_{x_1}^{x_2}(\frac{\partial L}{\partial y}\delta y - \delta y \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}))dx \\
+&= \left. (\frac{\partial L}{\partial y^{'}}\delta y)\right|_{x_1}^{x_2} + \int_{x_1}^{x_2} \delta y(\frac{\partial L}{\partial y} - \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}))dx \\
+\end{aligned}
+$$<p>而由于$y(x)$在$x_1, x_2$处的变分为0。所以$\left. (\frac{\partial L}{\partial y^{&rsquo;}}\delta y)\right|_{x_1}^{x_2} = 0$。</p><p>而$\delta y$是两函数变分，这个东西不一定恒取0。所以为了让$\delta S = 0$，必须是：</p><blockquote>$$
+\frac{\partial L}{\partial y} - \frac{d}{dx}(\frac{\partial L}{\partial y^{'}}) = 0
+$$</blockquote><p>这个公式就是<strong>欧拉-拉格朗日公式</strong>。</p><p>其与前面说的拉格朗日公式一模一样。只需要取$L = T-V$就变成之前的那个公式。但欧拉-拉格朗日公式并不规定$L$的形式，这个公式有更好的普适性。</p><h3 class="relative group">哈密顿力学<div id=哈密顿力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%93%88%e5%af%86%e9%a1%bf%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h3><p>TODO：未学习，感觉和物理引擎关联不大，等到需要时再补充。</p><h2 class="relative group">刚体动力学<div id=刚体动力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e5%8a%a8%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h2><blockquote><p>物体内任意两点之间距离永远不变的物体称为刚体</p></blockquote><h3 class="relative group">刚体自由度<div id=刚体自由度 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e8%87%aa%e7%94%b1%e5%ba%a6 aria-label=锚点>#</a></span></h3><p>刚体动力学主要就是在研究刚体的旋转方程。</p><p>首先必须明确，对于一个刚体，需要多少自由度去定义（默认笛卡尔坐标系下）：</p><p>使用刚体中任意三个不共线的质点$P_1, P_2, P_3$即可确定刚体位置。其约束方程为：</p>$$
+\begin{aligned}
+& (p_1 - p_2) ^ 2 = d_1^2 \\
+& (p_2 - p_3) ^ 2 = d_2^2 \\
+& (p_3 - p_1) ^ 2 = d_3^2 \\
+\end{aligned}
+$$<p>产生了3个约束方程。</p><p>而其余$N-3$个点满足方程：</p>$$
+\begin{aligned}
+& (p_i - p_1)^2 = a_i^2 \\
+& (p_i - p_2)^2 = b_i^2 \\
+& (p_i - p_3)^2 = c_i^2 \\
+\end{aligned}
+$$<p>产生了$3(N-3)$个约束方程。那么系统总约束方程个数就是 $3N - 6$。</p><p>而系统中一共有$N$个质点，其需要$3N$个自由度描述，所以显然刚体自由度就是</p>$$
+3N - (3N - 6) = 6
+$$<p>而我们知道，刚体的位置可以通过刚体中任意一点的位置来表示，占据3个自由度。那么剩下3个自由度就是刚体旋转的自由度。</p><p>但究竟怎么描述旋转，其实有很多方法（Proper Eular angles, Axis-Angle, Tait–Bryan angles）。后面会一一介绍。</p><p>接下来只研究刚体转动的情况。假设刚体无位移。</p><h3 class="relative group">一般转动<div id=一般转动 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%b8%80%e8%88%ac%e8%bd%ac%e5%8a%a8 aria-label=锚点>#</a></span></h3><p>我们假设刚体以他的质心为原点进行转动。那么转动前的坐标记为$\pmb{i}, \pmb{j}, \pmb{k}$，而转动后的记为$\pmb{i^{&rsquo;}}, \pmb{j^{&rsquo;}}, \pmb{k^{&rsquo;}}$。那么，我们可以对转动后的任意一个轴，使用其相对于转动前的轴的向量余弦来表示：</p>$$
+\begin{aligned}
+& \cos(\pmb{i^{'}},\pmb{i}) = \pmb{i^{'}}\cdot \pmb{i} \\
+& \cos(\pmb{i^{'}},\pmb{j}) = \pmb{i^{'}}\cdot \pmb{j} \\
+& \cos(\pmb{i^{'}},\pmb{k}) = \pmb{i^{'}}\cdot \pmb{k} \\
+\end{aligned}
+$$<p>左右两边同时乘上$\pmb{i}, \pmb{j}, \pmb{k}$，就可以得到$\pmb{i^{&rsquo;}}$相对于$\pmb{i},\pmb{j},\pmb{k}$的关系：</p>$$
+\begin{aligned}
+& \cos(\pmb{i^{'}},\pmb{i}) \pmb{i} = \pmb{i^{'}} \\
+& \cos(\pmb{i^{'}},\pmb{j}) \pmb{j} = \pmb{i^{'}} \\
+& \cos(\pmb{i^{'}},\pmb{k}) \pmb{k} = \pmb{i^{'}} \\
+\end{aligned}
+$$<p>再将三式相加，就可以用旧坐标表示新坐标：</p>$$
+3\pmb{i^{'}} = \cos(\pmb{i^{'}},\pmb{i}) \pmb{i} +
+\cos(\pmb{i^{'}},\pmb{j}) \pmb{j} +
+\cos(\pmb{i^{'}},\pmb{k}) \pmb{k}
+$$<p>$\pmb{j^{&rsquo;}},\pmb{k^{&rsquo;}}$同理。这样就得到新坐标和旧坐标的关系式（用$\alpha_{ij}$来表示系数）：</p>$$
+\begin{aligned}
+& \pmb{i^{'}} = \alpha_{11} \pmb{i} + \alpha_{12}\pmb{j} + \alpha_{13} \pmb{k} \\
+& \pmb{j^{'}} = \alpha_{21} \pmb{i} + \alpha_{22}\pmb{j} + \alpha_{23} \pmb{k} \\
+& \pmb{k^{'}} = \alpha_{31} \pmb{i} + \alpha_{32}\pmb{j} + \alpha_{33} \pmb{k} \\
+\end{aligned}
+$$<p>那么 $\alpha_{ij}$构成一个矩阵。这个矩阵就是表示旋转的矩阵，记为$A$。</p><p>那么对于刚体中任意点$\pmb{r}$的旋转，都可以使用此线性变换得到：</p>$$
+\pmb{r}^{'} = A\pmb{r}
+$$<p>那么至于要怎么表示这个旋转，历史上有多个方式：</p><h4 class="relative group">欧拉角（Proper Eular Angles）<div id=欧拉角proper-eular-angles class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%ac%a7%e6%8b%89%e8%a7%92proper-eular-angles aria-label=锚点>#</a></span></h4><p>注意：此欧拉角是欧拉最开始发明的表示角的方式。在其他领域中，欧拉角的含义各不相同。</p><p>欧拉角是使用三个角度表示的角：</p><ol><li>进动角$\phi$(precession)：刚体绕自己的转轴（即$\pmb{k}$）旋转的角度</li><li>章动角$\theta$(nutation)：<strong>在进动之后</strong>，刚体绕旋转过的$\pmb{i}$轴转动的角度</li><li>自转角$\psi$(intrinsic)：<strong>在章动之后</strong>，刚体绕旋转过的$\pmb{k}$轴转动的角度</li></ol><p>也就是说，每次欧拉角会产生三个坐标轴，我们分别记为$x,y,z$, $x^{&rsquo;},y^{&rsquo;},z^{&rsquo;}$和$x^{&rsquo;&rsquo;},y^{&rsquo;&rsquo;},z^{&rsquo;&rsquo;}$。</p><p>而欧拉角的整个绕轴顺序是 $z,x^{&rsquo;},z^{&rsquo;&rsquo;}$。</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt="Eular Angle" src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%ac%a7%e6%8b%89%e8%a7%92.png></figure><p>这也是能够造成“万向节死锁”的一种角度表示方法。其矩阵为：</p>$$
+\begin{aligned}
+& D =
+\begin{bmatrix}
+\cos \phi & \sin \phi & 0 \\
+-\sin \phi & \cos \phi & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix} \\
+& C =
+\begin{bmatrix}
+1 & 0 & 0 \\
+0 & \cos \theta & \sin \theta \\
+0 & -\sin \theta & \cos \theta \\
+\end{bmatrix} \\
+& B =
+\begin{bmatrix}
+\cos \psi & \sin \psi & 0 \\
+-\sin \psi & \cos \psi & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{aligned}
+$$<h4 class="relative group">泰特–布莱恩角（Tait–Bryan angles）<div id=泰特布莱恩角taitbryan-angles class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%b3%b0%e7%89%b9%e5%b8%83%e8%8e%b1%e6%81%a9%e8%a7%92taitbryan-angles aria-label=锚点>#</a></span></h4><p>即一般计算机图形学中的角。绕着全局的x, y, z轴依次旋转（旋转顺序可变，比如y-x-z, z-x-y等）。也是我们最熟悉的旋转表示法。在此就不赘述了。</p><h4 class="relative group">四元数表示法<div id=四元数表示法 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%9b%9b%e5%85%83%e6%95%b0%e8%a1%a8%e7%a4%ba%e6%b3%95 aria-label=锚点>#</a></span></h4><p>四元数也可以表示角，同时也有矩阵形式。老生常谈的事情，这里就不赘述了。</p><h4 class="relative group">轴-角 表示法<div id=轴-角-表示法 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e8%bd%b4-%e8%a7%92-%e8%a1%a8%e7%a4%ba%e6%b3%95 aria-label=锚点>#</a></span></h4><p>用一根旋转轴$\pmb{n}$和绕此轴旋转的角度$\theta$来表示。除了上面的四元数表示，还有罗德里格斯公式（ Rodrigues&rsquo; rotation formula）。其公式很易推导，这里直接给结果：</p><p>对于任意点$\pmb{r}$：</p>$$
+\pmb{r^{'}} = \pmb{r} \cos \phi + (\pmb{n} \times \pmb{r}) \sin \phi + \pmb{n}(\pmb{n} \cdot \pmb{r})(1 -\cos \phi)
+$$<h4 class="relative group">定点转动的欧拉定理<div id=定点转动的欧拉定理 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%ae%9a%e7%82%b9%e8%bd%ac%e5%8a%a8%e7%9a%84%e6%ac%a7%e6%8b%89%e5%ae%9a%e7%90%86 aria-label=锚点>#</a></span></h4><p>当物体绕着某点转动的时候，存在如下欧拉定理：</p><blockquote><p>任意次的绕点转动，都可以表示为一次绕轴转动。此轴过此转动点</p></blockquote><p>此轴就是旋转矩阵$A$的特征向量。</p><p>这里证明很好证：</p><p>首先，$A$的行列式只能为$\pm1$。因为旋转矩阵一定是正交矩阵，所以有$A^T = A^{-1}$，那么有$AA^T = I$
+，等价于$det(AA^T) = det(A)det(A^T) = 1$。而$\det(A) = \det(A^T)$，所以有$det(A) = \pm1$。</p><p>进一步可以断言，$det(A) = 1$。因为当不发生转动的时候，$A = I$为单位阵，其$det(A) = 1$。而当发生一点点转动时，由于转动的连续性（连续函数，不存在间断点），这一点点转动不可能使得$det(A)$突变到$-1$。所以$det(A)$始终为1（这里应该是有严格数学证明的，不过我没找到）。</p><p>接下来证明$A$有一个特征值1。根据特征值公式得求$det(A - E) = 0$。这很好证明：</p>$$
+\begin{aligned}
+& AA^T = I \\
+\Rightarrow & AA^T - A = I - A \\
+\Rightarrow & A(A^T - I) = I - A \\
+\Rightarrow & det(A)det(A^T - I) = det(I - A) \\
+\Rightarrow & det(A^T - I) = det(I - A) \\
+& \text{由于A是3x3矩阵} \\
+\Rightarrow & det(A^T - I) = (-1)^3det(A - I) \\
+\Rightarrow & det(A - I) = (-1)^3det(A - I) \\
+\Rightarrow & det(A - I) = 0 \\
+\end{aligned}
+$$<p>那么此特征值对应一个特征向量$\pmb{n}$。而在此特征向量上的所有点，经过$A$变换后都不变。所以$\pmb{n}$就是转轴。</p><h3 class="relative group">无限小转动分析<div id=无限小转动分析 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%97%a0%e9%99%90%e5%b0%8f%e8%bd%ac%e5%8a%a8%e5%88%86%e6%9e%90 aria-label=锚点>#</a></span></h3><p>我们无法直接将牛顿定律内容搬入刚体动力学，因为：</p><ol><li>由于转动的表示$\pmb{r^{&rsquo;}} = A \pmb{r}$。我们知道，当做多次转动时，这些转动的顺序是不能互换的。这样我们就无法定义角速度（因为角速度是矢量，满足交换性）。所以我们通过引入无限小转动来让极限情况下，转动操作满足交换性。</li><li>牛顿力学只在惯性系下成立，而惯性系不含旋转。</li></ol><p>无限小转动分析就是在处理这些问题。</p><p>定义一个无限小转动矩阵$\epsilon$为$t \rightarrow t+dt$时间内的转动，即$\epsilon \rightarrow 0$。</p><p>那么一次无限小转动的矩阵就可以记为：</p>$$
+A = I + \epsilon
+$$<p>使用此转动表示法，就可以让转动满足交换律。假设有两个转动 $A_1 = I + \epsilon_1$和$A_2 = I + \epsilon_2$，那么有：</p>$$
+\begin{aligned}
+& A_1A_2 = (I + \epsilon_1)(I + \epsilon_2) = I + \epsilon_1 + \epsilon_2 + \epsilon_1\epsilon_2
+\end{aligned}
+$$<p>这里$\epsilon_1\epsilon_2$是高阶无穷小，可以忽略。最后结果就是$A_1A_2 = A_2A_1$。</p><p>而$A$的逆$A^{-1}$其实是$I - \epsilon$。这一点可以通过算$AA^{-1}$得到。</p><p>而$A$的转置$A^T$其实是$I - \epsilon^T$，而旋转操作一定表示一个正交矩阵（因为旋转后三轴互相垂直），而又由正交矩阵性质可知$A^T = A^{-1}$，那么就有：</p>$$
+I + \epsilon = I - \epsilon^T \Rightarrow \epsilon + \epsilon^T = 0
+$$<p>那么显然，$\epsilon$的对角线元素必须是0，而上三角区域和下三角区域的各个元素必是相反数：</p>$$
+\epsilon =
+\begin{bmatrix}
+0 & -d\Omega_3 & d\Omega_2 \\
+d\Omega_3 & 0 & -d\Omega_1 \\
+-d\Omega_2 & d\Omega_1 & 0 \\
+\end{bmatrix}
+$$<p>这里的$d\Omega_i$只是一种符号，表示极小的值。</p><p>于是，旋转矩阵就可以表示为：</p>$$
+A = I + \epsilon =
+\begin{bmatrix}
+1 & -d\Omega_3 & d\Omega_2 \\
+d\Omega_3 & 1 & -d\Omega_1 \\
+-d\Omega_2 & d\Omega_1 & 1 \\
+\end{bmatrix}
+$$<p>那么，对于任意点$\pmb{r}$的无限小转动之差就是：</p>$$
+\pmb{r^{'}} - \pmb{r} = d\pmb{r} = \epsilon \pmb{r}
+$$<p>可以将这个矩阵乘开得到：</p>$$
+\begin{aligned}
+& d\pmb{r}_1 = -\pmb{r}_1 d\Omega_3 + \pmb{r}_3 d\Omega_2 \\
+& d\pmb{r}_2 = \pmb{r}_3 d\Omega_1 - \pmb{r}_1 d\Omega_3 \\
+& d\pmb{r}_3 = -\pmb{r}_1 d\Omega_2 + \pmb{r}_2 d\Omega_1 \\
+\end{aligned}
+$$<p>你可以发现这变成了一个叉乘：</p>$$
+\begin{aligned}
+d\pmb{r} =d\pmb{\Omega} \times \pmb{r} & & (1)
+\end{aligned}
+$$<p>其中：</p>$$
+d\pmb{\Omega} =
+\begin{bmatrix}
+d\Omega_1 & d\Omega_2 & d\Omega_3
+\end{bmatrix} ^T
+$$<p>而根据罗德里格斯公式：</p>$$
+\pmb{r^{'}} = \pmb{r} \cos \phi + (\pmb{n} \times \pmb{r}) \sin \phi + \pmb{n}(\pmb{n} \cdot \pmb{r})(1 -\cos \phi)
+$$<p>当$\theta \rightarrow 0$时，通过对$\sin\theta, \cos\theta$进行泰勒展开并略去二阶项（忽略高阶无穷小）后，可以得到：</p>$$
+\begin{aligned}
+& \sin\theta = \theta \\
+& \cos\theta = 1 \\
+\end{aligned}
+$$<p>那么原公式变为：</p>$$
+\begin{aligned}
+& \pmb{r^{'}} = \pmb{r} + (\pmb{n} \times \pmb{r}) d\phi \\
+& d\pmb{r} = \pmb{r^{'}} - \pmb{r} = (\pmb{n} \times \pmb{r}) d\phi \\
+\end{aligned}
+$$<p>这样，我们就得到了，在无限小转动下质点的位移变化量，此表示只和角度$d\phi$有关。</p><p>和$(1)$式做比较，还可以发现：</p>$$
+\begin{cases}
+& d\pmb{r} = d\pmb{\Omega} \times \pmb{r} \\
+& d\pmb{r} = \pmb{n}d\phi \times \pmb{r} \\
+\end{cases}
+$$<p>那么有</p>$$
+d\pmb{\Omega} = \pmb{n}d\phi
+$$<p>对两边除以$dt$，就可以得到角速度定义：</p>$$
+\pmb{\omega} = \pmb{n}\frac{d\phi}{dt}
+$$<p>这也就解释了为什么角速度是矢量。</p><p>而同时也可以得到角速度和速度的转换公式：</p>$$
+\frac{d\pmb{r}}{dt} = \pmb{\omega} \times \pmb{r}
+$$<p>额外扩展：角速度其实是<strong>轴矢量</strong>，在宇称变换下不改变方向<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup>。</p><h4 class="relative group">刚体运动的分解<div id=刚体运动的分解 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e8%bf%90%e5%8a%a8%e7%9a%84%e5%88%86%e8%a7%a3 aria-label=锚点>#</a></span></h4><p>对于刚体上任意的向量$\pmb{G}$（可以是刚体上一点的位矢，或刚体的角动量等）（假定刚体不移动），其总能分解成两个矢量和：</p>$$
+d\pmb{G}_{space} = d\pmb{G}_{body} + d\pmb{G}_{diff}
+$$<p>其中$d\pmb{G}<em>{space}$是在全局坐标下看此向量，$d\pmb{G}</em>{body}$是在物体自己的局部坐标系下看此向量（一般以质心为原点，坐标轴随刚体一起旋转），而$d\pmb{G}_{diff}$则是这两个$d\pmb{G}$的差。即在两个坐标系下观察出结果的差：</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=坐标变换结果 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%9d%90%e6%a0%87%e5%8f%98%e6%8d%a2%e7%ae%97%e5%ad%90.png></figure><p>比如我要观察$B$点，上图中$\vec{FB}$就是$\pmb{G}<em>{space}$，$\vec{EB}$就是$\pmb{G}</em>{body}$。而$\vec{FE}$就是$\pmb{G}_{diff}$。</p><p>那么显然，$d\pmb{G}<em>{diff}$只是刚体的转动量$d\pmb{G}</em>{rot}$，且$d\pmb{G}_{body} = 0$，于是式子可以写成：</p>$$
+d\pmb{G}_{space} = d\pmb{G}_{body} + d\pmb{G}_{rot} = 0 + d\pmb{\Omega} \times \pmb{G}
+$$<p>两边除$dt$就有：</p>$$
+\frac{d\pmb{G}_{space}}{dt} = \frac{d\pmb{\Omega}}{dt} \times \pmb{G} = \pmb{\omega} \times \pmb{G}
+$$<p>或者更一般地，可以定义算子：</p>$$
+\begin{aligned}
+(\frac{d \cdot}{dt})_{space} = (\frac{d \cdot}{dt})_{body} + \pmb{\omega} \times \cdot & & (2)
+\end{aligned}
+$$<p>正如图上所画，当选取质心为局部坐标系的原点时，刚体绕任意点的旋转可以被分解为：</p><ul><li>刚体质心的转动，可以应用质点动力学/运动学</li><li>刚体在自己局部坐标系下的转动</li></ul><p>这也是物理引擎中处理刚体问题的方法。</p><h4 class="relative group">欧拉角表示无限小转动<div id=欧拉角表示无限小转动 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%ac%a7%e6%8b%89%e8%a7%92%e8%a1%a8%e7%a4%ba%e6%97%a0%e9%99%90%e5%b0%8f%e8%bd%ac%e5%8a%a8 aria-label=锚点>#</a></span></h4><p>经过上面步骤，我们可以用欧拉角来表示无限小转动：</p>$$
+\pmb{\omega} = \dot{\phi} \pmb{z} + \dot{\theta} \pmb{x^{'}} + \dot{\psi} \pmb{z^{''}}
+$$<p>即将绕不同轴的小转动组合起来。</p><p>但这里有个问题，$\pmb{\omega}$中包含三个不相同的坐标系中的轴。这不利于计算。我们可以将其统一到最后的坐标系$x^{&rsquo;&rsquo;},y^{&rsquo;&rsquo;},z^{&rsquo;&rsquo;}$中。</p><p>显然，我们通过旋转方程可以得到各个轴之间的变换矩阵，所以可以利用这些矩阵将其他轴都变换成目标轴。矩阵很多也很简单，这里就不再赘述了（可见《理论力学》3.3.3节<sup id=fnref1:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>）。总之最后的结果为：</p>$$
+\begin{aligned}
+& \omega_{x^{''}} = \dot{\phi}\sin{\theta}\sin{\psi} + \dot{\theta}\cos{\psi} \\
+& \omega_{y^{''}} = \dot{\phi}\sin{\theta}\cos{\psi} - \dot{\theta}\sin{\psi} \\
+& \omega_{z^{''}} = \dot{\phi}\cos{\theta} + \dot{\psi} \\
+\end{aligned}
+$$<h3 class="relative group">刚体动力学方程<div id=刚体动力学方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e5%8a%a8%e5%8a%9b%e5%ad%a6%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h3><p>首先有：</p><blockquote><p>刚体的角速度和刚体的局部坐标系选取无关</p></blockquote><p>即，你可以在刚体上随便选原点和坐标系朝向，只要这个坐标系是"绑死在刚体上、跟着它一起转"的，那么你算出来的<strong>角速度 $\pmb{\omega}$ 永远是一样的</strong>。</p><h4 class="relative group">惯性张量(Inertia Tensor)<div id=惯性张量inertia-tensor class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8finertia-tensor aria-label=锚点>#</a></span></h4><p>当刚体绕着固定点旋转时，刚体上某点的角动量是：</p>$$
+\pmb{L} = m_i(\pmb{r}_i \times \pmb{v}_i)
+$$<p>其中$\pmb{r}_i$是刚体上此质点相对于此旋转点的位矢。</p><p>而由上一节可知，$\pmb{v_i} = \pmb{\omega} \times \pmb{r}_i$，并且利用向量三重积公式$a \times (b \times c) = b(a \cdot c) - c(a \cdot b)$，我们就有：</p>$$
+\begin{aligned}
+\pmb{L} & = m_i[\pmb{r}_i \times (\pmb{\omega} \times \pmb{r}_i)] \\
+& = m_i[\pmb{\omega}\pmb{r}_i^2 - \pmb{r}_i(\pmb{r}_i \cdot \pmb{\omega})] \\
+\end{aligned}
+$$<p>然后把所有点乘写开，就可以得到$\pmb{L}$的各个分量表示：</p>$$
+\begin{aligned}
+L_x & = \omega_x m_i(r_i^2 - x_i^2) - \omega_y m_i x_i y_i - \omega_z m_i x_i z_i \\
+& = I_{xx} \omega_x + I_{xy} \omega_y + I_{xz} \omega_z
+\end{aligned}
+$$<p>其他两个如法炮制：</p>$$
+\begin{aligned}
+L_y & = I_{yx} \omega_x + I_{yy} \omega_y + I_{yz} \omega_z \\
+L_z & = I_{zx} \omega_x + I_{zy} \omega_y + I_{yz} \omega_z \\
+\end{aligned}
+$$<p>其中：</p>$$
+\begin{aligned}
+I_{xx} & = m_i({r_i^2 - x_i}) \\
+I_{xy} & = -m_i x_i y_i \\
+\end{aligned}
+$$<p>可以看到$I_{ij}$组成了一个3x3矩阵。这就是<strong>惯性张量(Inertia Tensor)矩阵</strong>。</p><p>刚才我们算的是刚体上一个点的惯性张量。而显然整个刚体的惯性张量就是对所有点的惯性张量求和：</p>$$
+\begin{aligned}
+& I_{xx} =\int_V \rho(\pmb{r})(r^2 - x^2)dV \\
+& I_{ij} =\int_V \rho(\pmb{r})(r^2 \delta_{ij} - x_jx_k)dV\\
+\end{aligned}
+$$<p>其中，$\delta_{ij}$是一种符号：</p>$$
+\delta_{ij} =
+\begin{cases}
+& 1, & i = j \\
+& -1, & i \ne j \\
+\end{cases}
+$$<p>这个符号只是经常用来简化公式，没什么特别的含义。</p><p>完整的惯性张量为：</p>$$
+\begin{bmatrix}
+\int_V \rho(\pmb{r})(r^2 - x^2)dV & -\int_V \rho(\pmb{r})xydV & -\int_V \rho(\pmb{r})xzdV \\
+-\int_V \rho(\pmb{r}) yx dV & \int_V \rho(\pmb{r})(r^2 - y^2)dV & -\int_V \rho(\pmb{r})yz dV \\
+-\int_V \rho(\pmb{r})zx dV & -\int_V \rho(\pmb{r})zy dV & \int_V \rho(\pmb{r})(r^2 - z^2)dV \\
+\end{bmatrix}
+$$<p>或者写成对质量积分的形式（这个形式更常见，推导见《理论力学》3.5.2节<sup id=fnref2:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>）：</p>$$
+\begin{bmatrix}
+\int (y^2 + z^2)dm & -\int xydm & -\int xzdm \\
+-\int yx dm & \int (x^2 + z^2)dm & -\int yz dm \\
+-\int zx dm & -\int zy dm & \int (x^2 + y^2)dm \\
+\end{bmatrix}
+$$<p>可以看到他是个对称矩阵。</p><p>所以最后我们就得到刚体的角动量为：</p>$$
+\pmb{L} = \pmb{I}\pmb{\omega}
+$$<p>或者用分量形式表示（只是将矩阵乘开）：</p>$$
+\begin{aligned}
+\pmb{L} &= (I_{11}+I_{12}+I_{13})\omega_1 + (I_{21}+I_{22}+I_{23})\omega_2 (I_{31}+I_{32}+I_{33})\omega_3
+\end{aligned}
+$$<p>计算$\pmb{I}$的公式了解一下即可。在物理引擎中刚体是很规整的，其惯性张量基本上都有固定公式。</p><p>注意：惯性张量是“张量”，这是一种数学概念。其一个重要定律是张量是坐标无关的。也就是说一个刚体的惯性张量的值是固定的。但是他的分量是随着坐标系改变的（类比向量和向量在不同坐标系下的分量）。</p><p>对张量的研究是数学中的一个独立分支，在此不再赘述。想要直观理解张量可以看<a href="https://www.bilibili.com/video/BV1Jc41137iJ/?share_source=copy_web&amp;vd_source=e1b8baee842192a0e6b2b7d9ef8e10ef" target=_blank rel=noreferrer>这个</a>，<a href="https://www.bilibili.com/video/BV1zEWRzwEbj/?share_source=copy_web&amp;vd_source=e1b8baee842192a0e6b2b7d9ef8e10ef" target=_blank rel=noreferrer>这个</a>和<a href="https://www.bilibili.com/video/BV1dxbK6UEaE/?p=2&amp;share_source=copy_web&amp;vd_source=e1b8baee842192a0e6b2b7d9ef8e10ef" target=_blank rel=noreferrer>这个</a>视频。</p><h4 class="relative group">转动惯量(Moment of inertia)<div id=转动惯量moment-of-inertia class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e8%bd%ac%e5%8a%a8%e6%83%af%e9%87%8fmoment-of-inertia aria-label=锚点>#</a></span></h4><p>通过变换动能公式可以得到旋转时的动能：</p>$$
+\begin{aligned}
+T & = \frac{1}{2}m_i\pmb{v}_i^2 \\
+& = \frac{1}{2}m_i \pmb{v}_i\cdot(\pmb{\omega}\times \pmb{r}_i) \\
+& \text{利用混合积轮换公式} a\cdot(b\times c) = b \cdot(c\times a) = c\cdot (a\times b) \\
+& = \frac{1}{2}\pmb{\omega} \cdot m_i(\pmb{r}_i \times \pmb{b}_i) \\
+& = \frac{1}{2}\pmb{\omega} \cdot \pmb{L} \\
+& = \frac{1}{2}\pmb{\omega} \cdot \pmb{I} \cdot \pmb{\omega} \\
+\end{aligned}
+$$<p>令$\pmb{n}$为$\pmb{\omega}$的方向($\pmb{\omega} = \omega \pmb{n}$)，最后的公式就变为：</p>$$
+T = \frac{1}{2}\omega \pmb{n}\cdot \pmb{I} \cdot \pmb{n} \omega = \frac{1}{2} \omega^2 I
+$$<p>这里$I$是标量，为：</p>$$
+\begin{aligned}
+I & = \pmb{n} \cdot \pmb{I} \cdot \pmb{n} \\
+& = m_i[r_i^2 - (\pmb{r}_i \cdot \pmb{n})^2]
+\end{aligned}
+$$<p>就叫做<strong>绕这个轴的转动惯量(moment of inertia)</strong>。</p><p>其他物理书中对转动惯量的定义都是“物体上质点到轴的距离为$r$，转动惯量为$\int r^2 dm$"。这里其实也一样。因为$r_i^2 - (\pmb{r}_i \cdot \pmb{n})^2$就是$r^2$。</p><p>注意转动惯量和惯性张量不同，他依赖于轴的位置和朝向。</p><p>转动惯量有一个“平行轴定理”：</p><blockquote><p>刚体绕<strong>任意一根轴</strong>的转动惯量，等于它绕<strong>过质心且与之平行的那根轴</strong>的转动惯量，加上"把总质量集中到质心"后对这根轴的转动惯量：</p>$$
+I = I_{cm} + M d^2
+$$<p>其中 $I_{cm}$是以过质心的那根轴的转动惯量。$M$是刚体的总质量，$d$是两根轴之间的距离。</p></blockquote><h4 class="relative group">主轴定理<div id=主轴定理 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%b8%bb%e8%bd%b4%e5%ae%9a%e7%90%86 aria-label=锚点>#</a></span></h4><p>因为转动惯量$\pmb{I}$是一个实对称矩阵，所以显然有如下性质：</p><ul><li>其可以被正交相似对角化成 $TIT^{-1}$，其中$I = diag(I_1,I_2, I_3)$</li><li>$I_1,I_2,I_3$是$\pmb{I}$的特征值（也叫做<strong>主转动惯量(principal moments)</strong>），而对于的特征向量$\pmb{e_1},\pmb{e_2},\pmb{e_3}$就是$\pmb{I}$的<strong>惯性主轴(principal axes of inertia)</strong>（也就是说主轴有三个，且两两互相垂直）</li></ul><p>惯性主轴有如下性质：</p><ol><li>一般刚体转动时角动量和角速度不一定同向，但绕主轴转动时一定同向。这意味着：<ul><li>在无外力矩时，绕主轴的自由旋转是稳定的（角动量守恒，且刚体方向不晃动）</li></ul></li><li>如果绕非主轴转，刚体会摇晃，要维持固定转轴的话得不停地施加力矩</li><li>在刚体的局部坐标下(Body Frame)，主轴总是常向量，不随时间改变</li></ol><p>如果将旋转中心视为刚体重心的话，主轴就一定过质心，此时称为质心主轴。一般说主轴都是说质心主轴。此时质心和主轴构成刚体的一个局部坐标系。</p><p>这个坐标系带来一个非常非常好的性质：</p><ul><li>在此坐标系下惯性张量是对角阵，且其对角线元素总是常量。这意味着对于任意的物体，我们可以预计算其惯性张量，并且只需要存三个分量</li></ul><p>在物理引擎中，大部分的基本几何体，只要选取其几何中心为质心，其主轴就可以自然地被选取：</p><ul><li>球体：选取任意正交轴</li><li>盒体：选取平行于棱的三轴</li><li>胶囊体/圆柱体：选取中轴线上的轴，以及垂直于中轴线的平面上的任意两轴</li></ul><p>而对于凸多边形，则需要以其几何中心为原点先算一次惯性张量，然后做正交对角化得到真正的主轴和惯性张量。</p><p>这也意味着，如果在引擎中改变了物体的质心，必须重算惯性张量和主轴。一般会使用惯性张量形式的平行轴定理<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup>，从旧$I$得到新的，然后再算惯性主轴。</p><h4 class="relative group">沙勒定理(Chasles Theorem)<div id=沙勒定理chasles-theorem class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%b2%99%e5%8b%92%e5%ae%9a%e7%90%86chasles-theorem aria-label=锚点>#</a></span></h4><p>比起 “刚体运动的分解” 中说的分解方法，沙勒定理则更严格：</p><blockquote><p>刚体在空间中的任意一个有限位移，都可以分解为：绕某一根轴的转动，加上沿这一根轴的平移</p></blockquote><p>注意：平移是沿着轴的朝向平移。</p><p>这种运动又称为螺旋运动，就和螺丝转进螺母的运动一样。</p><h4 class="relative group">欧拉动力学方程<div id=欧拉动力学方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%ac%a7%e6%8b%89%e5%8a%a8%e5%8a%9b%e5%ad%a6%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h4><p>接下来进入力矩和转动的关系。也十分简单：</p><p>根据单质点动力学我们知道：</p>$$
+\pmb{N} = \frac{d\pmb{L}}{dt}
+$$<p>那么为了方便，选取质心主轴作为坐标系（即body frame），根据无限小转动分析中的公式$(2)$，有：</p>$$
+\begin{aligned}
+\pmb{N} & = \frac{d\pmb{L}}{dt} = (\frac{d\pmb{L}}{dt})_{body} + \pmb{\omega} \times \pmb{L} \\
+& = (\frac{d\pmb{I}\pmb{\omega}}{dt})_{body} + \pmb{\omega} \times \pmb{L} \\
+& \text{由于是质心主轴坐标系，I不改变，所以} \frac{d\pmb{I}\pmb{\omega}}{dt} = \pmb{I}\frac{d\pmb{\omega}}{dt} \\
+& = \pmb{I}\frac{d\pmb{\omega}}{dt} + \pmb{\omega}\times \pmb{L}
+\end{aligned}
+$$<p>这就是欧拉力学方程。或者使用展开后的形式：</p>$$
+\begin{aligned}
+N_1 &= I_1 \dot{\omega_1} - \omega_2\omega_3(I_2 - I_3) \\
+N_2 &= I_2 \dot{\omega_2} - \omega_3\omega_1(I_3 - I_1) \\
+N_3 &= I_3 \dot{\omega_3} - \omega_1\omega_2(I_1 - I_2) \\
+\end{aligned}
+$$<p>注意：如果不选取质心主轴作为body frame，那么公式中的导数数量会变得很多，这会导致微分方程求解十分困难。所以一般就只用此body frame的形式。</p><h3 class="relative group">刚体能量<div id=刚体能量 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e8%83%bd%e9%87%8f aria-label=锚点>#</a></span></h3><p>前提：选取质心主轴作为body frame。</p><p>动能（克尼希定理）：</p>$$
+T = \frac{1}{2}M\pmb{v}_{cm}^2 + \frac{1}{2}\pmb{\omega}\pmb{I}_{cm}\pmb{\omega}
+$$<p>势能则需要不同情况不同分析。</p><p>对于在均匀重力场中的重力势能来说，就是重力作用在质心的势能$V = M\pmb{g}$。</p><p>刚体内部势能为常数。因为内部各点相对距离固定不变。在拉格朗日量里一般直接设为0或并入最后的常数。</p><p>如果是在其他势能，一般的做法就只是对刚体上所有点的能量求和。</p><h3 class="relative group">刚体静力学<div id=刚体静力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e9%9d%99%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h3><p>根据网课<sup id=fnref3:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>补充的一些静力学知识。</p><h5 class="relative group">刚体平衡<div id=刚体平衡 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e5%b9%b3%e8%a1%a1 aria-label=锚点>#</a></span></h5><p>刚体平衡条件：</p><ol><li>刚体初始时处于平衡状态</li><li>维持平衡条件<ol><li>主矢为0：$\sum \pmb{F}_i = 0$</li><li>主力矩为0：$\sum{\pmb{N}_i} = 0$</li></ol></li></ol><p>其中，主矢为所有矢量相加，而主力矩就是所有力矩相加。</p><p>虽然力矩的值随着选取的中心点$O$改变，但在平衡问题中可以任意选取中心点：</p><blockquote><p>在刚体平衡问题中，简化中心可以任意选取</p></blockquote><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=刚体平衡时简化重心的选取 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%88%9a%e4%bd%93%e5%b9%b3%e8%a1%a1%e6%97%b6%e7%ae%80%e5%8c%96%e9%87%8d%e5%bf%83%e7%9a%84%e9%80%89%e5%8f%96.png></figure><p>这里$O$点的力矩为$\pmb{N}_O = \sum \pmb{r}_i \times \pmb{F}_i$</p><p>而$O^{&rsquo;}$点则是$N_{O^{&rsquo;}} = \sum (\pmb{r}_i + \pmb{r}_0) \times \pmb{F}_i = \pmb{N} + \pmb{r}_0 \times \sum \pmb{F}_i$</p><p>而平衡的条件就是$\sum \pmb{F}_i = 0$，所以可得$\pmb{N}_O = \pmb{N}_O^{&rsquo;}$。所以任意点的主力矩都是一样的。</p><h5 class="relative group">力系的简化<div id=力系的简化 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8a%9b%e7%b3%bb%e7%9a%84%e7%ae%80%e5%8c%96 aria-label=锚点>#</a></span></h5><p>力偶：</p><blockquote><p>大小相等，方向相反，但不共线的一对平行力</p></blockquote><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=力偶示意图 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%8a%9b%e5%81%b6%e7%a4%ba%e6%84%8f%e5%9b%be.png></figure><p>力偶只会对刚体施加转动效果。</p><p>力的可传递性原理：</p><blockquote><p>沿着力的作用线移动力，力的作用效果不变</p></blockquote><p>力的平移定理：</p><blockquote><p>力从$O$点平移到$O^{&rsquo;}$点时，要额外加上$O$到$O^{&rsquo;}$点的力偶矩</p></blockquote><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=力偶矩 src=/assets/%e5%88%86%e6%9e%90%e5%8a%9b%e5%ad%a6%e5%b0%8f%e8%ae%b0/%e5%8a%9b%e5%81%b6%e7%9f%a9.png></figure><p>力偶矩为 $(\pmb{r}_1 - \pmb{r_2}) \times \pmb{F}_1$。</p><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p><a href="https://www.bilibili.com/video/BV1xJ411s78q/?share_source=copy_web&amp;vd_source=e1b8baee842192a0e6b2b7d9ef8e10ef" target=_blank rel=noreferrer>理论力学（物理类） 主讲：哈尔滨工业大学物理学院 任延宇</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a>&#160;<a href=#fnref1:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a>&#160;<a href=#fnref2:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a>&#160;<a href=#fnref3:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2><p><a href=https://ia601406.us.archive.org/28/items/ClassicalMechanicsGoldstein3ed/Classical_Mechanics_Goldstein_3ed_text.pdf target=_blank rel=noreferrer>《Classical Mechanics》GlodStain</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3><p><a href=https://www.amazon.com/Classical-Mechanics-John-R-Taylor/dp/189138922X target=_blank rel=noreferrer>《Classical Mechanics》Taylor</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:4><p><a href=https://scipedia.bohrium.com/sciencepedia/feynman/keyword/polar_vector target=_blank rel=noreferrer>极矢量和轴矢量：物理学中隐藏的对称性 | Bohrium</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:5><p><a href=https://phys.libretexts.org/Bookshelves/Classical_Mechanics/Variational_Principles_in_Classical_Mechanics_%5C%28Cline%5C%29/13:_Rigid-body_Rotation/13.08:_Parallel-Axis_Theorem target=_blank rel=noreferrer>13.8: Parallel-Axis Theorem - Physics LibreTexts</a>&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div></div></section><footer class="pt-8 max-w-prose print:hidden"><div class=pt-8><hr class="border-dotted border-neutral-300 dark:border-neutral-600"><div class="flex justify-between pt-3"><span class="flex flex-col"><a class="flex text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/><span class=leading-6><span class="inline-block rtl:rotate-180">&larr;</span>&ensp;从0开始制作游戏物理引擎（八）
+</span></a><span class="ms-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2026-08-31T17:37:01+08:00>31 August 2026</time>
+</span></span><span class="flex flex-col items-end"></span></div></div></footer></article><div id=scroll-to-top class="fixed bottom-6 end-6 z-50 transform translate-y-4 opacity-0 duration-200"><a href=#the-top class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400" aria-label=返回顶部 title=返回顶部>&uarr;</a></div></main><footer id=site-footer class="py-10 print:hidden"><nav aria-label class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400"><ul class="flex list-none flex-col sm:flex-row"><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/tags/ title=Tags>标签</a></li><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/categories/ title=Categories>分类</a></li></ul></nav><div class="flex items-center justify-between"><p class="text-sm text-neutral-500 dark:text-neutral-400">&copy;
+2026
+VisualGMQ</p><p class="text-xs text-neutral-500 dark:text-neutral-400">由 <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://gohugo.io/ target=_blank rel="noopener noreferrer">Hugo</a> & <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://blowfish.page/ target=_blank rel="noopener noreferrer">Blowfish</a> 强力驱动</p></div></footer><div id=search-wrapper role=dialog aria-modal=true aria-label=搜索 class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-500" data-url=/><div id=search-modal class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"><header class="relative z-10 flex items-center justify-between flex-none px-2"><form class="flex items-center flex-auto min-w-0"><div class="flex items-center justify-center w-8 h-8 text-neutral-400"><span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></span></div><input type=search id=search-query aria-label=搜索 class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent" placeholder=搜索 tabindex=0></form><button id=close-search-button class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" title="关闭 (Esc)">
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></button></header><section class="flex-auto px-2 overflow-auto"><ul id=search-results></ul></section></div></div></div></body></html>
