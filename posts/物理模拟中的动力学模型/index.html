@@ -1,0 +1,588 @@
+<!doctype html><html lang=zh-cn dir=ltr class=scroll-smooth data-default-appearance=dark data-auto-appearance=true><head><meta charset=utf-8><meta http-equiv=content-language content="zh-cn"><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=theme-color><title>物理模拟中的动力学模型 &#183; VisualGMQ的博客</title><meta name=title content="物理模拟中的动力学模型 &#183; VisualGMQ的博客"><meta name=description content="VisualGMQ的博客"><meta name=keywords content="游戏开发,物理引擎,"><link rel=canonical href=https://visualgmq.github.io/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/><meta name=author content="VisualGMQ"><link href=https://github.com/VisualGMQ rel=me><link href=https://space.bilibili.com/256768793 rel=me><meta property="og:url" content="https://visualgmq.github.io/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/"><meta property="og:site_name" content="VisualGMQ的博客"><meta property="og:title" content="物理模拟中的动力学模型"><meta property="og:description" content="本文说明了物理引擎中的接触求解的物理模型，以及将其转换成LCP问题和用PGS方法求解。
+本文只讨论刚体模拟。
+此物理模型包含⑤部分：
+牛顿-欧拉方程 运动学映射：将位形参数对时间的导数和平动速度和角速度联系起来 对于永久关节的等式约束 对于法向接触的不等式约束 库伦摩擦定律"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-10-23T22:01:27+08:00"><meta property="article:modified_time" content="2026-10-23T22:01:27+08:00"><meta property="article:tag" content="游戏开发"><meta property="article:tag" content="物理引擎"><meta property="og:see_also" content="https://visualgmq.github.io/posts/lcp%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/"><meta name=twitter:card content="summary"><meta name=twitter:title content="物理模拟中的动力学模型"><meta name=twitter:description content="本文说明了物理引擎中的接触求解的物理模型，以及将其转换成LCP问题和用PGS方法求解。
+本文只讨论刚体模拟。
+此物理模型包含⑤部分：
+牛顿-欧拉方程 运动学映射：将位形参数对时间的导数和平动速度和角速度联系起来 对于永久关节的等式约束 对于法向接触的不等式约束 库伦摩擦定律"><link type=text/css rel=stylesheet href=/css/main.bundle.min.3ea5e9ae4f69e8960432a2dc45e8304f9c268908ca0c20747f7d863eba62703a2b12b572a03107e931b38752098408ee8864f4d682d1bdb86f60537573d70d6b.css integrity="sha512-PqXprk9p6JYEMqLcRegwT5wmiQjKDCB0f32GPrpicDorErVyoDEH6TGzh1IJhAjuiGT01oLRvbhvYFN1c9cNaw=="><script type=text/javascript src=/js/appearance.min.11183536302aa30e374452803c0154673009b5a4995c7f6559d1c935544cc591b599a5f2adfaeda41e1cc865bd62bdace9b0672a75294ce49d185f0f82b98cbe.js integrity="sha512-ERg1NjAqow43RFKAPAFUZzAJtaSZXH9lWdHJNVRMxZG1maXyrfrtpB4cyGW9Yr2s6bBnKnUpTOSdGF8PgrmMvg=="></script><script defer src=/lib/zoom/zoom.min.umd.a527109b68c082a70f3697716dd72a9d5aa8b545cf800cecbbc7399f2ca6f6e0ce3e431f2062b48bbfa47c9ea42822714060bef309be073f49b9c0e30d318d7b.js integrity="sha512-pScQm2jAgqcPNpdxbdcqnVqotUXPgAzsu8c5nyym9uDOPkMfIGK0i7+kfJ6kKCJxQGC+8wm+Bz9JucDjDTGNew=="></script><script defer src=/js/medium-zoom.67b71ecf7eecce38673a92244d1ffd93edb5f1aeedd12e725d0f67fe901828fa3562f6a6d64ad290b36b7d7034b8ea16e63486d75d957bcf6a2732923e5d46e6.js integrity="sha512-Z7cez37szjhnOpIkTR/9k+218a7t0S5yXQ9n/pAYKPo1Yvam1krSkLNrfXA0uOoW5jSG112Ve89qJzKSPl1G5g=="></script><script type=text/javascript src=/js/reading-progress.min.5d84577898a2dc0e1ed36baf2acb508e94e0c0f59a7fdeef67c1aa264029d9a17ccaff47182411b19d9de2eec2d6ac67f610f61bd938aa18af177ed66030cff1.js integrity="sha512-XYRXeJii3A4e02uvKstQjpTgwPWaf97vZ8GqJkAp2aF8yv9HGCQRsZ2d4u7C1qxn9hD2G9k4qhivF37WYDDP8Q=="></script><script defer type=text/javascript id=script-bundle src=/js/main.bundle.min.5b9ed082c219834880b0f2f41c608591e2581b1c718be2934d6e188412f3e9597b08940996c3a6bd5fb20ded8594a05aeb5a0a07370f6026452bd2655b6013bd.js integrity="sha512-W57QgsIZg0iAsPL0HGCFkeJYGxxxi+KTTW4YhBLz6Vl7CJQJlsOmvV+yDe2FlKBa61oKBzcPYCZFK9JlW2ATvQ==" data-copy=复制 data-copied=已复制></script><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><script type=application/ld+json>[{"@context":"https://schema.org","@type":"Article","articleSection":"Posts","name":"物理模拟中的动力学模型","headline":"物理模拟中的动力学模型","inLanguage":"zh-cn","url":"https://visualgmq.github.io/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/","author":{"@type":"Person","name":"VisualGMQ","image":"https://visualgmq.github.io/icons/logo.png","sameAs":["https://github.com/VisualGMQ","https://space.bilibili.com/256768793"]},"copyrightYear":"2026","dateCreated":"2026-10-23T22:01:27\u002b08:00","datePublished":"2026-10-23T22:01:27\u002b08:00","dateModified":"2026-10-23T22:01:27\u002b08:00","keywords":["游戏开发","物理引擎"],"mainEntityOfPage":"https://visualgmq.github.io/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/","wordCount":2470}]</script><script>window.MathJax={loader:{load:["[tex]/mathtools"]},tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0,packages:{"[+]":["mathtools"]}},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"],ignoreHtmlClass:"no-mathjax"},chtml:{scale:1}}</script><script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.js></script></head><body class="flex flex-col h-screen m-auto leading-7 max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32 text-lg bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral bf-scrollbar"><div id=the-top class="absolute flex self-center"><a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600" href=#main-content><span class="font-bold text-primary-600 pe-2 dark:text-primary-400">&darr;</span>
+跳过正文</a></div><header><div class="main-menu flex items-center w-full gap-2 p-1 pl-0"><div><a href=/ class=flex><span class=sr-only>VisualGMQ的博客</span>
+<img src=/icons/logo.png width=320 height=320 class="logo max-h-20 max-w-20 object-scale-down object-left nozoom" alt></a></div><a href=/ class="text-base font-medium truncate min-w-0 shrink">VisualGMQ的博客</a><div class="flex items-center ms-auto"><div class="hidden md:flex"><nav aria-label class="flex items-center gap-x-5 h-12"><a href=/posts/ class="flex items-center bf-icon-color-hover" aria-label=文章 title=Posts><span class="text-sm font-medium break-normal">文章
+</span></a><a href=/categories/ class="flex items-center bf-icon-color-hover" aria-label=分类 title=Categories><span class="text-sm font-medium break-normal">分类
+</span></a><a href=/tags/ class="flex items-center bf-icon-color-hover" aria-label=标签 title=Tags><span class="text-sm font-medium break-normal">标签
+</span></a><a href=/about/ class="flex items-center bf-icon-color-hover" aria-label=关于我 title=关于我><span class="text-sm font-medium break-normal">关于我
+</span></a><a href=/videos/ class="flex items-center bf-icon-color-hover" aria-label=视频集 title><span class="text-sm font-medium break-normal">视频集</span></a><div class="flex items-center"><button id=appearance-switcher aria-label=切换为深色模式 type=button class="text-sm bf-icon-color-hover" title=切换为深色模式><div class="flex items-center justify-center dark:hidden"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="items-center justify-center hidden dark:flex"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button></div><button id=search-button aria-label="搜索 (/)" class="flex items-center gap-2 rounded-lg border bf-border-color bf-border-color-hover bg-neutral-100/50 px-2 py-1 text-sm text-neutral-500 transition-colors hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:text-primary-400" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span><kbd id=search-shortcut-hint class="pointer-events-none font-sans text-xs text-neutral-500 dark:text-neutral-400" aria-hidden=true>⌘K</kbd></button></nav></div><div class="flex md:hidden"><div class="mobile-header-row relative flex items-center h-14 gap-4"><button id=appearance-switcher-mobile type=button aria-label=切换为深色模式 title=切换为深色模式 class="flex items-center justify-center text-neutral-900 hover:text-primary-600 dark:text-neutral-200 dark:hover:text-primary-400"><div class=dark:hidden><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="hidden dark:block"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button>
+<button id=search-button-mobile aria-label="搜索 (/)" class="flex items-center justify-center bf-icon-color-hover" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span></button>
+<input type=checkbox id=mobile-menu-toggle autocomplete=off class="hidden peer">
+<label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog aria-label class="flex items-center justify-center cursor-pointer bf-icon-color-hover"><span class="relative block icon"><svg viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416c17.7.0 32 14.33 32 32 0 17.7-14.3 32-32 32H32C14.33 128 0 113.7.0 96zM0 256c0-17.7 14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32H32c-17.67.0-32-14.3-32-32zM416 448H32c-17.67.0-32-14.3-32-32s14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32z"/></svg></span></label><div id=mobile-menu-dialog role=dialog aria-modal=true aria-label style=scrollbar-gutter:stable class="z-50 invisible overflow-y-auto opacity-0 transition-[opacity,visibility] duration-300 peer-checked:visible peer-checked:opacity-100
+fixed inset-0 px-6 py-20 bg-neutral-50/97 dark:bg-neutral-900/99
+bf-scrollbar"><label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog class="fixed end-8 top-5 z-50 h-12 w-12 rounded-full flex items-center justify-center cursor-pointer select-none bf-icon-color-hover border bf-border-color bf-border-color-hover bg-neutral-50 dark:bg-neutral-900"><span class=sr-only></span>
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></label><nav aria-label class="mx-auto max-w-md space-y-6"><div class=px-2><div class="flex items-center gap-4"><a href=/posts/ aria-label=文章 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Posts class="text-2xl font-bold tracking-tight">文章</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/categories/ aria-label=分类 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Categories class="text-2xl font-bold tracking-tight">分类</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/tags/ aria-label=标签 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Tags class="text-2xl font-bold tracking-tight">标签</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/about/ aria-label=关于我 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=关于我 class="text-2xl font-bold tracking-tight">关于我</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/videos/ aria-label=视频集 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title class="text-2xl font-bold tracking-tight">视频集</span></a></div></div></nav></div></div></div></div></div></header><div class="relative flex flex-col grow"><main id=main-content class=grow><div id=reading-progress class="fixed left-0 top-0 z-100 h-1 w-0 bg-primary-500 dark:bg-primary-400 print:hidden" aria-hidden=true></div><article><header id=single_header class="mt-5 max-w-prose"><h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">物理模拟中的动力学模型</h1><div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden"><div class="flex flex-row flex-wrap items-center"><time datetime=2026-10-23T22:01:27+08:00>23 October 2026</time><span class="px-2 text-primary-500">&#183;</span><span>2470 字</span><span class="px-2 text-primary-500">&#183;</span><span title=预计阅读>12 分钟</span></div></div></header><section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row"><div class="order-first lg:ms-auto px-0 lg:order-last lg:ps-8 lg:max-w-2xs"><div class="toc ps-5 print:hidden lg:sticky lg:top-10"><details open id=TOCView class="toc-right mt-0 overflow-y-auto overscroll-contain bf-scrollbar rounded-lg -ms-5 ps-5 pe-2 hidden lg:block"><summary class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="min-w-[220px] py-2 border-dotted border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContents aria-label=目录><ul><li><a href=#刚体运动学映射>刚体运动学映射</a></li><li><a href=#约束>约束</a></li><li><a href=#库伦摩擦力coulombs-law-of-friction>库伦摩擦力（Coulomb’s Law of Friction）</a><ul><li><a href=#库伦摩擦力模型及其问题>库伦摩擦力模型及其问题</a></li><li><a href=#使用最大耗散原理重新表述库伦模型>使用最大耗散原理重新表述库伦模型</a></li><li><a href=#使用最大耗散原理重新表述关节约束>使用最大耗散原理重新表述关节约束</a></li><li><a href=#painleve悖论>Painleve悖论</a></li><li><a href=#如何解决painleve悖论>如何解决Painleve悖论</a></li></ul></li><li><a href=#用加速度表示接触约束>用加速度表示接触约束</a></li><li><a href=#牛顿欧拉方程>牛顿欧拉方程</a></li><li><a href=#瞬时动力学模型>瞬时动力学模型</a><ul><li><a href=#当前的瞬时动力学模型>当前的瞬时动力学模型</a></li><li><a href=#模型的离散化>模型的离散化</a></li></ul></li><li><ul><li><a href=#离散化模型总结>离散化模型总结</a></li></ul></li></ul><ul><li><a href=#可能存在的无解>可能存在的无解</a></li><li><a href=#时间步进lcp>时间步进LCP</a></li><li><a href=#带有铰链和关节的约束>带有铰链和关节的约束</a></li><li><a href=#数值解法>数值解法</a></li></ul></nav></div></details><details class="toc-inside mt-0 overflow-hidden rounded-lg -ms-5 ps-5 lg:hidden"><summary class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="py-2 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContentsMobile aria-label=目录><ul><li><a href=#刚体运动学映射>刚体运动学映射</a></li><li><a href=#约束>约束</a></li><li><a href=#库伦摩擦力coulombs-law-of-friction>库伦摩擦力（Coulomb’s Law of Friction）</a><ul><li><a href=#库伦摩擦力模型及其问题>库伦摩擦力模型及其问题</a></li><li><a href=#使用最大耗散原理重新表述库伦模型>使用最大耗散原理重新表述库伦模型</a></li><li><a href=#使用最大耗散原理重新表述关节约束>使用最大耗散原理重新表述关节约束</a></li><li><a href=#painleve悖论>Painleve悖论</a></li><li><a href=#如何解决painleve悖论>如何解决Painleve悖论</a></li></ul></li><li><a href=#用加速度表示接触约束>用加速度表示接触约束</a></li><li><a href=#牛顿欧拉方程>牛顿欧拉方程</a></li><li><a href=#瞬时动力学模型>瞬时动力学模型</a><ul><li><a href=#当前的瞬时动力学模型>当前的瞬时动力学模型</a></li><li><a href=#模型的离散化>模型的离散化</a></li></ul></li><li><ul><li><a href=#离散化模型总结>离散化模型总结</a></li></ul></li></ul><ul><li><a href=#可能存在的无解>可能存在的无解</a></li><li><a href=#时间步进lcp>时间步进LCP</a></li><li><a href=#带有铰链和关节的约束>带有铰链和关节的约束</a></li><li><a href=#数值解法>数值解法</a></li></ul></nav></div></details></div></div><div class="min-w-0 min-h-0 max-w-fit"><details class="mt-2 mb-5 overflow-hidden rounded-lg ms-0 ps-5"><summary class="py-1 text-lg font-semibold cursor-pointer bg-primary-200 text-neutral-800 -ms-5 ps-5 dark:bg-primary-800 dark:text-neutral-100">从0开始制作游戏物理引擎 -
+这篇文章属于一个选集。</summary><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%80/>§ 1:
+从0开始制作游戏物理引擎（一）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/>§ 2:
+从0开始制作游戏物理引擎（二）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/>§ 3:
+从0开始制作游戏物理引擎（三）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/>§ 4:
+从0开始制作游戏物理引擎（四）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/>§ 5:
+从0开始制作游戏物理引擎（五）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/>§ 6:
+从0开始制作游戏物理引擎（六）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/>§ 7:
+从0开始制作游戏物理引擎（七）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/>§ 8:
+从0开始制作游戏物理引擎（八）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/>§ 9:
+分析力学小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/>§ 10:
+几何数值积分小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/>§ 11:
+最优化理论小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/lcp%E5%B0%8F%E8%AE%B0/>§ 12:
+LCP小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600">§ 13:
+本文</div></details><div class="article-content max-w-prose mb-20"><p>本文说明了物理引擎中的接触求解的物理模型，以及将其转换成LCP问题和用PGS方法求解。</p><p>本文只讨论刚体模拟。</p><p>此物理模型包含⑤部分：</p><ol><li>牛顿-欧拉方程</li><li>运动学映射：将位形参数对时间的导数和平动速度和角速度联系起来</li><li>对于永久关节的等式约束</li><li>对于法向接触的不等式约束</li><li>库伦摩擦定律</li></ol><h1 class="relative group">瞬时间动力学的推导<div id=瞬时间动力学的推导 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%9e%ac%e6%97%b6%e9%97%b4%e5%8a%a8%e5%8a%9b%e5%ad%a6%e7%9a%84%e6%8e%a8%e5%af%bc aria-label=锚点>#</a></span></h1><h2 class="relative group">刚体运动学映射<div id=刚体运动学映射 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e8%bf%90%e5%8a%a8%e5%ad%a6%e6%98%a0%e5%b0%84 aria-label=锚点>#</a></span></h2><p>刚体的运动由其质心处的平动和以质心为原点的局部坐标系的转动组合而成。将平动位置$\pmb{x}$和转动的姿态（以四元数表示）$Q$放在一起组合成广义坐标：</p>$$
+\pmb{q} = (\pmb{x}, Q) =
+\begin{bmatrix}
+\pmb{x}^T & Q_x & Q_y & Q_z & Q_w
+\end{bmatrix}
+$$<p>而其对应的广义速度为：</p>$$
+\dot{\pmb{q}} = (\dot{\pmb{x}},\dot{Q}) = (\pmb{v},\ G\pmb{\omega})
+\qquad
+\pmb{u} = (\pmb{v}, \pmb{\omega})
+$$<p>对于平动，这里显然有 $\pmb{v} = \dot{\pmb{x}}$。对于转动，使用<a href=https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/#%E5%9B%9B%E5%85%83%E6%95%B0%E8%A1%A8%E7%A4%BA%E7%9A%84%E6%97%A0%E9%99%90%E5%B0%8F%E8%BD%AC%E5%8A%A8%EF%BC%88%E5%9B%9B%E5%85%83%E6%95%B0%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%EF%BC%89>刚体动力学中的四元数表示法</a>可以得到：</p>$$
+\begin{aligned}
+\dot{Q} & = G \pmb{\omega} \\
+G & =
+\frac{1}{2}
+\begin{bmatrix}
+-Q_x & -Q_y & -Q_z \\
+Q_w & Q_z & -Q_y \\
+-Q_z & Q_w & Q_x \\
+Q_y & -Q_x & Q_w \\
+\end{bmatrix}
+\end{aligned}
+$$<p>这样，我们可以得到总的运动学映射：</p>$$
+\begin{aligned}
+\dot{q} & = Hu \\
+H &=
+\begin{bmatrix}
+1_{3\times 3} & 0 \\
+0 & G \\
+\end{bmatrix}
+\end{aligned}
+$$<h2 class="relative group">约束<div id=约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h2><p>有两种<a href=https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/#%E7%BA%A6%E6%9D%9F>约束</a>：</p><ol><li>双边约束：$C(q_1, \cdots, q_n; u_1, \cdots, u_m, t)= 0$。比如各种铰链施加给连接到的刚体的约束。</li><li>单边约束：$C(q_1, \cdots, q_n; u_1, \cdots, u_m, t) \ge 0$。比如接触分离的约束。</li></ol><p>考虑两个半径为$r_1, r_2$，球心为$\pmb{x_1}, \pmb{x_2}$的球体，他们之间的约束为：</p>$$
+C(\pmb{x}_1, \pmb{x}_2) = \|\pmb{x}_1-\pmb{x}_2\|-(r_1+r_2)
+$$<p>此时，如果$C(\pmb{x_1}, \pmb{x_2}) = 0$，那么这两个球相贴。</p><p>但如果$C(\pmb{x_1}, \pmb{x_2}) \ge 0$，那么两球是相离/相贴的，即非相交状态。</p><p>就是因为存在单边约束，我们才必须将问题转换成LCP问题。如果只有双边约束，直接用拉格朗日乘子法就能解了。</p><p>我们将约束施加给刚体的力分解为垂直于刚体（法向），以及平行于刚体（切向）的力，这样便于后面融入库伦摩擦力。</p><p>对于<strong>无摩擦接触力</strong>来说，接触力只在法向存在。</p><p>那么此时，法向接触约束就是：</p>$$
+C(\pmb{q}, t) \ge 0
+$$<p>从物理角度看，该约束由物体间的法向接触力$\pmb{f}_n$维持，其中：</p>$$
+\pmb{f}_n \ge 0
+$$<p>而且显然他两是互补关系：</p>$$
+0 \le C(\pmb{q}, t) \perp \pmb{f}_n \ge 0
+$$<p>这里我们用集合</p>$$
+\begin{aligned}
+&\mathcal{U} = \{i : \text{接触}i\text{为点接触}\} \\
+&\mathcal{B} = \{i : \text{接触}i\text{为关节接触}\}
+\end{aligned}
+$$<p>来表示点接触和关节接触。后面用${}^{u}C(\pmb{q}, t)$表示点接触。关节接触同理。</p><h2 class="relative group">库伦摩擦力（Coulomb’s Law of Friction）<div id=库伦摩擦力coulombs-law-of-friction class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%ba%93%e4%bc%a6%e6%91%a9%e6%93%a6%e5%8a%9bcoulombs-law-of-friction aria-label=锚点>#</a></span></h2><p>即我们高中学的摩擦力，是经验定律，由库伦从大量实验中得出。</p><p>但我们不能直接使用库伦模型。因为他是个<strong>不连续</strong>的定律。库伦定律是导致物理模型变复杂的罪魁祸首。</p><h3 class="relative group">库伦摩擦力模型及其问题<div id=库伦摩擦力模型及其问题 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%ba%93%e4%bc%a6%e6%91%a9%e6%93%a6%e5%8a%9b%e6%a8%a1%e5%9e%8b%e5%8f%8a%e5%85%b6%e9%97%ae%e9%a2%98 aria-label=锚点>#</a></span></h3><p>在接触点处建立局部坐标系：法向$\pmb{n}$，切向$\pmb{t}, \pmb{o}$，这样<strong>接触力</strong>$\pmb{F}$可以写成：</p>$$
+\begin{aligned}
+\pmb{F} &= \pmb{F}_n \pmb{n} + \pmb{F}_t \\
+\pmb{F}_t &= F_t \pmb{t} + F_o \pmb{o}
+\end{aligned}
+$$<p>注意这里是<strong>接触力</strong>而不是外力。接触力是接触面施加在物体上的反作用力。在这里被分为面给物体的支撑力（法向），以及他们之间的摩擦力（切向）。</p><p>库伦摩擦模型中，将摩擦力分为<strong>静摩擦(Sticky)</strong> 和 <strong>动摩擦(Slide)</strong>：</p>$$
+\pmb{F}_t =
+\begin{cases}
+& \text{任意满足}||\pmb{F}_t|| \le \mu N \text{的}\pmb{F}_t\text{，通常由外力决定} & , ||\pmb{v}_t|| = 0 \\
+& -\mu F_n \frac{\pmb{v}_t}{||\pmb{v}_t||} & , ||\pmb{v}_t|| \gt 0
+\end{cases}
+$$<p>即，当物体没有移动时是静摩擦。而移动之后就是动摩擦，摩擦力大小是$F_n \mu$，方向为移动的反方向。</p><p>或者用几何的方式。库伦条件规定了所有允许的接触力：</p>$$
+\begin{aligned}
+C(F_n) & = \{\pmb{F}_t : ||\pmb{F_t}|| \le \mu F_n \} \\
+F_n &\ge 0 \\
+\end{aligned}
+$$<p>这在图像上构成一个朝向接触面外的锥体(<strong>摩擦锥</strong>)：</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=摩擦锥 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%91%a9%e6%93%a6%e9%94%a5.png></figure><p>这个锥体的定义可以写得更清楚一些：</p>$$
+\begin{aligned}
+\mu^2 \pmb{F}_n^2 - \pmb{F}_t^2 - \pmb{F_o}^2 & \ge 0 \\
+F_n & \ge 0 \\
+\end{aligned}
+$$<p>库伦模型的公式不是连续的：在静态/动态摩擦转换的临界点，摩擦力会发生突变，导致数值积分不稳定。Stewart2000<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>中给出了一个例子：</p><p>考虑滑块在斜面上滑动（向上或者向下）</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=斜面上的砖块 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%96%9c%e9%9d%a2%e4%b8%8a%e7%9a%84%e7%a0%96%e5%9d%97.png></figure><p>此砖块的运动方程是：</p>$$
+m \frac{dv}{dt} = mg\sin \theta - \mu mg \cos \theta \operatorname{sgn} v
+$$<p>其中$\operatorname{sgn}$是符号函数。</p><p>此方程对于$v$是不连续的:</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=滑块滑动的不连续性 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%bb%91%e5%9d%97%e6%bb%91%e5%8a%a8%e7%9a%84%e4%b8%8d%e8%bf%9e%e7%bb%ad%e6%80%a7.png></figure><p>在$v = 0$处有一个间断点。</p><p>甚至这个方程<strong>有可能不存在解</strong>，因为滑块在某些情况下，以初始速度$v$滑动一段时间后会停止。但方程中当$v = 0$时的解是$\sin \theta = 0$，这显然是不合理的。</p><p>Stewart指出，虽然可以通过某些手段把不连续函数光滑，但在这个场景下几乎没有好处，必须另寻他法。</p><p>为了解决库伦函数不连续的问题，我们干脆不使用函数，而是将摩擦问题变成一个LCP问题，用LCP的方式去求解。</p><h3 class="relative group">使用最大耗散原理重新表述库伦模型<div id=使用最大耗散原理重新表述库伦模型 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%bd%bf%e7%94%a8%e6%9c%80%e5%a4%a7%e8%80%97%e6%95%a3%e5%8e%9f%e7%90%86%e9%87%8d%e6%96%b0%e8%a1%a8%e8%bf%b0%e5%ba%93%e4%bc%a6%e6%a8%a1%e5%9e%8b aria-label=锚点>#</a></span></h3><p>在材料力学中有一个“最大耗散原理”（又称最大逸散功原理），他比库伦定律更能表述正确的摩擦模型。他是个通用定理，但对于摩擦力来说，是指给定法向接触力$\pmb{F}_n$，摩擦力$\pmb{F}_t$是在给定的法向接触力$\pmb{F}_n$所允许的一切可能摩擦力中，使能量耗散率$-\pmb{F}_t \cdot v_{rel}$最大的那个一个。其中$\pmb{v}_{rel}$是接触点处的相对速度。</p><p>也就是说，可以将库伦摩擦模型变成一个优化问题：</p>$$
+\pmb{F}_t \in \arg \max_{\pmb{F}_t^{'} \in C(F_n)}(-\pmb{v}_t \cdot \pmb{F}_t^{'})
+$$<p>那么，对于单边接触，各项同性的库伦摩擦的最大耗散问题就是：</p>$$
+\begin{aligned}
+& \text{maximize} & -(\pmb{v}_t \cdot \pmb{F}_t) \\
+& \text{subject to} & \mu^2 \pmb{F}_n^2 - \pmb{F}_t^2 \ge 0
+\end{aligned}
+$$<p>这就变成一个凸优化问题（目标函数是线性函数）。</p><p><strong>注意这里的自变量是向量$\pmb{F}_t$。</strong></p><p>但是这个问题不能用KKT条件。因为在锥顶$F_{n} = 0$处，可行域塌缩成一个点（锥尖尖那里），这导致约束变成$\pmb{F}_t^2 \le 0 \Rightarrow \pmb{F}_t = 0$。这样KKT的平稳性条件就变成$-\pmb{v}_t + \lambda \nabla \pmb{F}_t^2 = 0 \Rightarrow \pmb{v}_t = 0$。这样只要滑动速度不为0（这肯定会被触发），KKT在这里就无解。</p><p>这时，可以使用更宽松的Fritz-John条件，这样可以写成：</p>$$
+\begin{aligned}
+\nabla L: & -\lambda_0 \nabla (\pmb{v}_t\pmb{F}_t) + \lambda_1 \nabla(\mu^2 \pmb{F}_n^2 - \pmb{F}_t^2) \\
+& = -\lambda_0 \nabla(v_t F_t + v_o F_o) + \lambda_1 \nabla(\mu^2F_n^2 - F_t^2 - F_o^2)
+\end{aligned}
+$$<p>而$\nabla$算子是对$\pmb{F}_t = \begin{bmatrix}F_t \\ F_o\end{bmatrix}$求导，所以这个条件就变成：</p>$$
+\begin{aligned}
+& \frac{\partial L}{\partial F_t} = -\lambda_0 v_t - 2\lambda_1 F_t = 0 \\
+& \frac{\partial L}{\partial F_o} = -\lambda_0 v_o - 2\lambda_1 F_o = 0 \\
+\end{aligned}
+$$<p>取$\lambda_0 = 2\mu F_n$归一化，可以将式子变成：</p>$$
+\begin{aligned}
+\mu F_n v_t + \lambda_1F_t &= 0 \\
+\mu F_n v_o + \lambda_1F_o &= 0 \\
+\end{aligned}
+$$<p>然后再给约束条件起个名$\alpha = \mu^2 \pmb{F}_n^2 - F_t^2 - F_o^2 \ge 0$，这样Fritz-John条件就是：</p>$$
+\begin{aligned}
+& \mu F_n v_t + \lambda_1F_t = 0 \\
+& \mu F_n v_o + \lambda_1F_o = 0 \\
+\alpha =& \mu^2 F_n^2 - F_t^2 - F_o^2 \ge 0 \\
+& 0 \le \alpha \perp \lambda_1 \ge 0
+\end{aligned}
+$$<p>这类似于LCP问题，但关键是$\alpha$并不是个线性函数，所以并不能视为LCP。</p><p>在现在的大多数游戏物理中，通常是将摩擦锥变成近似的棱锥或者盒子，这样才能将摩擦锥融入LCP问题（LCP问题只能处理多个线性方程包围的问题）。</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=摩擦锥变摩擦棱锥 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%91%a9%e6%93%a6%e9%94%a5%e5%8f%98%e6%91%a9%e6%93%a6%e6%a3%b1%e9%94%a5.png></figure><h3 class="relative group">使用最大耗散原理重新表述关节约束<div id=使用最大耗散原理重新表述关节约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%bd%bf%e7%94%a8%e6%9c%80%e5%a4%a7%e8%80%97%e6%95%a3%e5%8e%9f%e7%90%86%e9%87%8d%e6%96%b0%e8%a1%a8%e8%bf%b0%e5%85%b3%e8%8a%82%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h3><p>如果要在关节约束上增加摩擦，我们首先假设关节约束只有一个自由度（比如PhysX中的滑动关节，或者纯铰链关节）。此时摩擦力方向只有一个，需要固定一个最大摩擦力$\mu F_n = F_{max}$（因为铰链没有法向的说法，只能手动给一个最大摩擦力），然后将上面的FJ条件变成：</p>$$
+\begin{aligned}
+& F_{max} v_t + \lambda_1F_t = 0 \\
+\alpha =& F_{max}^2 - F_t^2 \ge 0 \\
+& 0 \le \alpha \perp \lambda_1 \ge 0
+\end{aligned}
+$$<p>如果自由度更多，并且自由度的量纲是同一类型（比如绕任意三轴移动的关节），那么就是：</p>$$
+\begin{aligned}
+& F_{max} v_x + \lambda_1F_x = 0 \\
+& F_{max} v_y + \lambda_1F_y = 0 \\
+& F_{max} v_z + \lambda_1F_z = 0 \\
+\alpha =&F_{max}^2 - F_x^2 - F_y^2 - F_z^2 \ge 0 \\
+& 0 \le \alpha \perp \lambda_1 \ge 0
+\end{aligned}
+$$<p>如果量纲不一样（比如一个平动 + 两个转动）</p>$$
+\begin{aligned}
+& c v_x + \beta F_x = 0 \\
+& c\ell^{2}\omega_y + \beta \tau_y = 0 \\
+& c\ell^{2}\omega_z + \beta \tau_z = 0 \\
+\alpha &= c^{2} - \left(
+F_x^{2} +
+\frac{\tau_y^{2}+\tau_z^{2}}{\ell^{2}}
+\right) \ge 0 \\
+0 &\le \alpha \perp \beta \ge 0
+\end{aligned}
+$$<p>这里$c$是平动时最大的摩擦力。而$cl^2$则是转动时最大的摩擦力。这里也可以将$cl^2$单独设成一个变量，只是你要明白此变量里面蕴含了长度单位，这样两边的量纲才能对齐。</p><h3 class="relative group">Painleve悖论<div id=painleve悖论 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#painleve%e6%82%96%e8%ae%ba aria-label=锚点>#</a></span></h3><p>是指研究下面这个粉笔在黑板上书写时接触问题产生的悖论：</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=Painleve悖论 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/Painlevel%e6%82%96%e8%ae%ba.png></figure><p>问题中只要求粉笔下端紧贴黑板，接触点处有切向速度，但是对于$\theta$没有要求。假设粉笔与地面接触点为$(x_c, y_c)$，向右为$x$轴正方向，向上为$y$轴正方向，粉笔向左移动，即$\dot{x} < 0$。并假设逆时针下$\theta$为正。此时摩擦力$F = + \mu N$，那么有：</p>$$
+\begin{aligned}
+m \ddot{x} &= F \\
+m \ddot{y} &= N - mg \\
+J\ddot{\theta} &= \frac{l}{2}(+F \sin \theta - N \cos \theta) \\
+y_c &= y - \frac{l}{2}\sin \theta \\
+\end{aligned}
+$$<p>第三个式子用力矩公式$J\ddot{\theta} = \tau = r \times F$可以得到。</p><p>把这些方程带入到$F = +\mu N$得到：</p>$$
+[\frac{1}{m} - \frac{l^2}{4J}\cos \theta (\mu \sin \theta - \cos \theta)]N = g - \frac{l}{2} \sin \theta \dot{\theta}^2
+$$<p>这里令方括号内的式子为$\Delta$，而等式右边为$S$，这样式子就是：</p>$$
+N = \frac{S}{\Delta}
+$$<p>显然在真实物理中，$N \ge 0$恒成立。但是Painleve指出存在不成立的情况：</p><ul><li>$\Delta = 0$时，即存在临界摩擦系数$\mu_c = \frac{\cos^2 \theta + \frac{4J}{ml^2}}{\sin \theta \cos \theta}$时，$N$变成无穷大。此时没有有限解。</li><li>$\Delta < 0, S > 0$时，$N < 0$反而会将粉笔往黑板拉，此时方程无解。</li></ul><p>这个条件是容易达成的，比如取$\theta = 45^\circ, J = \frac{ml^2}{12}$， 此时临界摩擦系数$\mu_c = \frac{5}{3}$。</p><p>当$\mu = \mu_c$时，$\Delta = 0$。而当$\mu > \mu_c$时，$\Delta < 0$。</p><p>那你说当$\Delta < 0$的时候，我直接强制令$N = 0$来模拟粉笔离开黑板的情况呢？也不行。因为此时$\ddot{y_c} = -g < 0$还是会给物体一个向下的加速度，物体还是会陷入黑板。</p><p>Painlevel悖论告诉我们：刚体+库伦摩擦这个物理模型在某些情况下会失效。但现在业界也没有更好的物理模型（反在在实时模拟中没有）。现阶段，你可以认为”理想的“求解器在$\Delta \le 0$的情况下存在未定义行为。实际工程上到底会发生什么完全由实际的求解器决定，不是由物理决定的。</p><h3 class="relative group">如何解决Painleve悖论<div id=如何解决painleve悖论 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%a6%82%e4%bd%95%e8%a7%a3%e5%86%b3painleve%e6%82%96%e8%ae%ba aria-label=锚点>#</a></span></h3><p>明明使用的是牛顿和欧拉定理，但为什么会有Painleve悖论？难道是违背了物理原理？正是如此！因为物理模型太理想化了：</p><ul><li>点接触假设：假设接触区域是一个点，面积为0，不可形变。这导致力不是状态的连续函数。真实的柔性接触中：<ul><li>双方都会变形，法向力是一个函数$N = k\delta + c\dot{\delta}$，其中$\delta$是穿透深度。此函数是连续的单值函数。没有了柔度，力就无法表示成连续函数。</li><li>接触有面积，有屈服应力（指材料在拉伸或压缩过程中，当应力达到某一数值后，应力几乎不再增加但应变迅速增大），这让法向接触力存在上限。而点接触下无法定义屈服应力，这导致法向接触力的上限是无限大。</li></ul></li><li>库仑定律假设：<ul><li>在$\pmb{v}_t = 0$处摩擦力方向未定义，这导致我们只能使用互补问题去定义而不是方程</li></ul></li><li>刚体的刚性假设：<ul><li>刚体碰撞是“原子时刻”：普通物体碰撞虽然说时间也很短，但是至少是个连续的变化过程。而刚体则是瞬时的，这导致原本可以描述运动的方程，在$t \rightarrow 0$下产生了奇点</li></ul></li></ul><p>要想深挖必须学习材料力学。这里就不再细说了。</p><p>如果将上述假设中去掉的东西补回去：</p><table><thead><tr><th>补回去</th><th>变成</th><th>得到</th><th>代价</th></tr></thead><tbody><tr><td>柔度</td><td>弹簧–阻尼接触模型</td><td>力律函数连续单值，ODE良定</td><td>确定性消失，函数依赖没有物理意义的参数</td></tr><tr><td>有界力</td><td>屈服/压溃</td><td>有解，但解在边界</td><td>需要引入材料模型</td></tr><tr><td>屈服面</td><td>凸 QP / CCP</td><td>凸问题，可证明总可解</td><td>无真静摩擦、各向同性摩擦</td></tr><tr><td>弹性体</td><td>FEM / XPBD</td><td>物理真实</td><td>FEM解算慢</td></tr></tbody></table><h2 class="relative group">用加速度表示接触约束<div id=用加速度表示接触约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%94%a8%e5%8a%a0%e9%80%9f%e5%ba%a6%e8%a1%a8%e7%a4%ba%e6%8e%a5%e8%a7%a6%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h2><p>接触约束（单边与双边）可以通过对约束$C(\pmb{q}, t)$做泰勒展开来用加速度表示。这里一般用附加在约束上的两者之间的相对距离表示约束（正如约束一节展示的例子那样）。</p><p>令$\pmb{\bar{q}} = \pmb{q} + \Delta \pmb{q}$和$\bar{t} = t + \Delta t$。将其做二元函数泰勒展开：</p>$$
+\begin{aligned}
+\bar{C}(\pmb{\bar{q}}, \bar{t}) &= C(\pmb{q}, t) + \frac{\partial C}{\partial \pmb{q}}\Delta \pmb{q} + \frac{\partial C}{\partial t}\Delta t + \frac{1}{2}((\Delta \pmb{q})^T \frac{\partial^2 C}{\partial \pmb{q}^2} \Delta \pmb{q} + 2\frac{\partial^2C}{\partial \pmb{q} \partial t}\Delta \pmb{q} \Delta t + \frac{\partial^2 C}{\partial t^2}\Delta t^2)
+\end{aligned}
+$$<p>然后把位移公式：</p>$$
+\Delta \pmb{q} = \dot{\pmb{q}} \Delta t + \frac{1}{2}\ddot{\pmb{q}} \Delta t^2
+$$<p>带入到上面的式子，就有：</p>$$
+\begin{aligned}
+\bar{C}(\pmb{\bar{q}}, \bar{t}) - C(\pmb{q}, t) = \Delta \bar{C}(\bar{\pmb{q}}, \bar{t}) = &(\frac{\partial C}{\partial q}\dot{\pmb{q}} + \frac{\partial C}{\partial t})\Delta t + \\
+&\frac{1}{2}(\frac{\partial C}{\partial q}\ddot{\pmb{q}} +
+\dot{\pmb{q}}^T\frac{\partial^2 C}{\partial q^2}\dot{\pmb{q}} +
+2\frac{\partial^2 C}{\partial q\partial t} +
+\frac{\partial^2 C}{\partial t^2})
+\Delta t^2
+\end{aligned}
+$$<p>而根据位移公式$x = v t + \frac{1}{2}a t^2$：</p>$$
+\begin{aligned}
+\Delta \bar{C}
+&= \left(\frac{\partial C}{\partial \pmb{q}}\dot{\pmb{q}} + \frac{\partial C}{\partial t}\right)\Delta t +
+\frac{1}{2}\left(
+\frac{\partial C}{\partial \pmb{q}}\ddot{\pmb{q}} +
+\dot{\pmb{q}}^{\mathsf T}\frac{\partial^2 C}{\partial \pmb{q}^2}\dot{\pmb{q}} +
+2\frac{\partial^2 C}{\partial \pmb{q}\partial t}\dot{\pmb{q}} +
+\frac{\partial^2 C}{\partial t^2}
+\right)\Delta t^2
+\end{aligned}
+$$<p>对比 $\Delta C = \nu\,\Delta t + \frac{1}{2}a\,\Delta t^2$：</p>$$
+\begin{aligned}
+\nu &= \frac{\partial C}{\partial \pmb{q}}\dot{\pmb{q}} + \frac{\partial C}{\partial t} \\
+a &= \frac{\partial C}{\partial \pmb{q}}\ddot{\pmb{q}} +
+\dot{\pmb{q}}^{\mathsf T}\frac{\partial^2 C}{\partial \pmb{q}^2}\dot{\pmb{q}} +
+2\frac{\partial^2 C}{\partial \pmb{q}\partial t}\dot{\pmb{q}} +
+\frac{\partial^2 C}{\partial t^2}
+\end{aligned}
+$$<p>代入运动学关系 $\dot{\pmb q}=H\pmb u,\ \ddot{\pmb q}=\dot H\pmb u+H\dot{\pmb u}$：</p>$$
+\begin{aligned}
+\nu &= J\pmb{u} + \frac{\partial C}{\partial t} \\
+\pmb{a} &= J\dot{\pmb{u}} + \pmb{k} \\
+\pmb{J} &= \frac{\partial C}{\partial \pmb{q}}H \\
+\pmb{k} &= \dot{J}\pmb{u} +
+\frac{\partial^2 C}{\partial \pmb{q}\partial t}H\pmb{u} +
+\frac{\partial^2 C}{\partial t^2} \\
+\end{aligned}
+$$<p>注意这里的$\pmb{v}, \pmb{a}$是相对速度和相对加速度。</p><p>再次回到库伦摩擦力模型：滑动摩擦的表述，要求相对速度$v \ne 0$。</p><p>但是当存在滚动摩擦时，比如一个球在空中边转圈边垂直下落到地面上，和地面接触的一瞬间时，由于其和地面并没有切向的速度，所以库伦模型只能给出摩擦力为0的错误结论。</p><p>仿照约束子集的定义，定义摩擦子集，其中$\mathcal{S}$是滑动摩擦，而$\mathcal{R}$是滚动摩擦：</p>$$
+\begin{aligned}
+\mathcal{S} &= \{i : C_n(\pmb q, \pmb u, t) = 0, \pmb{v}_n = 0, \pmb{v}_t \ne 0\} \\
+\mathcal{R} &= \{i : C_n(\pmb q, \pmb u, t) = 0, \pmb{v}_n = 0, \pmb{v}_t = 0\} \\
+\end{aligned}
+$$<p>此时我们可以用加速度来判断物体的运动趋势。对于滚动摩擦就有：</p>$$
+\begin{rcases}
+& {}^{u}\mu_i\, {}^{u}F_{in}\, {}^{u}a_{it} + {}^{u}\lambda_{i1}\, {}^{u}F_{it} = 0 \\
+& {}^{u}\mu_i\, {}^{u}F_{in}\, {}^{u}a_{io} + {}^{u}\lambda_{i1}\, {}^{u}F_{io} = 0 \\
+\phantom{}{}^{u}\alpha_i =& {}^{u}\mu_i^2\, {}^{u}F_{in}^2 - {}^{u}F_{it}^2 - {}^{u}F_{io}^2 \ge 0 \\
+& 0 \le {}^{u}\alpha_i \perp {}^{u}\lambda_{i1} \ge 0
+\end{rcases}
+\forall i \in \mathcal{U} \cap \mathcal{R}
+$$<p>只是将原来的速度替换成加速度。</p><p>变量左上角的角标$u$表示他位于$\mathcal{U}$集合中。这里看上去符号很多，其实意思是找到单边约束中满足滚动摩擦的约束。</p><p>而对于双边约束中的滚动摩擦，也有类似的公式(以一自由度关节为例)：</p>$$
+\begin{rcases}
+& {}^bF_{i\ max}{}^ba_{if} + {}^b\lambda_{i1} {}^b F_{if} = 0 \\
+& {}^{b}\pmb{a}_i = {}^bF_{i\ max}^2 - {}^bF_{if}^2 \ge 0 \\
+& 0 \le {}^{b}\alpha_i \perp {}^{b}\pmb \lambda_{i1} \ge 0 \\
+\end{rcases}
+\forall i \in \mathcal{B} \cap \mathcal{R}
+$$<p>此时滚动摩擦不满足最大耗散原理，他可以在摩擦锥内部的任意位置（而非边界处）。因为这时相对速度为0，无法确定最大耗散。</p><h2 class="relative group">牛顿欧拉方程<div id=牛顿欧拉方程 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%89%9b%e9%a1%bf%e6%ac%a7%e6%8b%89%e6%96%b9%e7%a8%8b aria-label=锚点>#</a></span></h2><p>将 <a href=https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/#%E7%89%9B%E9%A1%BF-%E6%AC%A7%E6%8B%89%E6%96%B9%E7%A8%8B>牛顿-欧拉方程</a> 用矩阵的方式重新表述：</p>$$
+\begin{aligned}
+M(\pmb{q})\dot{\pmb{u}} & = g(\pmb{q}, \pmb{u}, t) \\
+M & =
+\begin{bmatrix}
+m \pmb{1}_{3 \times 3} & \pmb{0} \\
+\pmb{0} & \pmb{I} \\
+\end{bmatrix} \\
+g &=
+\begin{bmatrix}
+\pmb{F} \\
+\pmb{\tau} - \pmb{\omega} \times \pmb{I} \pmb{\omega}
+\end{bmatrix}
+\end{aligned}
+$$<p>这里$M$是由普通质量和惯性张量$I$构成的质量矩阵（6x6的）。而$g$则是原本牛顿-欧拉方程的右边构成。</p><p>将$g(\pmb{q}, \pmb{u}, t)$使用单边/双边解出处的法向力，摩擦力以及其他所有广义力之和表示：</p>$$
+M(\pmb{q})\dot{\pmb{u}} = {}^{u}J_n(\pmb{q})^T {}^{u}\pmb{F}_n + {}^{u}J_f(\pmb{q})^T {}^{u}\pmb{F}_f + {}^{b}J_n(\pmb{q})^T {}^{b}\pmb{F}_n + {}^{b}J_f(\pmb{q})^T {}^{b}\pmb{F}_f + g_{ext}(\pmb{q}, \pmb{u}, t)
+$$<p>其中最后一项$g_{ext}(\pmb{q}, \pmb{u}, t)$是所有非接触力和力矩的合力。</p><h2 class="relative group">瞬时动力学模型<div id=瞬时动力学模型 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%9e%ac%e6%97%b6%e5%8a%a8%e5%8a%9b%e5%ad%a6%e6%a8%a1%e5%9e%8b aria-label=锚点>#</a></span></h2><h3 class="relative group">当前的瞬时动力学模型<div id=当前的瞬时动力学模型 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%bd%93%e5%89%8d%e7%9a%84%e7%9e%ac%e6%97%b6%e5%8a%a8%e5%8a%9b%e5%ad%a6%e6%a8%a1%e5%9e%8b aria-label=锚点>#</a></span></h3><p>综合上面所有的方程，可以得到瞬时动力学模型：</p>$$
+\begin{cases}
+\text{① 运动学：} & \dot{\pmb q}=H(\pmb q)\pmb u & (16) \\
+\text{② 动力学：} & M\dot{\pmb u} = {}^{u}J_n^{\mathsf T}\,{}^{u}\pmb F_n + {}^{u}J_f^{\mathsf T}\,{}^{u}\pmb F_f + {}^{b}J_n^{\mathsf T}\,{}^{b}\pmb F_n + {}^{b}J_f^{\mathsf T}\,{}^{b}\pmb F_f + \pmb g_{ext} & (34)\\[6pt]
+\text{③ 关节：} & {}^{b}\pmb a_n = \pmb 0 & (30)\\
+\text{④ 法向：} & \pmb 0 \le {}^{u}\pmb F_n \;\perp\; {}^{u}\pmb a_n \ge \pmb 0 & (31) \\
+\text{⑤ 摩擦：} & (25)(27)\ \text{滑动}\quad (32)(33)\ \text{滚动} &
+\end{cases}
+$$<p>滑动：单边接触</p>$$
+\begin{aligned}
+\mu_i{}^{u}F_{in}\,{}^{u}\nu_{it} + {}^{u}F_{it}\,{}^{u}\beta_i &= 0\\
+\mu_i{}^{u}F_{in}\,{}^{u}\nu_{io} + {}^{u}F_{io}\,{}^{u}\beta_i &= 0\\
+\phantom{}{}^{u}\alpha_i = \mu_i^2\,{}^{u}F_{in}^2 - {}^{u}F_{it}^2 - {}^{u}F_{io}^2 &\ge 0\\
+0 \le {}^{u}\alpha_i & \perp {}^{u}\beta_i \ge 0
+\end{aligned}
+\qquad\text{(25)}
+$$<p>滑动：关节</p>$$
+\begin{aligned}
+\phantom{}{}^{b}F_{io\max}\,{}^{b}\nu_{io} + {}^{b}F_{io}\,{}^{b}\beta_i &= 0\\
+\phantom{}{}^{b}\alpha_i = {}^{b}F_{io\max}^2 - {}^{b}F_{io}^2 &\ge 0\\
+0 \le {}^{b}\alpha_i &\;\perp\; {}^{b}\beta_i \ge 0
+\end{aligned}
+\qquad\text{(27)}
+$$<p>滚动：单边接触</p>$$
+\begin{aligned}
+\mu_i\,{}^{u}F_{in}\,{}^{u}a_{it} + {}^{u}F_{it}\,{}^{u}\beta_i &= 0\\
+\mu_i\,{}^{u}F_{in}\,{}^{u}a_{io} + {}^{u}F_{io}\,{}^{u}\beta_i &= 0\\
+\phantom{}{}^{u}\alpha_i = \mu_i^2\,{}^{u}F_{in}^2 - {}^{u}F_{it}^2 - {}^{u}F_{io}^2 &\ge 0\\
+0 \le {}^{u}\alpha_i &\;\perp\; {}^{u}\beta_i \ge 0
+\end{aligned}
+\qquad\text{(32)}
+$$<p>滚动：关节</p>$$
+\begin{aligned}
+\phantom{}{}^{b}F_{io\max}\,{}^{b}a_{io} + {}^{b}F_{io}\,{}^{b}\beta_i &= 0\\
+\phantom{}{}^{b}\alpha_i = {}^{b}F_{io\max}^2 - {}^{b}F_{io}^2 &\ge 0\\
+0 \le {}^{b}\alpha_i &\;\perp\; {}^{b}\beta_i \ge 0
+\end{aligned}
+\qquad\text{(33)}
+$$<h3 class="relative group">模型的离散化<div id=模型的离散化 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%a8%a1%e5%9e%8b%e7%9a%84%e7%a6%bb%e6%95%a3%e5%8c%96 aria-label=锚点>#</a></span></h3><p>需要离散化动力学模型以方便算法进行求解。</p><p>在离散化时动力学方程之前，我们要明白，由于Painleve悖论，在某些时候模型是无解的，这是无法避免的问题。</p><p>有一部分原因在于模型工作在加速度层，某些时候的力为无穷大。我们可以将模型重新表述成以<strong>冲量</strong>和<strong>速度</strong>为未知量的形式，以<strong>减缓</strong>Painleve悖论中的问题。</p><p>M. Anitescu和F. A. Potra在《Formulating Dynamic Multi-Rigid-Body Contact Problems with Friction as Solvable Linear Complementarity Problems》中小修了一下模型，加入了松弛变量让模型<strong>在任何时候</strong>都可解。但代价是不再精确满足库伦定律：摩擦力可以略微越出摩擦锥，这导致满足静摩擦条件时物体可能还会一点点滑移。但我们这里就不说这个了。</p><hr><p>为了模型能够求解，我们将模型在步长$\Delta t$下离散化。使用后向欧拉离散：</p>$$
+\dot{\pmb{u}}(t_{k+1}) \approx \frac{\pmb{u}^{(k+1)} - \pmb{u}^{(k)}}{\Delta t}， \dot{\pmb{q}}(t_{k+1}) \approx \frac{\pmb{q}^{(k+1)} - \pmb{q}^{(k)}}{\Delta t}
+$$<p>其中变量右上角角标表示当前变量来自第几次迭代。</p><p>首先离散化牛顿-欧拉方程：</p>$$
+\begin{aligned}
+M^{(k+1)}\bigl(\pmb u^{(k+1)}-\pmb u^{(k)}\bigr)
+&= {}^{u}J_n^{(k+1)\mathsf T}\,{}^{u}\pmb p_n^{(k+1)}
++{}^{u}J_f^{(k+1)\mathsf T}\,{}^{u}\pmb p_f^{(k+1)} \\
+& +{}^{b}J_n^{(k+1)\mathsf T}\,{}^{b}\pmb p_n^{(k+1)}
++{}^{b}J_f^{(k+1)\mathsf T}\,{}^{b}\pmb p_f^{(k+1)}
++\pmb p_{ext}^{(k+1)} \\
+\pmb{p}^{(k+1)} &= \Delta t F^{(k+1)} \\
+\pmb{p}_{ext} &= \Delta t \pmb{g}_{ext}
+\end{aligned}
+$$<p>然后离散运动学映射：</p>$$
+\pmb q^{(k+1)}-\pmb q^{(k)}
+=\Delta t\,H^{(k+1)}\,\pmb u^{(k+1)}
+$$<p>这里有两个问题：</p><ol><li>因为$\pmb{q}$内包含单位四元数，而将$\Delta t\,H^{(k+1)}\,\pmb u^{(k+1)}$加到$\pmb{q}^{(k)}$后会增大四元数长度（转的越大增大越大）。解决办法是每次步进后重新单位化$\pmb{q}^{(k+1)}$的四元数部分。但在转动较大时依旧有问题。</li><li>$H^{(k+1)}$是$\pmb{q}^{k+1}$的函数，这导致这方程是隐式的。这很难解。所以对$H^{(k+1)}$做一次泰勒展开，取其线性部分$H^{k}$将其变为显式的</li></ol><p>这样最后离散化结果就是：</p><h2 class="relative group">$$
+\pmb q^{(k+1)}-\pmb q^{(k)}
+=\Delta t\,H^{(k)}\,\pmb u^{(k+1)}
+$$<div class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=# aria-label=锚点>#</a></span></h2><p>对于四元数膨胀的问题，JoltPhysics的做法是位置和旋转分开算，使用真正的四元数步进：</p>$$
+\pmb{q}^{(k+1)} = e^{\frac{1}{2}\omega \Delta t} \otimes \pmb{q}^{(k)}
+$$<p>在代码上就是（注意欧拉公式$e^{i\theta} = \cos \theta + i \cdot \sin \theta$，所以上面的其实是四元数公式）：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>float</span>  <span class=n>len</span>  <span class=o>=</span> <span class=err>ω</span><span class=o>*</span><span class=n>dt</span> <span class=err>的长度</span><span class=p>;</span>          <span class=c1>// θ = ‖ω‖Δt
+</span></span></span><span class=line><span class=cl><span class=n>Vec3</span>   <span class=n>axis</span> <span class=o>=</span> <span class=err>ω</span><span class=o>*</span><span class=n>dt</span> <span class=o>/</span> <span class=n>len</span><span class=p>;</span>           <span class=c1>// 单位轴
+</span></span></span><span class=line><span class=cl><span class=n>Quat</span>   <span class=n>dq</span>   <span class=o>=</span> <span class=n>Quat</span><span class=o>::</span><span class=n>sRotation</span><span class=p>(</span><span class=n>axis</span><span class=p>,</span> <span class=n>len</span><span class=p>);</span>   <span class=c1>// (cos(θ/2), sin(θ/2)·axis)
+</span></span></span><span class=line><span class=cl><span class=n>mRotation</span> <span class=o>=</span> <span class=p>(</span><span class=n>dq</span> <span class=o>*</span> <span class=n>mRotation</span><span class=p>).</span><span class=n>Normalized</span><span class=p>();</span></span></span></code></pre></div></div><hr><p>然后离散化双边约束，只需将约束进行泰勒展开然后丢掉高阶项：</p>$$
+\phantom{}{}^{b}C_n^{(k)}
++\bigl({}^{b}J_n\bigr)^{(k)}\,\pmb u^{(k+1)}\,\Delta t
++\frac{\partial\,{}^{b}C_n^{(k)}}{\partial t}\,\Delta t = 0
+$$<p>然后离散化单边约束的互补条件，同样也是将约束进行泰勒展开：</p>$$
+\pmb 0 \;\le\; {}^{u}\pmb p_n^{(k+1)}
+\;\perp\;
+\phantom{}{}^{u}C_n^{(k)}
++\bigl({}^{u}J_n\bigr)^{(k)}\,\pmb u^{(k+1)}\,\Delta t
++\frac{\partial\,{}^{u}C_n^{(k)}}{\partial t}\,\Delta t
+\;\ge\; \pmb 0
+$$<p>现在摩擦还是在摩擦锥中，原问题无法表示成LCP。通过多面体近似摩擦锥：</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=摩擦锥近似 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%91%a9%e6%93%a6%e9%94%a5%e8%bf%91%e4%bc%bc.png></figure><p>这里锥体的边数由你决定。越多算法越慢，但结果越精确。摩擦如果在边界上，则一定指向边界上的某个顶点（如图b）。如果不指向边界则LCP有无穷多解。</p><p>这里用重心坐标去表示摩擦：</p><p>多边形的顶点（图b）记为$\vec{d}$，然后用这些顶点构的重心坐标$\alpha_i$去表示摩擦冲量：</p>$$
+\begin{rcases}
+& {}^u\pmb{p}_{if}^{(k+1)} = {}^uD_i {}^u\alpha_i \\
+& {}^u\pmb{D}_i =
+\begin{bmatrix}
+\vec{d_{i1}} & \vec{d_{i2}} & \cdots & \vec{d_{in}} \\
+\end{bmatrix} \\
+& \sum_{j=1}^n{}^u \alpha_{ij} \le \mu_i\ {}^u\pmb{p}_{in}^{(k+1)} \\
+\end{rcases}
+\forall i \in \mathcal{U}
+$$<p>其中$\alpha_i = (\alpha_{i1}, \alpha_{i2}, \cdots, \alpha_{in})$是<strong>乘了半径</strong>的重心坐标构成的向量。所以第三个式子里他是小于等于半径的。</p><p>现在增加松弛变量$\beta_i \ge 0$，当$\beta_i = 0$时为滚动，此时摩擦冲量可以位于多边形内部的任意位置。而$\beta_i > 0$时为滑动，此时摩擦冲量必须位于边界上（满足最大耗散），而此时 $\sum_j^n {}^u\alpha_i^j = \mu_i {}^u\pmb{p}_{in}^{(k+1)}$。</p><p>这样我们就有互补条件：</p>$$
+\begin{aligned}
+& 0 \le (\mu_i\ {}^u\pmb{p}_{in}^{(k+1)} - \pmb{e}_i^T\ {}^u\pmb{\alpha}_i)
+\perp
+\phantom{}{}^u\beta_i \ge 0 & \forall i \in \mathcal{U}
+\end{aligned}
+$$<p>其中$\pmb{e}_i^T$是分量个数为多边形顶点个数（排除锥顶），所有元素都为1的向量。只是为了将求和符号变成点乘而做的。</p><p>但这个条件只约束了摩擦在摩擦锥内，并未约束最大耗散原理。要使摩擦冲量在摩擦锥边界上，可以将摩擦子空间的相对速度$\pmb{v}_{if}^{(k+f)}$映射到$\pmb{d_{ij}}$上来产生新的互补条件：</p>$$
+\begin{aligned}
+& 0 \le ({}^u\pmb{D}_i^T\ {}^u\pmb{J}_{if}\ \pmb{u}^{(k+1)} + \pmb{e}_i\ {}^u\beta_i)
+\perp
+\phantom{}{}^u\pmb{\alpha}_i \ge 0 & \forall i \in \mathcal{U}
+\end{aligned}
+$$<p>这里${}^u\pmb{D}_i^T {}^u\pmb{J}_{if}\pmb{u}^{(k+1)}$展开就是${}^u\pmb{D}_i^T \frac{\partial C}{\partial \pmb{q}}H\pmb{u}^{(k+1)} ={}^u\pmb{D}_i^T \frac{\partial C}{\partial \pmb{q}}\dot{\pmb{q}} = {}^u\pmb{D}_i^T C_{\pmb{q}} = {}^u\pmb{D}_i^T \nu$为$D^T$乘上$C$对时间的全导数。这里是将速度强制投影到摩擦锥的边界上。</p><p>注意：这里假设约束不是时变的，即$\nu = \frac{\partial C}{\partial \pmb{q}}\dot{\pmb{q}}$。</p><p>这样我们可以将所有的单边接触的互补条件堆叠在一起构成一个式子：</p>$$
+\begin{aligned}
+& 0 \le ({}^u\pmb{D}^T\ {}^u\pmb{J}_f \pmb{u}^{(k+1)} + {}^u \pmb{E}\ {}^u\pmb{\beta}) \perp {}^u \pmb{\alpha} \ge 0 \\
+& 0 \le ({}^u\pmb{U}^T\ {}^u\pmb{p}^{(k+1)} - {}^u \pmb{E}^T\ {}^u\pmb{\alpha}) \perp {}^u \pmb{\beta} \ge 0 \\
+\end{aligned}
+$$<p>其中$\pmb{E}$是以${}^u\pmb{e}_i$为非零块的分块对角矩阵，他是用来对所有向量进行广播求和的，比如：</p>$$
+\begin{aligned}
+E &=
+\begin{bmatrix}
+1 & 0 \\
+1 & 0 \\
+1 & 0 \\
+1 & 0 \\
+0 & 1 \\
+0 & 1 \\
+0 & 1 \\
+0 & 1 \\
+\end{bmatrix} \\
+\pmb{\beta} &=
+\begin{bmatrix}
+\beta_{11} & \beta_{12} & \cdots & \beta_{1n} \\
+\beta_{21} & \beta_{22} & \cdots & \beta_{2n} \\
+\end{bmatrix} \\
+E\pmb{\beta} &=
+\begin{bmatrix}
+\sum_i \beta_{1i} \\
+\sum_i \beta_{2i} \\
+\end{bmatrix}
+\end{aligned}
+$$<p>对于关节约束，则有：</p>$$
+\begin{aligned}
+& 0 \le ({}^b\pmb{D}^T\ {}^b\pmb{J}_f\ \pmb{u}^{(k+1)} + {}^b \pmb{E}\ {}^b\pmb{\beta}) \perp {}^b \pmb{\alpha} \ge 0 \\
+& 0 \le ({}^b\pmb{p}_{f\ max} - {}^b \pmb{E}^T\ {}^b\pmb{\alpha}) \perp {}^b \pmb{\beta} \ge 0 \\
+\end{aligned}
+$$<p>其中${}^b\pmb{p}_{f\ max} = \Delta t\ {}^b \pmb{F}_{f max}$。</p><h3 class="relative group">离散化模型总结<div id=离散化模型总结 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%a6%bb%e6%95%a3%e5%8c%96%e6%a8%a1%e5%9e%8b%e6%80%bb%e7%bb%93 aria-label=锚点>#</a></span></h3><p>综合上述离散化结果，可以得到离散化模型：</p><p>线性化牛顿–欧拉</p>$$
+\begin{aligned}
+& M^{(k)}\bigl(\pmb u^{(k+1)}-\pmb u^{(k)}\bigr)
+={}^{u}J_n^{\mathsf T}{}^{u}\pmb p_n^{(k+1)}
++{}^{u}J_f^{\mathsf T}{}^{u}D\,{}^{u}\pmb\alpha
++{}^{b}J_n^{\mathsf T}{}^{b}\pmb p_n^{(k+1)}
++{}^{b}J_f^{\mathsf T}{}^{b}D\,{}^{b}\pmb\alpha
++\pmb p_{ext}^{(k)} & (41)
+\end{aligned}
+$$<p>线性化运动学映射</p>$$
+\begin{aligned}
+& \pmb q^{(k+1)}-\pmb q^{(k)}=\Delta t\,H^{(k)}\pmb u^{(k+1)} & (42)
+\end{aligned}
+$$<p>线性化关节约束</p>$$
+\begin{aligned}
+& {}^{b}J_n^{(k)}\pmb u^{(k+1)}
++\frac{{}^{b}C_n^{(k)}}{\Delta t}
++\frac{\partial{}^{b}C_n^{(k)}}{\partial t}
+=\pmb 0
+& (43)
+\end{aligned}
+$$<p>线性化法向互补</p>$$
+\begin{aligned}
+&\pmb 0\le{}^{u}\pmb p_n^{(k+1)}
+\;\perp\;
+\phantom{}{}^{u}J_n^{(k)}\pmb u^{(k+1)}
++\frac{{}^{u}C_n^{(k)}}{\Delta t}
++\frac{\partial{}^{u}C_n^{(k)}}{\partial t}
+\;\ge\pmb 0
+& (44)
+\end{aligned}
+$$<p>单边摩擦</p>$$
+\begin{aligned}
+&\begin{aligned}
+\pmb 0&\le\Bigl({}^{u}D^{\mathsf T}{}^{u}J_f\pmb u^{(k+1)}+{}^{u}E\,{}^{u}\pmb\beta\Bigr)\perp{}^{u}\pmb\alpha\ge\pmb 0\\
+\pmb 0&\le\Bigl({}^{u}U\,{}^{u}\pmb p_n^{(k+1)}-{}^{u}E^{\mathsf T}{}^{u}\pmb\alpha\Bigr)\perp{}^{u}\pmb\beta\ge\pmb 0
+\end{aligned}
+& (48)
+\end{aligned}
+$$<p>关节摩擦</p>$$
+\begin{aligned}
+&\begin{aligned}
+\pmb 0&\le\Bigl({}^{b}D^{\mathsf T}{}^{b}J_f\pmb u^{(k+1)}+{}^{b}E\,{}^{b}\pmb\beta\Bigr)\perp{}^{b}\pmb\alpha\ge\pmb 0\\
+\pmb 0&\le\Bigl({}^{b}\pmb p_{f\max}-{}^{b}E^{\mathsf T}{}^{b}\pmb\alpha\Bigr)\perp{}^{b}\pmb\beta\ge\pmb 0
+\end{aligned}
+& (49)
+\end{aligned}
+$$<p>其中 ${}^b\pmb{p}_{f\ max} = \Delta t\ {}^b \pmb{F}_{f max}$</p><p>此时的模型是一个MLCP（混合线性互补问题），因为里面除了LCP条件之外还有额外的等式。</p><h1 class="relative group">解瞬时动力学<div id=解瞬时动力学 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e8%a7%a3%e7%9e%ac%e6%97%b6%e5%8a%a8%e5%8a%9b%e5%ad%a6 aria-label=锚点>#</a></span></h1><p>虽然模型是一个MLCP，但发现未知广义位置$\pmb{q}^{(k+1)}$只出现在运动学映射方程中。所以，此MLCP可以解耦成：</p><ol><li>以未知广义速度和冲量为未知量的LCP</li><li>以未知广义位置为未知量的运动学映射方程</li></ol><p>这样我们可以先求LCP，然后将LCP的解带入运动学映射以更新广义位置。</p><h2 class="relative group">可能存在的无解<div id=可能存在的无解 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8f%af%e8%83%bd%e5%ad%98%e5%9c%a8%e7%9a%84%e6%97%a0%e8%a7%a3 aria-label=锚点>#</a></span></h2><p>在求解前需要知道，在数学上，如果去掉（43），（44）两式中的${}^uC_n^{(k)}, \frac{\partial {}^u C_n^{(k)}}{\partial t}\Delta t, \frac{\partial {}^b C_n^{(k)}}{\partial t}\Delta t$这三项的话，那么LCP就<strong>总是有解的</strong>。但在游戏物理中我们不能去掉这些（详见接下来的例子）。</p><p>从物理上理解：这三个量（其实两个量）分别表示：</p><ul><li>${}^uC_n^{(k)}$物体间的距离（$> 0$相离，$= 0$相贴，$<0$相交）</li><li>$\frac{\partial {}^b C_n^{(k)}}{\partial t}$为间隙函数的改变量。一般来说此函数都是非时变的。但当存在其他改变物体广义坐标$\pmb{q}$的因素时（即无法完全由$C$表示约束），此函数会被动变成时变的，在游戏开发中主要是：<ul><li>动画驱动的刚体：由动画直接改变物体位置</li></ul></li></ul><p>而LCP不可解的情况只有在“物体被逼到重叠无法避免”的时候才不行。简单来说就是有外力导致物体不得不脱离关节约束。</p><p>比如一个Box被关节钉在地面上，此时有一个Kinematic类型（质量无限大）的物体往下移动压在Box上。这在游戏物理中是很可能发生的。</p><p>此时有两个方面会导致无解：</p><ul><li>不可行的初始条件：这对应于${}^uC_n^{(k)} < 0$。假设$\frac{\partial {}^b C_n^{(k)}}{\partial t}\Delta t = 0$ ，那么${}^uC_n^{(k)} \lt 0$表示物体互相穿透了，那么${}^u\pmb{J}_n \pmb{u} \ge -\frac{{}^uC_n}{\Delta t} \gt 0$需要求一个正的分离速度。如果此时只有接触那完全是可行的。但关键是问题中包含了限制自由度的关节，导致根本不可能存在此分离速度，导致问题可能无解。
+这对于于Kinematic将Box压入地面时，由于约束的存在无法计算分离速度。</li><li>物体或关节的轨迹指定为时间给定的函数：这对应于$\frac{\partial {}^b C_n^{(k)}}{\partial t} \ne 0$。此时方程变成${}^u\pmb{J}_n \pmb{u} \ge - (\frac{{}^uC_n}{\Delta t} + \frac{\partial {}^uC_n}{\partial t})$。而左端是盒子的速度为0，右端的$\frac{\partial {}^b C_n^{(k)}}{\partial t} \lt 0$，方程矛盾，所以无解。</li></ul><p>这也很符合物理常识，正常的物体这样被挤压肯定就碎了，但是因为我们是刚体物理所以无法处理这件事。</p><h2 class="relative group">时间步进LCP<div id=时间步进lcp class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%97%b6%e9%97%b4%e6%ad%a5%e8%bf%9blcp aria-label=锚点>#</a></span></h2><p>将离散模型转换成矩阵形式：</p><p>所有的互补条件构成：</p>$$
+\pmb 0 \;\le\;
+\begin{bmatrix}
+\phantom{}{}^{u}J_n^{(k)}\,\pmb u^{(k+1)}
++\dfrac{{}^{u}C_n^{(k)}}{\Delta t}
++\dfrac{\partial\,{}^{u}C_n^{(k)}}{\partial t}
+\\[12pt]
+\phantom{}{}^{u}D^{\mathsf T}\,{}^{u}J_f\,\pmb u^{(k+1)}
++{}^{u}E\,{}^{u}\pmb\beta
+\\[12pt]
+\phantom{}{}^{b}D^{\mathsf T}\,{}^{b}J_f\,\pmb u^{(k+1)}
++{}^{b}E\,{}^{b}\pmb\beta
+\\[12pt]
+\phantom{}{}^{u}U\,{}^{u}\pmb p_n^{(k+1)}
+-{}^{u}E^{\mathsf T}\,{}^{u}\pmb\alpha
+\\[12pt]
+\phantom{}{}^{b}\pmb p_{f\max}
+-{}^{b}E^{\mathsf T}\,{}^{b}\pmb\alpha
+\end{bmatrix}
+\;\perp\;
+\begin{bmatrix}
+\phantom{}{}^{u}\pmb p_n^{(k+1)}\\[8pt]
+\phantom{}{}^{u}\pmb\alpha\\[8pt]
+\phantom{}{}^{b}\pmb\alpha\\[8pt]
+\phantom{}{}^{u}\pmb\beta\\[8pt]
+\phantom{}{}^{b}\pmb\beta
+\end{bmatrix}
+\;\ge\;\pmb 0
+\qquad (50)
+$$<p>而所有的等式条件构成：</p>$$
+\begin{bmatrix}
+M & -{}^{b}J_n^{\mathsf T}\\[4pt]
+-{}^{b}J_n & 0
+\end{bmatrix}
+\begin{bmatrix}
+\pmb u^{(k+1)}\\[4pt]
+\phantom{}{}^{b}\pmb p_n^{(k+1)}
+\end{bmatrix} =
+\begin{bmatrix}
+\pmb x_1\\[4pt]
+\pmb x_2
+\end{bmatrix}
+\qquad (51)
+$$<p>其中</p>$$
+\begin{aligned}
+\pmb x_1
+&={}^{u}J_n^{\mathsf T}\,{}^{u}\pmb p_n^{(k+1)}
++{}^{b}J_f^{\mathsf T}\,{}^{b}D\,{}^{b}\pmb\alpha
++{}^{u}J_f^{\mathsf T}\,{}^{u}D\,{}^{u}\pmb\alpha
++M\,\pmb u^{(k)}
++\pmb p_{ext}\\[6pt]
+\pmb x_2
+&=\frac{{}^{b}C_n^{(k)}}{\Delta t}
++\frac{\partial\,{}^{b}C_n^{(k)}}{\partial t}
+\end{aligned}
+$$<p>为了解出$\pmb{u}, \pmb{p}_n$，给左端矩阵求逆：</p>$$
+\begin{bmatrix}
+\pmb u^{(k+1)}\\[4pt]
+\phantom{}{}^{b}\pmb p_n^{(k+1)}
+\end{bmatrix} =
+\begin{bmatrix}S_{11} & S_{12}\\ S_{12}^{\mathsf T} & S_{22}\end{bmatrix}
+\begin{bmatrix}
+\pmb x_1\\[4pt]
+\pmb x_2
+\end{bmatrix}
+\qquad (52)
+$$<p>这里：</p>$$
+\begin{aligned}
+S_{11} &= M^{-1} +
+M^{-1}{}^{b}J_n^{\mathsf T}\,B^{-1}\,{}^{b}J_n\,M^{-1}
+&& (53a)\\[6pt]
+S_{12} &=\; M^{-1}\,{}^{b}J_n^{\mathsf T}\,B^{-1}
+&& (53b)\\[6pt]
+S_{22} &= B^{-1}
+&& (53c)
+\end{aligned}
+$$<p>其中</p>$$
+B \;=\; -{}^{b}J_n\,M^{-1}\,{}^{b}J_n^{\mathsf T}
+$$<p>把解出来的广义速度代回（50）式就有最后标准的LCP：</p>$$
+\begin{aligned}
+A &=
+\begin{bmatrix}
+\phantom{}{}^{u}J_n S_{11}{}^{u}J_n^{\mathsf T}
+& {}^{u}J_n S_{11}{}^{u}J_D^{\mathsf T}
+& {}^{u}J_n S_{11}{}^{b}J_D^{\mathsf T}
+& 0
+& 0
+\\
+\phantom{}{}^{u}J_D S_{11}{}^{u}J_n^{\mathsf T}
+& {}^{u}J_D S_{11}{}^{u}J_D^{\mathsf T}
+& {}^{u}J_D S_{11}{}^{b}J_D^{\mathsf T}
+& {}^{u}E
+& 0
+\\
+\phantom{}{}^{b}J_D S_{11}{}^{u}J_n^{\mathsf T}
+& {}^{b}J_D S_{11}{}^{u}J_D^{\mathsf T}
+& {}^{b}J_D S_{11}{}^{b}J_D^{\mathsf T}
+& 0
+& {}^{b}E
+\\
+\phantom{}{}^{u}U
+& -{}^{u}E^{\mathsf T}
+& 0
+& 0
+& 0
+\\
+0
+& 0
+& -{}^{b}E^{\mathsf T}
+& 0
+& 0
+\end{bmatrix} \\
+\pmb b &=
+\begin{bmatrix}
+\phantom{}{}^{u}J_n\,\pmb r
++\dfrac{{}^{u}C_n^{(k)}}{\Delta t}
++\dfrac{\partial\,{}^{u}C_n^{(k)}}{\partial t}
+\\[14pt]
+\phantom{}{}^{u}J_D\,\pmb r
+\\[8pt]
+\phantom{}{}^{b}J_D\,\pmb r
+\\[8pt]
+\pmb 0
+\\[8pt]
+\phantom{}{}^{b}\pmb p_{f\max}
+\end{bmatrix} \\
+\pmb x &=
+\begin{bmatrix}
+\phantom{}{}^{u}\pmb p_n\\[4pt]
+\phantom{}{}^{u}\pmb\alpha\\[4pt]
+\phantom{}{}^{b}\pmb\alpha\\[4pt]
+\phantom{}{}^{u}\pmb\beta\\[4pt]
+\phantom{}{}^{b}\pmb\beta
+\end{bmatrix} \\
+& \pmb 0 \;\le\; \pmb x \;\perp\; A\,\pmb x + \pmb b \;\ge\; \pmb 0
+\end{aligned}
+$$<p>其中：</p>$$
+\begin{aligned}
+\pmb r
+&= S_{11}\bigl(M\pmb u^{(k)}+\pmb p_{ext}\bigr) +
+S_{12}\left(\dfrac{{}^{b}C_n^{(k)}}{\Delta t} +
+\dfrac{\partial\,{}^{b}C_n^{(k)}}{\partial t}\right) \\
+\phantom{}{}^uJ_D &= {}^uD^T\ {}^uJ_f
+\end{aligned}
+$$<p>如果系统中不存在关节，可以将$A, b, x$中删掉第三，五行。并从$A$中删除第三，五列。</p><p>并且，如果 $\frac{{}^u C_n}{\Delta t} + \frac{\partial {}^uC_n}{\partial t} \ge 0$。那么解总是存在。</p><h2 class="relative group">带有铰链和关节的约束<div id=带有铰链和关节的约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b8%a6%e6%9c%89%e9%93%b0%e9%93%be%e5%92%8c%e5%85%b3%e8%8a%82%e7%9a%84%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h2><p>TODO：</p><h2 class="relative group">数值解法<div id=数值解法 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%95%b0%e5%80%bc%e8%a7%a3%e6%b3%95 aria-label=锚点>#</a></span></h2><p>TODO：</p><h1 class="relative group">参考<div id=参考 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%8f%82%e8%80%83 aria-label=锚点>#</a></span></h1><ul><li>David Baraff. SIGGRAPH 94《Fast Contact Force Computation for Nopenetration Rigid Bodies》</li><li>David E.Stewart 2000 《Rigid-Body Dynamics with Friction and Impact》</li><li>Kenny Erleben 2012 《Interactive Simulation of Rigid Body Dynamics in Computer Graphics》</li></ul><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p>David E.Stewart 2000 《Rigid-Body Dynamics with Friction and Impact》&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div><details class="mt-2 mb-5 overflow-hidden rounded-lg ms-0 ps-5"><summary class="py-1 text-lg font-semibold cursor-pointer bg-primary-200 text-neutral-800 -ms-5 ps-5 dark:bg-primary-800 dark:text-neutral-100">从0开始制作游戏物理引擎 -
+这篇文章属于一个选集。</summary><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%80/>§ 1:
+从0开始制作游戏物理引擎（一）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/>§ 2:
+从0开始制作游戏物理引擎（二）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/>§ 3:
+从0开始制作游戏物理引擎（三）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/>§ 4:
+从0开始制作游戏物理引擎（四）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/>§ 5:
+从0开始制作游戏物理引擎（五）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/>§ 6:
+从0开始制作游戏物理引擎（六）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/>§ 7:
+从0开始制作游戏物理引擎（七）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/>§ 8:
+从0开始制作游戏物理引擎（八）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/>§ 9:
+分析力学小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/>§ 10:
+几何数值积分小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/>§ 11:
+最优化理论小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/lcp%E5%B0%8F%E8%AE%B0/>§ 12:
+LCP小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600">§ 13:
+本文</div></details></div></section><footer class="pt-8 max-w-prose print:hidden"><div class=pt-8><hr class="border-dotted border-neutral-300 dark:border-neutral-600"><div class="flex justify-between pt-3"><span class="flex flex-col"><a class="flex text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/><span class=leading-6><span class="inline-block rtl:rotate-180">&larr;</span>&ensp;分析力学小记
+</span></a><span class="ms-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2026-10-01T00:45:27+08:00>1 October 2026</time>
+</span></span><span class="flex flex-col items-end"><a class="flex text-right text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/><span class=leading-6>几何数值积分小记&ensp;<span class="inline-block rtl:rotate-180">&rarr;</span>
+</span></a><span class="me-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2026-10-29T20:27:43+08:00>29 October 2026</time></span></span></div></div></footer></article><div id=scroll-to-top class="fixed bottom-6 end-6 z-50 transform translate-y-4 opacity-0 duration-200"><a href=#the-top class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400" aria-label=返回顶部 title=返回顶部>&uarr;</a></div></main><footer id=site-footer class="py-10 print:hidden"><nav aria-label class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400"><ul class="flex list-none flex-col sm:flex-row"><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/tags/ title=Tags>标签</a></li><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/categories/ title=Categories>分类</a></li></ul></nav><div class="flex items-center justify-between"><p class="text-sm text-neutral-500 dark:text-neutral-400">&copy;
+2026
+VisualGMQ</p><p class="text-xs text-neutral-500 dark:text-neutral-400">由 <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://gohugo.io/ target=_blank rel="noopener noreferrer">Hugo</a> & <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://blowfish.page/ target=_blank rel="noopener noreferrer">Blowfish</a> 强力驱动</p></div></footer><div id=search-wrapper role=dialog aria-modal=true aria-label=搜索 class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-500" data-url=/><div id=search-modal class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"><header class="relative z-10 flex items-center justify-between flex-none px-2"><form class="flex items-center flex-auto min-w-0"><div class="flex items-center justify-center w-8 h-8 text-neutral-400"><span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></span></div><input type=search id=search-query aria-label=搜索 class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent" placeholder=搜索 tabindex=0></form><button id=close-search-button class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" title="关闭 (Esc)">
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></button></header><section class="flex-auto px-2 overflow-auto"><ul id=search-results></ul></section></div></div></div></body></html>
