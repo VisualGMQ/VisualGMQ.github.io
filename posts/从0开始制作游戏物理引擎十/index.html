@@ -1,0 +1,790 @@
+<!doctype html><html lang=zh-cn dir=ltr class=scroll-smooth data-default-appearance=dark data-auto-appearance=true><head><meta charset=utf-8><meta http-equiv=content-language content="zh-cn"><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=theme-color><title>从0开始制作游戏物理引擎（十） &#183; VisualGMQ的博客</title><meta name=title content="从0开始制作游戏物理引擎（十） &#183; VisualGMQ的博客"><meta name=description content="VisualGMQ的博客"><meta name=keywords content="游戏开发,物理引擎,"><link rel=canonical href=https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%8D%81/><meta name=author content="VisualGMQ"><link href=https://github.com/VisualGMQ rel=me><link href=https://space.bilibili.com/256768793 rel=me><meta property="og:url" content="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%8D%81/"><meta property="og:site_name" content="VisualGMQ的博客"><meta property="og:title" content="从0开始制作游戏物理引擎（十）"><meta property="og:description" content="现在，我们终于可以开始写码来实现物理模拟。
+在实现的过程中，我们会发现纯理论模型带来的工程上的问题。这些问题等到之后的文章中再解决。
+本文先实现只有碰撞分离约束的模拟代码，带有关节的等之后文章实现。"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-11-18T22:45:27+08:00"><meta property="article:modified_time" content="2026-11-18T22:45:27+08:00"><meta property="article:tag" content="游戏开发"><meta property="article:tag" content="物理引擎"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B9%9D/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/lcp%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/"><meta property="og:see_also" content="https://visualgmq.github.io/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/"><meta name=twitter:card content="summary"><meta name=twitter:title content="从0开始制作游戏物理引擎（十）"><meta name=twitter:description content="现在，我们终于可以开始写码来实现物理模拟。
+在实现的过程中，我们会发现纯理论模型带来的工程上的问题。这些问题等到之后的文章中再解决。
+本文先实现只有碰撞分离约束的模拟代码，带有关节的等之后文章实现。"><link type=text/css rel=stylesheet href=/css/main.bundle.min.3ea5e9ae4f69e8960432a2dc45e8304f9c268908ca0c20747f7d863eba62703a2b12b572a03107e931b38752098408ee8864f4d682d1bdb86f60537573d70d6b.css integrity="sha512-PqXprk9p6JYEMqLcRegwT5wmiQjKDCB0f32GPrpicDorErVyoDEH6TGzh1IJhAjuiGT01oLRvbhvYFN1c9cNaw=="><script type=text/javascript src=/js/appearance.min.11183536302aa30e374452803c0154673009b5a4995c7f6559d1c935544cc591b599a5f2adfaeda41e1cc865bd62bdace9b0672a75294ce49d185f0f82b98cbe.js integrity="sha512-ERg1NjAqow43RFKAPAFUZzAJtaSZXH9lWdHJNVRMxZG1maXyrfrtpB4cyGW9Yr2s6bBnKnUpTOSdGF8PgrmMvg=="></script><script defer src=/lib/zoom/zoom.min.umd.a527109b68c082a70f3697716dd72a9d5aa8b545cf800cecbbc7399f2ca6f6e0ce3e431f2062b48bbfa47c9ea42822714060bef309be073f49b9c0e30d318d7b.js integrity="sha512-pScQm2jAgqcPNpdxbdcqnVqotUXPgAzsu8c5nyym9uDOPkMfIGK0i7+kfJ6kKCJxQGC+8wm+Bz9JucDjDTGNew=="></script><script defer src=/js/medium-zoom.67b71ecf7eecce38673a92244d1ffd93edb5f1aeedd12e725d0f67fe901828fa3562f6a6d64ad290b36b7d7034b8ea16e63486d75d957bcf6a2732923e5d46e6.js integrity="sha512-Z7cez37szjhnOpIkTR/9k+218a7t0S5yXQ9n/pAYKPo1Yvam1krSkLNrfXA0uOoW5jSG112Ve89qJzKSPl1G5g=="></script><script type=text/javascript src=/js/reading-progress.min.5d84577898a2dc0e1ed36baf2acb508e94e0c0f59a7fdeef67c1aa264029d9a17ccaff47182411b19d9de2eec2d6ac67f610f61bd938aa18af177ed66030cff1.js integrity="sha512-XYRXeJii3A4e02uvKstQjpTgwPWaf97vZ8GqJkAp2aF8yv9HGCQRsZ2d4u7C1qxn9hD2G9k4qhivF37WYDDP8Q=="></script><script defer type=text/javascript id=script-bundle src=/js/main.bundle.min.5b9ed082c219834880b0f2f41c608591e2581b1c718be2934d6e188412f3e9597b08940996c3a6bd5fb20ded8594a05aeb5a0a07370f6026452bd2655b6013bd.js integrity="sha512-W57QgsIZg0iAsPL0HGCFkeJYGxxxi+KTTW4YhBLz6Vl7CJQJlsOmvV+yDe2FlKBa61oKBzcPYCZFK9JlW2ATvQ==" data-copy=复制 data-copied=已复制></script><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><script type=application/ld+json>[{"@context":"https://schema.org","@type":"Article","articleSection":"Posts","name":"从0开始制作游戏物理引擎（十）","headline":"从0开始制作游戏物理引擎（十）","inLanguage":"zh-cn","url":"https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%8D%81/","author":{"@type":"Person","name":"VisualGMQ","image":"https://visualgmq.github.io/icons/logo.png","sameAs":["https://github.com/VisualGMQ","https://space.bilibili.com/256768793"]},"copyrightYear":"2026","dateCreated":"2026-11-18T22:45:27\u002b08:00","datePublished":"2026-11-18T22:45:27\u002b08:00","dateModified":"2026-11-18T22:45:27\u002b08:00","keywords":["游戏开发","物理引擎"],"mainEntityOfPage":"https://visualgmq.github.io/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%8D%81/","wordCount":3022}]</script><script>window.MathJax={loader:{load:["[tex]/mathtools"]},tex:{inlineMath:[["$","$"],["\\(","\\)"]],displayMath:[["$$","$$"],["\\[","\\]"]],processEscapes:!0,processEnvironments:!0,packages:{"[+]":["mathtools"]}},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"],ignoreHtmlClass:"no-mathjax"},chtml:{scale:1}}</script><script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.js></script></head><body class="flex flex-col h-screen m-auto leading-7 max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32 text-lg bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral bf-scrollbar"><div id=the-top class="absolute flex self-center"><a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600" href=#main-content><span class="font-bold text-primary-600 pe-2 dark:text-primary-400">&darr;</span>
+跳过正文</a></div><header><div class="main-menu flex items-center w-full gap-2 p-1 pl-0"><div><a href=/ class=flex><span class=sr-only>VisualGMQ的博客</span>
+<img src=/icons/logo.png width=320 height=320 class="logo max-h-20 max-w-20 object-scale-down object-left nozoom" alt></a></div><a href=/ class="text-base font-medium truncate min-w-0 shrink">VisualGMQ的博客</a><div class="flex items-center ms-auto"><div class="hidden md:flex"><nav aria-label class="flex items-center gap-x-5 h-12"><a href=/posts/ class="flex items-center bf-icon-color-hover" aria-label=文章 title=Posts><span class="text-sm font-medium break-normal">文章
+</span></a><a href=/categories/ class="flex items-center bf-icon-color-hover" aria-label=分类 title=Categories><span class="text-sm font-medium break-normal">分类
+</span></a><a href=/tags/ class="flex items-center bf-icon-color-hover" aria-label=标签 title=Tags><span class="text-sm font-medium break-normal">标签
+</span></a><a href=/about/ class="flex items-center bf-icon-color-hover" aria-label=关于我 title=关于我><span class="text-sm font-medium break-normal">关于我
+</span></a><a href=/videos/ class="flex items-center bf-icon-color-hover" aria-label=视频集 title><span class="text-sm font-medium break-normal">视频集</span></a><div class="flex items-center"><button id=appearance-switcher aria-label=切换为深色模式 type=button class="text-sm bf-icon-color-hover" title=切换为深色模式><div class="flex items-center justify-center dark:hidden"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="items-center justify-center hidden dark:flex"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button></div><button id=search-button aria-label="搜索 (/)" class="flex items-center gap-2 rounded-lg border bf-border-color bf-border-color-hover bg-neutral-100/50 px-2 py-1 text-sm text-neutral-500 transition-colors hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:text-primary-400" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span><kbd id=search-shortcut-hint class="pointer-events-none font-sans text-xs text-neutral-500 dark:text-neutral-400" aria-hidden=true>⌘K</kbd></button></nav></div><div class="flex md:hidden"><div class="mobile-header-row relative flex items-center h-14 gap-4"><button id=appearance-switcher-mobile type=button aria-label=切换为深色模式 title=切换为深色模式 class="flex items-center justify-center text-neutral-900 hover:text-primary-600 dark:text-neutral-200 dark:hover:text-primary-400"><div class=dark:hidden><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="hidden dark:block"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button>
+<button id=search-button-mobile aria-label="搜索 (/)" class="flex items-center justify-center bf-icon-color-hover" title="搜索 (/)">
+<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span></button>
+<input type=checkbox id=mobile-menu-toggle autocomplete=off class="hidden peer">
+<label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog aria-label class="flex items-center justify-center cursor-pointer bf-icon-color-hover"><span class="relative block icon"><svg viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416c17.7.0 32 14.33 32 32 0 17.7-14.3 32-32 32H32C14.33 128 0 113.7.0 96zM0 256c0-17.7 14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32H32c-17.67.0-32-14.3-32-32zM416 448H32c-17.67.0-32-14.3-32-32s14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32z"/></svg></span></label><div id=mobile-menu-dialog role=dialog aria-modal=true aria-label style=scrollbar-gutter:stable class="z-50 invisible overflow-y-auto opacity-0 transition-[opacity,visibility] duration-300 peer-checked:visible peer-checked:opacity-100
+fixed inset-0 px-6 py-20 bg-neutral-50/97 dark:bg-neutral-900/99
+bf-scrollbar"><label for=mobile-menu-toggle tabindex=0 role=button aria-expanded=false aria-controls=mobile-menu-dialog class="fixed end-8 top-5 z-50 h-12 w-12 rounded-full flex items-center justify-center cursor-pointer select-none bf-icon-color-hover border bf-border-color bf-border-color-hover bg-neutral-50 dark:bg-neutral-900"><span class=sr-only></span>
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></label><nav aria-label class="mx-auto max-w-md space-y-6"><div class=px-2><div class="flex items-center gap-4"><a href=/posts/ aria-label=文章 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Posts class="text-2xl font-bold tracking-tight">文章</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/categories/ aria-label=分类 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Categories class="text-2xl font-bold tracking-tight">分类</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/tags/ aria-label=标签 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=Tags class="text-2xl font-bold tracking-tight">标签</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/about/ aria-label=关于我 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title=关于我 class="text-2xl font-bold tracking-tight">关于我</span></a></div></div><div class=px-2><div class="flex items-center gap-4"><a href=/videos/ aria-label=视频集 class="flex grow items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title class="text-2xl font-bold tracking-tight">视频集</span></a></div></div></nav></div></div></div></div></div></header><div class="relative flex flex-col grow"><main id=main-content class=grow><div id=reading-progress class="fixed left-0 top-0 z-100 h-1 w-0 bg-primary-500 dark:bg-primary-400 print:hidden" aria-hidden=true></div><article><header id=single_header class="mt-5 max-w-prose"><h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">从0开始制作游戏物理引擎（十）</h1><div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden"><div class="flex flex-row flex-wrap items-center"><time datetime=2026-11-18T22:45:27+08:00>18 November 2026</time><span class="px-2 text-primary-500">&#183;</span><span>3022 字</span><span class="px-2 text-primary-500">&#183;</span><span title=预计阅读>15 分钟</span></div></div></header><section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row"><div class="order-first lg:ms-auto px-0 lg:order-last lg:ps-8 lg:max-w-2xs"><div class="toc ps-5 print:hidden lg:sticky lg:top-10"><details open id=TOCView class="toc-right mt-0 overflow-y-auto overscroll-contain bf-scrollbar rounded-lg -ms-5 ps-5 pe-2 hidden lg:block"><summary class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="min-w-[220px] py-2 border-dotted border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContents aria-label=目录><ul><li><a href=#geometry-shape和rigidactor>Geometry, Shape和RigidActor</a><ul><li><a href=#geometry>Geometry</a></li><li><a href=#shape>Shape</a></li><li><a href=#rigidactor>RigidActor</a></li></ul></li><li><a href=#刚体的惯性张量计算方案>刚体的惯性张量计算方案</a><ul><li><a href=#主惯性张量计算>主惯性张量计算</a></li></ul></li></ul><ul><li><ul><li><a href=#将质心和主惯性张量移到刚体局部坐标系下>将质心和主惯性张量移到刚体局部坐标系下</a></li><li><a href=#求出刚体质心>求出刚体质心</a></li><li><a href=#将每个shape的惯性张量移到刚体质心并求和>将每个<code>Shape</code>的惯性张量移到刚体质心并求和</a></li><li><a href=#分解刚体的惯性张量>分解刚体的惯性张量</a></li></ul></li><li><a href=#物理模型的实现>物理模型的实现</a><ul><li><a href=#速度积分>速度积分</a></li><li><a href=#碰撞检测和流型生成>碰撞检测和流型生成</a></li><li><a href=#将流型转换成解算器接触>将流型转换成解算器接触</a></li><li><a href=#约束求解>约束求解</a><ul><li><a href=#接触约束>接触约束</a></li><li><a href=#摩擦约束>摩擦约束</a></li></ul></li><li><a href=#位置积分>位置积分</a></li><li><a href=#现有模型存在的问题>现有模型存在的问题</a><ul><li><a href=#baumgarte-stability>Baumgarte Stability</a></li></ul></li></ul></li><li><a href=#演示>演示</a></li></ul></nav></div></details><details class="toc-inside mt-0 overflow-hidden rounded-lg -ms-5 ps-5 lg:hidden"><summary class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">目录</summary><div class="py-2 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><nav id=TableOfContentsMobile aria-label=目录><ul><li><a href=#geometry-shape和rigidactor>Geometry, Shape和RigidActor</a><ul><li><a href=#geometry>Geometry</a></li><li><a href=#shape>Shape</a></li><li><a href=#rigidactor>RigidActor</a></li></ul></li><li><a href=#刚体的惯性张量计算方案>刚体的惯性张量计算方案</a><ul><li><a href=#主惯性张量计算>主惯性张量计算</a></li></ul></li></ul><ul><li><ul><li><a href=#将质心和主惯性张量移到刚体局部坐标系下>将质心和主惯性张量移到刚体局部坐标系下</a></li><li><a href=#求出刚体质心>求出刚体质心</a></li><li><a href=#将每个shape的惯性张量移到刚体质心并求和>将每个<code>Shape</code>的惯性张量移到刚体质心并求和</a></li><li><a href=#分解刚体的惯性张量>分解刚体的惯性张量</a></li></ul></li><li><a href=#物理模型的实现>物理模型的实现</a><ul><li><a href=#速度积分>速度积分</a></li><li><a href=#碰撞检测和流型生成>碰撞检测和流型生成</a></li><li><a href=#将流型转换成解算器接触>将流型转换成解算器接触</a></li><li><a href=#约束求解>约束求解</a><ul><li><a href=#接触约束>接触约束</a></li><li><a href=#摩擦约束>摩擦约束</a></li></ul></li><li><a href=#位置积分>位置积分</a></li><li><a href=#现有模型存在的问题>现有模型存在的问题</a><ul><li><a href=#baumgarte-stability>Baumgarte Stability</a></li></ul></li></ul></li><li><a href=#演示>演示</a></li></ul></nav></div></details></div></div><div class="min-w-0 min-h-0 max-w-fit"><details class="mt-2 mb-5 overflow-hidden rounded-lg ms-0 ps-5"><summary class="py-1 text-lg font-semibold cursor-pointer bg-primary-200 text-neutral-800 -ms-5 ps-5 dark:bg-primary-800 dark:text-neutral-100">从0开始制作游戏物理引擎 -
+这篇文章属于一个选集。</summary><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%80/>§ 1:
+从0开始制作游戏物理引擎（一）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/>§ 2:
+从0开始制作游戏物理引擎（二）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/>§ 3:
+从0开始制作游戏物理引擎（三）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/>§ 4:
+从0开始制作游戏物理引擎（四）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/>§ 5:
+从0开始制作游戏物理引擎（五）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/>§ 6:
+从0开始制作游戏物理引擎（六）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/>§ 7:
+从0开始制作游戏物理引擎（七）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/>§ 8:
+从0开始制作游戏物理引擎（八）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/>§ 9:
+分析力学小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/>§ 10:
+几何数值积分小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/>§ 11:
+最优化理论小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/lcp%E5%B0%8F%E8%AE%B0/>§ 12:
+LCP小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/>§ 13:
+物理模拟中的动力学模型</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B9%9D/>§ 14:
+从0开始制作游戏物理引擎（九）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600">§ 15:
+本文</div></details><div class="article-content max-w-prose mb-20"><p>现在，我们终于可以开始写码来实现物理模拟。</p><p>在实现的过程中，我们会发现纯理论模型带来的工程上的问题。这些问题等到之后的文章中再解决。</p><p>本文先实现只有碰撞分离约束的模拟代码，带有关节的等之后文章实现。</p><h2 class="relative group">Geometry, Shape和RigidActor<div id=geometry-shape和rigidactor class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#geometry-shape%e5%92%8crigidactor aria-label=锚点>#</a></span></h2><p>首先是一些最基本的结构的定义。</p><h3 class="relative group">Geometry<div id=geometry class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#geometry aria-label=锚点>#</a></span></h3><p><code>Geometry</code>是几何体，其派生类是各种各样的具体的几何：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// 为了效率，没有定义虚的析构函数，所以永远不要从Geometry*去释放内存。
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Geometry</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>enum</span> <span class=k>class</span> <span class=nc>Type</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Invalid</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>Box</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>Sphere</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>Capsule</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>Cylinder</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>ConvexHull</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>kCount</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Geometry</span><span class=p>(</span><span class=n>Type</span> <span class=n>type</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Type</span> <span class=n>GetType</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>BoxGeometry</span><span class=o>*</span> <span class=n>AsBox</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>SphereGeometry</span><span class=o>*</span> <span class=n>AsSphere</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>CapsuleGeometry</span><span class=o>*</span> <span class=n>AsCapsule</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>CylinderGeometry</span><span class=o>*</span> <span class=n>AsCylinder</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>ConvexHullGeometry</span><span class=o>*</span> <span class=n>AsConvexHull</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>BoxGeometry</span><span class=o>*</span> <span class=n>AsBox</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>SphereGeometry</span><span class=o>*</span> <span class=n>AsSphere</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>CapsuleGeometry</span><span class=o>*</span> <span class=n>AsCapsule</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>CylinderGeometry</span><span class=o>*</span> <span class=n>AsCylinder</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>ConvexHullGeometry</span><span class=o>*</span> <span class=n>AsConvexHull</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>Type</span> <span class=n>m_type</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 一个traits，用于标识哪些类型的几何体只能是Static的（比如未来可能要加的三角面，高度图）
+</span></span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>Geometry</span><span class=o>::</span><span class=n>Type</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>GeometryTraits</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=k>static</span> <span class=kt>bool</span> <span class=n>MustBeStatic</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><p>然后有一个<code>GeometryUnion</code>用来将所有的几何体存储在一起（抄的PhysX），以避免独立<code>Geometry</code>的内存分配：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>class</span> <span class=nc>GeometryUnion</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>GeometryUnion</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=n>Geometry</span><span class=o>::</span><span class=n>Type</span> <span class=n>type</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=k>const</span> <span class=n>BoxGeometry</span><span class=o>&amp;</span> <span class=n>box</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=k>const</span> <span class=n>SphereGeometry</span><span class=o>&amp;</span> <span class=n>sphere</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=k>const</span> <span class=n>CapsuleGeometry</span><span class=o>&amp;</span> <span class=n>capsule</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=k>const</span> <span class=n>CylinderGeometry</span><span class=o>&amp;</span> <span class=n>cylinder</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>GeometryUnion</span><span class=p>(</span><span class=k>const</span> <span class=n>ConvexHullGeometry</span><span class=o>&amp;</span> <span class=n>convex_hull</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=kt>bool</span> <span class=n>IsValid</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>BoxGeometry</span><span class=o>*</span> <span class=n>AsBox</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>BoxGeometry</span><span class=o>*</span> <span class=n>AsBox</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>SphereGeometry</span><span class=o>*</span> <span class=n>AsSphere</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>SphereGeometry</span><span class=o>*</span> <span class=n>AsSphere</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>CapsuleGeometry</span><span class=o>*</span> <span class=n>AsCapsule</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>CapsuleGeometry</span><span class=o>*</span> <span class=n>AsCapsule</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>CylinderGeometry</span><span class=o>*</span> <span class=n>AsCylinder</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>CylinderGeometry</span><span class=o>*</span> <span class=n>AsCylinder</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>ConvexHullGeometry</span><span class=o>*</span> <span class=n>AsConvexHull</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>ConvexHullGeometry</span><span class=o>*</span> <span class=n>AsConvexHull</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>Geometry</span><span class=o>*</span> <span class=n>GetGeometry</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Geometry</span><span class=o>*</span> <span class=n>GetGeometry</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=k>constexpr</span> <span class=kt>bool</span> <span class=n>IsGeomSatisfied</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>is_trivially_destructible_v</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>InvalidGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>BoxGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>SphereGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>CapsuleGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>CylinderGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>IsGeomSatisfied</span><span class=o>&lt;</span><span class=n>ConvexHullGeometry</span><span class=o>&gt;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 将他们都变成Union，这样一个GeometryUnion就可以存储任意几何体，而不需要从内存中分分配
+</span></span></span><span class=line><span class=cl>    <span class=k>union</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>InvalidGeometry</span> <span class=n>m_invalid</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=n>BoxGeometry</span> <span class=n>m_box</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>SphereGeometry</span> <span class=n>m_sphere</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>CylinderGeometry</span> <span class=n>m_cylinder</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>CapsuleGeometry</span> <span class=n>m_capsule</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>ConvexHullGeometry</span> <span class=n>m_convex_hull</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=n>m_union</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><h3 class="relative group">Shape<div id=shape class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#shape aria-label=锚点>#</a></span></h3><p>形状，是用于附加在刚体上的形状。<strong>所有碰撞相关的东西都应该放在Shape中</strong>。比如几何体，摩擦因子，弹性系数等。但模拟相关的东西（比如速度，加速度，力等）则不应该放在这里。</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>class</span> <span class=nc>Shape</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>friend</span> <span class=k>class</span> <span class=nc>BroadPhase</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>friend</span> <span class=k>class</span> <span class=nc>RigidActor</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Shape</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Shape</span><span class=p>(</span><span class=k>const</span> <span class=n>BoxGeometry</span><span class=o>&amp;</span> <span class=n>box</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Shape</span><span class=p>(</span><span class=k>const</span> <span class=n>SphereGeometry</span><span class=o>&amp;</span> <span class=n>sphere</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Shape</span><span class=p>(</span><span class=k>const</span> <span class=n>CapsuleGeometry</span><span class=o>&amp;</span> <span class=n>capsule</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Shape</span><span class=p>(</span><span class=k>const</span> <span class=n>CylinderGeometry</span><span class=o>&amp;</span> <span class=n>cylinder</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Shape</span><span class=p>(</span><span class=k>const</span> <span class=n>ConvexHullGeometry</span><span class=o>&amp;</span> <span class=n>convex_hull</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Geometry</span><span class=o>::</span><span class=n>Type</span> <span class=n>GetType</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>SetLocalTransform</span><span class=p>(</span><span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>transform</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>SetLocalTransform</span><span class=p>(</span><span class=n>Vector3</span> <span class=n>position</span><span class=p>,</span> <span class=n>Quaternion</span> <span class=n>rotation</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>GetLocalTransform</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>GetTransform</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>BoundingBox</span><span class=o>&amp;</span> <span class=n>GetBoundingBox</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>MassProperties</span> <span class=n>ComputeMassProperties</span><span class=p>(</span><span class=n>real</span> <span class=n>density</span><span class=p>)</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>RigidActor</span><span class=o>*</span> <span class=nf>GetOwner</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>RigidActor</span><span class=o>*</span> <span class=n>GetOwner</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=n>rebuildBV</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>attachToActor</span><span class=p>(</span><span class=n>RigidActor</span><span class=o>*</span> <span class=n>actor</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>updateByOwnerTransform</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>GeometryUnion</span> <span class=n>m_geometry</span><span class=p>;</span>      <span class=c1>// 存储一个几何体
+</span></span></span><span class=line><span class=cl>    <span class=n>Transform</span> <span class=n>m_local_transform</span><span class=p>;</span>   <span class=c1>// 相对于刚体质心的局部偏移
+</span></span></span><span class=line><span class=cl>    <span class=n>Transform</span> <span class=n>m_transform</span><span class=p>;</span>         <span class=c1>// 全局坐标
+</span></span></span><span class=line><span class=cl>    <span class=n>BoundingBox</span> <span class=n>m_aabb</span><span class=p>;</span>            <span class=c1>// AABB，用于BroadPhase加速
+</span></span></span><span class=line><span class=cl>	<span class=n>real</span> <span class=n>m_friction</span><span class=p>{</span><span class=mf>0.2</span><span class=p>};</span>          <span class=c1>// 摩擦因子。未来可能会换成基于材质的摩擦
+</span></span></span><span class=line><span class=cl>	<span class=n>real</span> <span class=n>m_density</span><span class=p>{</span><span class=mf>1.0</span><span class=p>};</span>           <span class=c1>// 密度，用于后面计算惯性张量
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_inv_inertia</span><span class=p>;</span>         <span class=c1>// 
+</span></span></span><span class=line><span class=cl>	<span class=n>RigidActor</span><span class=o>*</span> <span class=n>m_owner</span><span class=p>{};</span>    <span class=c1>// 持有他的刚体
+</span></span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><h3 class="relative group">RigidActor<div id=rigidactor class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#rigidactor aria-label=锚点>#</a></span></h3><p><code>RigidActor</code>是刚体的基类，而<code>DynamicRigidBody</code>和<code>StaticRigidBody</code>则是他的子类。</p><p><strong>所有模拟相关的东西都应该放在这里</strong>，比如速度，角速度，力，力矩，惯性张量等。</p><p>有些引擎（如JoltPhysics）会将静态/动态物体都放在一个类里面，但是静态物显然不需要动态物中的速度，力，质量，惯性等用于模拟的属性，所以我们这里为了节省内存还是分开放。</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>class</span> <span class=nc>RigidActor</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>enum</span> <span class=k>class</span> <span class=nc>Type</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Dynamic</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>Static</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>RigidActor</span><span class=p>(</span><span class=n>Type</span> <span class=n>type</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=o>~</span><span class=n>RigidActor</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>DynamicRigidBody</span><span class=o>*</span> <span class=n>AsDynamic</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>StaticRigidBody</span><span class=o>*</span> <span class=n>AsStatic</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>DynamicRigidBody</span><span class=o>*</span> <span class=n>AsDynamic</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>StaticRigidBody</span><span class=o>*</span> <span class=n>AsStatic</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Type</span> <span class=n>GetType</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>Teleport</span><span class=p>(</span><span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>transform</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>GetTransform</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>std</span><span class=o>::</span><span class=n>span</span><span class=o>&lt;</span><span class=n>Shape</span><span class=o>*&gt;</span> <span class=n>GetShapes</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>AttachShape</span><span class=p>(</span><span class=n>Shape</span><span class=o>&amp;</span> <span class=n>shape</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>RemoveShape</span><span class=p>(</span><span class=n>Shape</span><span class=o>&amp;</span> <span class=n>shape</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>RemoveShape</span><span class=p>(</span><span class=n>size_t</span> <span class=n>index</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>SetFriction</span><span class=p>(</span><span class=n>real</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>real</span> <span class=n>GetFriction</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>protected</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>Transform</span> <span class=n>m_transform</span><span class=p>;</span>        <span class=c1>// 质心。虽然有些引擎中会定义额外的质心偏移量，
+</span></span></span><span class=line><span class=cl>                                  <span class=c1>// 但我们这里就不写那么麻烦了，
+</span></span></span><span class=line><span class=cl>                                  <span class=c1>// 我们认为刚体质心就是刚体位置
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Shape</span><span class=o>*&gt;</span> <span class=n>m_shapes</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Type</span> <span class=n>m_type</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 动态物需要有模拟相关的参数
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>DynamicRigidBody</span> <span class=o>:</span> <span class=k>public</span> <span class=n>RigidActor</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>DynamicRigidBody</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>real</span> <span class=n>GetMass</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>SetMass</span><span class=p>(</span><span class=n>real</span> <span class=n>mass</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Vector3</span> <span class=n>GetVelocity</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Vector3</span> <span class=n>GetAngularVelocity</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=na>[[nodiscard]]</span> <span class=n>Vector3</span> <span class=n>GetImpulse</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_inv_mass</span><span class=p>{</span><span class=mi>1</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_velocity</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>         <span class=c1>// 线速度
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_angular_velocity</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span> <span class=c1>// 角速度
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_inv_inertia</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>      <span class=c1>// 主轴下的转动惯量
+</span></span></span><span class=line><span class=cl>    <span class=n>Quaternion</span> <span class=n>m_inertia_rotation</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Quaternion</span><span class=o>::</span><span class=n>Identity</span><span class=p>()};</span>  <span class=c1>// 主轴到刚体局部坐标下的旋转
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_force</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>  <span class=c1>// 力
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_torque</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span> <span class=c1>// 力矩
+</span></span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 静态物没有多的东西
+</span></span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>StaticRigidBody</span> <span class=o>:</span> <span class=k>public</span> <span class=n>RigidActor</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>StaticRigidBody</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><h2 class="relative group">刚体的惯性张量计算方案<div id=刚体的惯性张量计算方案 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%9a%e4%bd%93%e7%9a%84%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8f%e8%ae%a1%e7%ae%97%e6%96%b9%e6%a1%88 aria-label=锚点>#</a></span></h2><p>根据经典力学，我们知道，如果刚体的形状不变，那么惯性张量在惯性主轴下有两个优点：</p><ol><li>不变</li><li>是对角矩阵</li></ol><p>此时可以使用一个<code>Vector3 m_inertia</code>来记录而不是一个<code>Matrix33</code>。</p><p>如果你的物理引擎中，一个刚体只有一个形状，且此形状的质心总是在形状中心，那么你可以直接这样存。但是一般物理引擎中，质心并不总是在<code>Shape</code>中心，甚至一个刚体可能有多个<code>Shape</code>。这个时候必须汇集所有<code>Shape</code>自己的惯性张量来算出整个<code>DynamicRigidBody</code>的惯性张量。</p><p>步骤如下：</p><ol><li>对于每个<code>Shape</code>，计算其在主轴下的，质心位于几何中心的惯性张量（主惯性矩），此时是一个对角矩阵，使用<code>Vector3</code>存储</li><li>用<code>Shape</code>的<code>local_transform</code>将质心和惯性张量变换到刚体局部坐标系下</li><li>用所有<code>Shape</code>的质量和质心，算出整个刚体的质心</li><li>用<strong>平行轴定理</strong>，把每个<code>Shape</code>的惯性张量移到刚体质心，然后对其求和得到整体惯性张量</li><li>对惯性张量做分解，得到惯性主轴以及主轴下的惯性张量。以及如何从刚体局部坐标系转到主坐标系的旋转。</li></ol><h3 class="relative group">主惯性张量计算<div id=主惯性张量计算 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%b8%bb%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8f%e8%ae%a1%e7%ae%97 aria-label=锚点>#</a></span></h3><p>第一步是最好做的，首先计算主轴下的惯性张量。不同的几何体物理上有现成的公式：</p><table><thead><tr><th>形状</th><th>质量</th><th>主惯性矩</th></tr></thead><tbody><tr><td>Box</td><td>$8\rho h_x h_y h_z$</td><td>$\begin{aligned} x &= \frac{m}{3}(h_y^2 + h_z^2)\\ y &= \frac{m}{3}(h_x^2 + h_z^2)\\ z &= \frac{m}{3}(h_x^2 + h_y^2) \end{aligned}$</td></tr><tr><td>Sphere</td><td>$\frac{4}{3}\pi r^3 \rho$</td><td>$x,y,z=\frac{2}{5}mr^2$</td></tr><tr><td>Cylinder（轴线在$y$轴上，$H$是圆柱高度）</td><td>$\pi r^2H\rho$</td><td>$\begin{aligned} y &= \frac{1}{2}(mr^2)\\ x,z &= \frac{m}{12}(3r^2+H^2)\end{aligned}$</td></tr><tr><td>Causple（轴线在$y$轴上，$H$是圆柱部分高度，$m_c$是圆柱部分质量，$m_h$是半球部分质量）</td><td>$\pi r^2H\rho + \frac{4}{3}\pi r^2 \rho$</td><td>$\begin{aligned} y&=\frac{1}{2}m_cr^2+\frac{4}{5}m_hr^2 \\ x,z&=\frac{1}{12}m_c(3r^2+H^2)+\frac{4}{5}m_hr^2+m_h\left(\frac{1}{2}H^2+\frac{3}{4}Hr\right)\end{aligned}$</td></tr><tr><td>这里<code>ConvexHull</code>要麻烦一些，其质量需要先得到几何中心$P_c = \frac{\sum_{i = 1}^N P_i}{N}$，然后通过此中心和每个面上的三角面构成的四面体的体积$V_i$进行求和。这里假设四面体的三个边向量是$\pmb{a}, \pmb{b}, \pmb{c}$，那么四面体的体积是：</td><td></td><td></td></tr></tbody></table>$$
+V_i = \frac{1}{6}\pmb{a}\cdot (\pmb{b} \times \pmb{c})
+$$<p>然后每个四面的对质心的贡献是</p>$$
+S_t = V_t \frac{\pmb a + \pmb b + \pmb c}{4}
+$$<p>这样质心就是：</p>$$
+C = \frac{\sum S_t}{\sum V_t}
+$$<p>惯性张量则更麻烦，先定义某个三角面中的三个点$P_1, P_2, P_3$和质心$C$构成的向量：</p>$$
+\mathbf a=P_1-C,\qquad
+\mathbf b=P_2-C,\qquad
+\mathbf c=P_3-C
+$$<p>然后计算二阶矩：</p><h1 class="relative group">$$
+M_C<div id=m_c class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#m_c aria-label=锚点>#</a></span></h1><p>\sum_t
+\frac{V_t}{20}
+\left(
+\mathbf a\mathbf a^T
++
+\mathbf b\mathbf b^T
++
+\mathbf c\mathbf c^T
++
+(\mathbf a+\mathbf b+\mathbf c)
+(\mathbf a+\mathbf b+\mathbf c)^T
+\right)
+$$</p><p>然后得到绕质心的惯性张量：</p>$$
+\begin{aligned}
+I_C
+&=
+\rho\left(
+\operatorname{tr}(M_C)I_3-M_C
+\right) \\
+I_3 &= \operatorname{diag}(1, 1, 1) \\
+\end{aligned}
+$$<p>这里注意：<strong>ConvexHull的几何中心不一定在Shape的<code>local_transform</code>处，他是有偏移的</strong>，所以你需要将偏移量也一并返回出去。一般的计算接口是：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>GeometryMassProperties</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_mass</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span> <span class=c1>// 质量
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_center_of_mass</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span> <span class=c1>// 质心到Shape的local_transform的偏移量，只有ConvexHull不是0
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_inertia</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span> <span class=c1>// 主轴下的转动惯量
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>array</span><span class=o>&lt;</span><span class=n>Vector3</span><span class=o>&gt;</span> <span class=n>m_principal_axes</span><span class=p>;</span> <span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Shape</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=na>[[nodiscard]]</span> <span class=n>GeometryMassProperties</span> <span class=n>ComputeMassProperties</span><span class=p>(</span><span class=n>real</span> <span class=n>density</span><span class=p>)</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><h3 class="relative group">将质心和主惯性张量移到刚体局部坐标系下<div id=将质心和主惯性张量移到刚体局部坐标系下 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b0%86%e8%b4%a8%e5%bf%83%e5%92%8c%e4%b8%bb%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8f%e7%a7%bb%e5%88%b0%e5%88%9a%e4%bd%93%e5%b1%80%e9%83%a8%e5%9d%90%e6%a0%87%e7%b3%bb%e4%b8%8b aria-label=锚点>#</a></span></h3><p>对于质心，只需要将其做一次变换。对于主轴，只需做一次旋转（主轴存在<code>Matrix33</code>的各列中）。而对于惯性张量，则需要</p>$$
+I_{body} =
+A_{body}
+\begin{bmatrix}
+I_x & 0 & 0 \\
+0 & I_y & 0 \\
+0 & 0 & I_z \\
+\end{bmatrix}
+A_{body}^T
+$$<p>其中$A_{body}$是主轴在Shape Space下的坐标。也就是变换后的主轴所在矩阵。</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Step2: transform inertia &amp; center of mass from geometry space to
+</span></span></span><span class=line><span class=cl><span class=c1>// shape space
+</span></span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>Transform</span><span class=o>&amp;</span> <span class=n>shape_local_trans</span> <span class=o>=</span> <span class=n>shape</span><span class=o>-&gt;</span><span class=n>GetLocalTransform</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>Matrix33</span> <span class=n>R</span> <span class=o>=</span> <span class=n>shape_local_trans</span><span class=p>.</span><span class=n>m_rotation</span><span class=p>.</span><span class=n>toRotationMatrix</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>Vector3</span> <span class=n>t</span> <span class=o>=</span> <span class=n>shape_local_trans</span><span class=p>.</span><span class=n>m_position</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Vector3</span> <span class=n>center_of_mass</span> <span class=o>=</span> <span class=n>t</span> <span class=o>+</span> <span class=n>R</span> <span class=o>*</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_center_of_mass</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Matrix33</span> <span class=n>principal_axes</span> <span class=o>=</span> <span class=n>R</span> <span class=o>*</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_principle_axes</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Matrix33</span> <span class=n>inertia_body</span> <span class=o>=</span> <span class=n>principal_axes</span> <span class=o>*</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_inertia</span><span class=p>.</span><span class=n>asDiagonal</span><span class=p>()</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl>						<span class=n>principal_axes</span><span class=p>.</span><span class=n>transpose</span><span class=p>();</span></span></span></code></pre></div></div><h3 class="relative group">求出刚体质心<div id=求出刚体质心 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%b1%82%e5%87%ba%e5%88%9a%e4%bd%93%e8%b4%a8%e5%bf%83 aria-label=锚点>#</a></span></h3><p>只需要对所有<code>Shape</code>的质心按质量加权平均即可：</p>$$
+c_{body} = \frac{\sum m_ic_i}{\sum m_i}
+$$<h3 class="relative group">将每个<code>Shape</code>的惯性张量移到刚体质心并求和<div id=将每个shape的惯性张量移到刚体质心并求和 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b0%86%e6%af%8f%e4%b8%aashape%e7%9a%84%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8f%e7%a7%bb%e5%88%b0%e5%88%9a%e4%bd%93%e8%b4%a8%e5%bf%83%e5%b9%b6%e6%b1%82%e5%92%8c aria-label=锚点>#</a></span></h3><p>使用平行轴定理：</p>$$
+I^{'} = I + M(||\pmb{d}||^2 \pmb{E}_3 - \pmb{d}\pmb{d}^T)
+$$<div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Step4: using `parallel axis theorem`
+</span></span></span><span class=line><span class=cl><span class=c1>// to move inertia from shape space to rigidbody space
+</span></span></span><span class=line><span class=cl><span class=n>Matrix33</span> <span class=n>body_inertia</span> <span class=o>=</span> <span class=n>Matrix33</span><span class=o>::</span><span class=n>Zero</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=p>(</span><span class=k>auto</span><span class=o>&amp;</span> <span class=nl>mp</span> <span class=p>:</span> <span class=n>shape_mp_list</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=n>Vector3</span> <span class=n>d</span> <span class=o>=</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_center_of_mass</span> <span class=o>-</span> <span class=n>rigid_center_of_mass</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=n>Matrix33</span> <span class=n>shift</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>		<span class=n>Matrix33</span><span class=o>::</span><span class=n>Identity</span><span class=p>()</span> <span class=o>*</span> <span class=n>d</span><span class=p>.</span><span class=n>squaredNorm</span><span class=p>()</span> <span class=o>-</span> <span class=n>d</span> <span class=o>*</span> <span class=n>d</span><span class=p>.</span><span class=n>transpose</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=n>body_inertia</span> <span class=o>+=</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_inertia</span> <span class=o>+</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_mass</span> <span class=o>*</span> <span class=n>shift</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><h3 class="relative group">分解刚体的惯性张量<div id=分解刚体的惯性张量 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%88%86%e8%a7%a3%e5%88%9a%e4%bd%93%e7%9a%84%e6%83%af%e6%80%a7%e5%bc%a0%e9%87%8f aria-label=锚点>#</a></span></h3><p>最后就是分解惯性张量为特征向量和特征值。这里我直接用<code>Eigen</code>库的分解函数了：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// Step5: get eigen values &amp; eigen vectors
+</span></span></span><span class=line><span class=cl><span class=c1>// NOTE: SelfAdjointEigenSolver use to decompose symmetric matrix,
+</span></span></span><span class=line><span class=cl><span class=c1>//       faster than EigenSolver
+</span></span></span><span class=line><span class=cl><span class=n>Eigen</span><span class=o>::</span><span class=n>SelfAdjointEigenSolver</span><span class=o>&lt;</span><span class=n>Matrix33</span><span class=o>&gt;</span> <span class=n>solver</span><span class=p>(</span><span class=n>body_inertia</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>solver</span><span class=p>.</span><span class=n>info</span><span class=p>()</span> <span class=o>!=</span> <span class=n>Eigen</span><span class=o>::</span><span class=n>Success</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Vector3</span> <span class=n>principal_inertia</span> <span class=o>=</span> <span class=n>solver</span><span class=p>.</span><span class=n>eigenvalues</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>Matrix33</span> <span class=n>principal_axes</span> <span class=o>=</span> <span class=n>solver</span><span class=p>.</span><span class=n>eigenvectors</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 浮点数误差可能导致某个分量小于0，必须强制大于0不然物理上不正确
+</span></span></span><span class=line><span class=cl><span class=n>principal_inertia</span> <span class=o>=</span> <span class=n>principal_inertia</span><span class=p>.</span><span class=n>cwiseMax</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 由于我希望旋转矩阵可以转换成四元数，所以必须强制旋转矩阵为右手系
+</span></span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>principal_axes</span><span class=p>.</span><span class=n>determinant</span><span class=p>()</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=n>principal_axes</span><span class=p>.</span><span class=n>col</span><span class=p>(</span><span class=mi>2</span><span class=p>)</span> <span class=o>=</span> <span class=o>-</span><span class=n>principal_axes</span><span class=p>.</span><span class=n>col</span><span class=p>(</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 转换成四元数
+</span></span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>inertia_rotation</span> <span class=o>=</span> <span class=n>Quaternion</span><span class=p>(</span><span class=n>principal_axes</span><span class=p>).</span><span class=n>normalized</span><span class=p>();</span></span></span></code></pre></div></div><h2 class="relative group">物理模型的实现<div id=物理模型的实现 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%89%a9%e7%90%86%e6%a8%a1%e5%9e%8b%e7%9a%84%e5%ae%9e%e7%8e%b0 aria-label=锚点>#</a></span></h2><p>接下来编写模拟求解器：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>class</span> <span class=nc>RigidSolver</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=n>Solve</span><span class=p>(</span><span class=n>Manifold</span><span class=o>&amp;</span> <span class=n>manifold</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><p>求解器要求传入一个<code>Manifold</code>，并求解此<code>Manifold</code>内的一对物体的碰撞分离约束。</p><h3 class="relative group">速度积分<div id=速度积分 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e9%80%9f%e5%ba%a6%e7%a7%af%e5%88%86 aria-label=锚点>#</a></span></h3><p>首先根据当前的力做速度积分。这里是公式（41）的变体：</p><p>$$
+\begin{aligned}
+& M\bigl(\pmb u^{(k+1)}-\pmb u^{(k)}\bigr)
+={}^{u}J_n^{\mathsf T}{}^{u}\pmb p_n^{(k+1)}
++{}^{u}J_f^{\mathsf T}{}^{u}D,{}^{u}\pmb\alpha
++{}^{b}J_n^{\mathsf T}{}^{b}\pmb p_n^{(k+1)}
++{}^{b}J_f^{\mathsf T}{}^{b}D,{}^{b}\pmb\alpha
++\pmb p_{ext}^{(k)} \
+&\Rightarrow \
+& \pmb u^{(k+1)}-\pmb u^{(k)}
+=M^{-1}\ {}^{u}J_n^{\mathsf T}{}^{u}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{u}J_f^{\mathsf T}{}^{u}D,{}^{u}\pmb\alpha
++M^{-1}\ {}^{b}J_n^{\mathsf T}{}^{b}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{b}J_f^{\mathsf T}{}^{b}D,{}^{b}\pmb\alpha
++M^{-1}\ \pmb p_{ext}^{(k)} \
+&\Rightarrow \
+& \pmb u^{(k+1)} = \pmb u^{(k)}</p><ul><li>\pmb{o}
++M^{-1}\ \pmb p_{ext}^{(k)} \
+&\text{其中} \pmb{o} =
+M^{-1}\ {}^{u}J_n^{\mathsf T}{}^{u}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{u}J_f^{\mathsf T}{}^{u}D,{}^{u}\pmb\alpha
++M^{-1}\ {}^{b}J_n^{\mathsf T}{}^{b}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{b}J_f^{\mathsf T}{}^{b}D,{}^{b}\pmb\alpha
+\end{aligned}
+$$
+这里只是将左边的质量矩阵挪到右边，然后变成一个$\pmb{u}$的增量形式。</li></ul><p>我们使用的是<strong>倒数第二个式子中后面的部分</strong>，即$\pmb{u}^{(k+1}) = \pmb{u}^{(k)} + M^{-1} \pmb{p}_{ext}^{(k)}$。至于$\pmb{o}$，我们等到后面算。</p><p>这里$\pmb{p}_{ext}^{(k)}$就是这一步的总外力产生的动量。这里其实有一些工程上的取舍，按道理我们整个物理模型里面所有的力都被动量替换了，理论上不应该有力。但是从用户使用物理引擎的角度上来说，他们可能更希望给一个力而不是动量。所以我们<code>DynamicRigidBody</code>类里面存的是力/力矩而不是动量。</p><p>市面上的物理引擎允许用户给一个冲量。有些是两者都可以给（比如PhysX）。</p><p>这里使用（15）式中对$\pmb{p}_{ext}^{(k)}$的定义，将矩阵拆开，得到速度和角速度的计算公式：</p>$$
+\begin{aligned}
+\pmb{u}_{linear} &= \frac{\pmb{F}}{m}\Delta t \\
+\pmb{I}\pmb{u}_{angular} &= \pmb{\tau} - \pmb{\omega} \times \pmb{I}\pmb{\omega}
+\end{aligned}
+$$<p>这里线速度就是牛顿第二定律的变形，可以直接写码。而第二项还得进行变形才能得到角速度：</p>$$
+\pmb{u} = \pmb{I}^{-1}\pmb{\tau} - \pmb{I}^{-1}(\pmb{\omega} \times \pmb{I}\pmb{\omega})
+$$<p>这里又迎来一个工程上的取舍，就是后面的陀螺项$\pmb \omega \times \pmb I \pmb \omega$到底要不要算？</p><p>计算陀螺项会带来如下问题：</p><ul><li>会给系统注入额外的能量，即使使用辛积分也无法避免（TODO:弄清楚为何无法避免）。这导致旋转的物体会越转越快，最后爆炸</li><li>在基于约束的物理模型中，陀螺项常常会破坏约束求解器</li></ul><p>而陀螺项带来的效应一般只在如下场合才比较明显：</p><ul><li>物体非对称。此时陀螺项非0</li><li>物体高速转动时</li></ul><p>所以如果你只是模拟一些刚体，那根本不需要加入陀螺项。如果你要模拟陀螺，飞盘等你就需要这一项。</p><p>对于常见的球体高速滚动，由于其各向同性的性质，其陀螺项无论如何都为0，所以也不需要模拟。</p><p>综上所述，在去掉陀螺项的情况下，我们只需这样更新角速度：</p>$$
+\pmb u^{(k+1)} = \pmb u^{(k)} + \pmb I^{-1}\pmb \tau
+$$<p>那么在无陀螺项时，所有的代码为：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>integrateVelocity</span><span class=p>(</span><span class=n>DynamicRigidBody</span><span class=o>&amp;</span> <span class=n>body</span><span class=p>,</span> <span class=n>real</span> <span class=n>dt</span><span class=p>)</span> <span class=k>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>velocity</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetVelocity</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>angular_velocity</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetAngularVelocity</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>velocity</span> <span class=o>+=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetForce</span><span class=p>()</span> <span class=o>*</span> <span class=n>body</span><span class=p>.</span><span class=n>GetMassProperties</span><span class=p>().</span><span class=n>m_inv_mass</span> <span class=o>*</span> <span class=n>dt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>angular_velocity</span> <span class=o>+=</span> <span class=n>body</span><span class=p>.</span><span class=n>MultiplyInvInertiaWorld</span><span class=p>(</span><span class=n>body</span><span class=p>.</span><span class=n>GetTorque</span><span class=p>()</span> <span class=o>*</span> <span class=n>dt</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>body</span><span class=p>.</span><span class=n>SetVelocity</span><span class=p>(</span><span class=n>velocity</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>body</span><span class=p>.</span><span class=n>SetAngularVelocity</span><span class=p>(</span><span class=n>angular_velocity</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><p>这里<code>MultiplyInvInertiaWorld</code>是一个小函数，用来将参数$v$计算$\pmb I^{-1} v$公式并返回。因为这个公式会在很多地方使用所以封装了一下。注意这里$\pmb I$是<strong>世界坐标下的惯性张量</strong>，每次计算时都新算（因为$\pmb I$和刚体位置&速度强相关，动了一点点都得重算，就不做cache了）。</p><p>如果非要算陀螺项，需要注意牛顿-欧拉方程是在主轴下定义的，所以得在主轴坐标系下计算。需要在增量完速度&角速度后面加上如下代码：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>use_gyro</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>auto</span><span class=o>&amp;</span> <span class=n>mp</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetMassProperties</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>	<span class=c1>// 得到变换到主轴坐标系下的矩阵
+</span></span></span><span class=line><span class=cl>	<span class=n>Quaternion</span> <span class=n>q</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetTransform</span><span class=p>().</span><span class=n>m_rotation</span> <span class=o>*</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_inertia_rotation</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 将角速度变换到主轴下
+</span></span></span><span class=line><span class=cl>	<span class=n>Vector3</span> <span class=n>local_w</span> <span class=o>=</span> <span class=n>q</span><span class=p>.</span><span class=n>conjugate</span><span class=p>()</span> <span class=o>*</span> <span class=n>angular_velocity</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 得到inertia。因为存的都是inertia的倒数所以要转换
+</span></span></span><span class=line><span class=cl>	<span class=n>Vector3</span> <span class=n>local_inertia</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>3</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>real</span> <span class=n>inv_inertia</span> <span class=o>=</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_inv_inertia</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>		<span class=n>local_inertia</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>inv_inertia</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=mf>1.0</span> <span class=o>/</span> <span class=nl>inv_inertia</span> <span class=p>:</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 算主轴下的角动量 L = Iw
+</span></span></span><span class=line><span class=cl>	<span class=n>Vector3</span> <span class=n>local_L</span> <span class=o>=</span> <span class=n>local_inertia</span><span class=p>.</span><span class=n>cwiseProduct</span><span class=p>(</span><span class=n>local_w</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>	<span class=c1>// 陀螺项，这是用无外力的牛顿-欧拉方程
+</span></span></span><span class=line><span class=cl>	<span class=n>Vector3</span> <span class=n>new_L</span> <span class=o>=</span> <span class=n>local_L</span> <span class=o>-</span> <span class=n>local_w</span><span class=p>.</span><span class=n>cross</span><span class=p>(</span><span class=n>local_L</span><span class=p>)</span> <span class=o>*</span> <span class=n>dt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 归一化L，因为无外力矩时L守恒，但欧拉积分会放大他，所以要归一化，不然越转越快
+</span></span></span><span class=line><span class=cl>	<span class=n>real</span> <span class=n>old_len2</span> <span class=o>=</span> <span class=n>local_L</span><span class=p>.</span><span class=n>squaredNorm</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=n>real</span> <span class=n>new_len2</span> <span class=o>=</span> <span class=n>new_L</span><span class=p>.</span><span class=n>squaredNorm</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>new_len2</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>new_L</span> <span class=o>*=</span> <span class=n>std</span><span class=o>::</span><span class=n>sqrt</span><span class=p>(</span><span class=n>old_len2</span> <span class=o>/</span> <span class=n>new_len2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>	<span class=c1>// 转回世界坐标系
+</span></span></span><span class=line><span class=cl>	<span class=n>angular_velocity</span> <span class=o>=</span> <span class=n>q</span> <span class=o>*</span> <span class=n>mp</span><span class=p>.</span><span class=n>m_inv_inertia</span><span class=p>.</span><span class=n>cwiseProduct</span><span class=p>(</span><span class=n>new_L</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><p>这里的陀螺项<code>new_L</code>的计算，是用牛顿欧拉方程中去掉力矩的结果$\frac{d\pmb L}{dt} = -\pmb \omega \times \pmb I \pmb \omega$（因为力矩造成的影响在前面算过了）。</p><p>归一化$\pmb L$则是为了防止积分算法额外注入的能量导致物体越转越快，$\pmb L$方向是对的，但是大小会越来越大，所以强制将他的长度改回计算之前的长度，保持长度恒定。</p><h3 class="relative group">碰撞检测和流型生成<div id=碰撞检测和流型生成 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%a2%b0%e6%92%9e%e6%a3%80%e6%b5%8b%e5%92%8c%e6%b5%81%e5%9e%8b%e7%94%9f%e6%88%90 aria-label=锚点>#</a></span></h3><p>这里直接调用上一个文章中说的流型生成函数即可（这里我暂时没用空间划分，以让代码更加直观），将所有流型都存下来以便后续解算：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>detectContacts</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>span</span><span class=o>&lt;</span><span class=n>RigidActor</span><span class=o>*&gt;</span> <span class=n>actors</span><span class=p>,</span> <span class=n>real</span> <span class=n>dt</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>actors</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>actors</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>RigidActor</span><span class=o>*</span> <span class=n>actor1</span> <span class=o>=</span> <span class=n>actors</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=n>RigidActor</span><span class=o>*</span> <span class=n>actor2</span> <span class=o>=</span> <span class=n>actors</span><span class=p>[</span><span class=n>j</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>actor1</span><span class=o>-&gt;</span><span class=n>GetType</span><span class=p>()</span> <span class=o>==</span> <span class=n>RigidActor</span><span class=o>::</span><span class=n>Type</span><span class=o>::</span><span class=n>Static</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>                <span class=n>actor2</span><span class=o>-&gt;</span><span class=n>GetType</span><span class=p>()</span> <span class=o>==</span> <span class=n>RigidActor</span><span class=o>::</span><span class=n>Type</span><span class=o>::</span><span class=n>Static</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=n>Shape</span><span class=o>*</span> <span class=nl>shape1</span> <span class=p>:</span> <span class=n>actor1</span><span class=o>-&gt;</span><span class=n>GetShapes</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>for</span> <span class=p>(</span><span class=n>Shape</span><span class=o>*</span> <span class=nl>shape2</span> <span class=p>:</span> <span class=n>actor2</span><span class=o>-&gt;</span><span class=n>GetShapes</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>shape1</span><span class=o>-&gt;</span><span class=n>GetBoundingBox</span><span class=p>().</span><span class=n>IsIntersect</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                            <span class=n>shape2</span><span class=o>-&gt;</span><span class=n>GetBoundingBox</span><span class=p>()))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                        <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>Manifold</span> <span class=n>manifold</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>ComputeManifold</span><span class=p>(</span><span class=o>*</span><span class=n>shape1</span><span class=p>,</span> <span class=o>*</span><span class=n>shape2</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>manifold</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                        <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                    <span class=p>}</span>
+</span></span><span class=line><span class=cl>                    
+</span></span><span class=line><span class=cl>                    <span class=c1>// 转换成SolverContact并存下来（下面会说）
+</span></span></span><span class=line><span class=cl>					<span class=n>convertManifoldToSolverContacts</span><span class=p>(</span><span class=n>manifold</span><span class=p>,</span> <span class=n>dt</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><h3 class="relative group">将流型转换成解算器接触<div id=将流型转换成解算器接触 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e5%b0%86%e6%b5%81%e5%9e%8b%e8%bd%ac%e6%8d%a2%e6%88%90%e8%a7%a3%e7%ae%97%e5%99%a8%e6%8e%a5%e8%a7%a6 aria-label=锚点>#</a></span></h3><p>我们这里定义解算器使用的接触<code>SolverContact</code>。里面只是预计算一些常数，并且将<code>Manifold</code>的信息汇总在一起：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>SolverContact</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>RigidActor</span><span class=o>*</span> <span class=n>m_body1</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>    <span class=n>RigidActor</span><span class=o>*</span> <span class=n>m_body2</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 只是m_body1,m_body2的对应动态物
+</span></span></span><span class=line><span class=cl>    <span class=n>DynamicRigidBody</span><span class=o>*</span> <span class=n>m_dyn1</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>    <span class=n>DynamicRigidBody</span><span class=o>*</span> <span class=n>m_dyn2</span><span class=p>{};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 接触点到质心的向量，用于力矩计算
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_r1</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_r2</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 此接触点处的局部坐标系
+</span></span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_normal</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_tangent1</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>m_tangent2</span><span class=p>{</span><span class=n>Vector3</span><span class=o>::</span><span class=n>Zero</span><span class=p>()};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=n>real</span> <span class=n>m_depth</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>     <span class=c1>// 接触深度
+</span></span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_friction</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>  <span class=c1>// 摩擦系数
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_normal_mass</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_tangent1_mass</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_tangent2_mass</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// JM^{-1}J^T 对角矩阵
+</span></span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_normal_mass</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>array</span><span class=o>&lt;</span><span class=n>real</span><span class=p>,</span> <span class=mi>2</span><span class=o>&gt;</span> <span class=n>m_tangent_masses</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// LCP中要求解的量: p_n, p_f
+</span></span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_normal_impulse</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>array</span><span class=o>&lt;</span><span class=n>real</span><span class=p>,</span> <span class=mi>2</span><span class=o>&gt;</span> <span class=n>m_tangent_impulses</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// -C_n/dt
+</span></span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>m_bias</span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span></span></span></code></pre></div></div><p>这里的<code>m_normal</code>,<code>m_tangent1</code>,<code>m_tangent2</code>，是在接触点处，以穿透方向为$z$轴，搭建的一个直角坐标系：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span> <span class=o>=</span> <span class=n>manifold</span><span class=p>.</span><span class=n>m_separate_normal</span><span class=p>.</span><span class=n>normalized</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent1</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span><span class=p>.</span><span class=n>unitOrthogonal</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent2</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span><span class=p>.</span><span class=n>cross</span><span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent1</span><span class=p>).</span><span class=n>normalized</span><span class=p>();</span></span></span></code></pre></div></div><p>这里<code>unitOrghogonal()</code>函数随意返回一个和<code>m_normal</code>垂直的向量，实现上是挑一个<code>m_normal</code>中最大分量所在的方向和<code>m_normal</code>做叉乘。</p><p>这个坐标系其实就是我们介绍库伦摩擦时的坐标系，建立此坐标系也有利于后面的库伦摩擦计算。</p><hr><p>然后要解释约束雅克比矩阵$\pmb J$的计算：</p>$$
+\pmb J = \frac{\partial \dot{C}}{\partial \pmb u}
+$$<p>对于接触约束来说，$C$是：</p>$$
+C = \pmb n \cdot(\pmb x_2 + \pmb r_2 - (\pmb x_1 + \pmb r_1))
+$$<p>这里$\pmb x_i$是第$i$个刚体的质心位置，$\pmb r_i$是接触点相对质心的位置（即代码中的<code>m_r1</code>,<code>m_r2</code>）。这个约束在值上应该是穿透深度：</p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=接触约束 src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e6%8e%a5%e8%a7%a6%e7%ba%a6%e6%9d%9f.png></figure><p>图上紫色的是质心，绿色和红色是一对接触点，灰色向量就是$\pmb x_i + \pmb r_i$。所以他两相减再点乘$\pmb n$就是穿透深度。</p><p>这里首先让$C$对时间求导，得到：</p>$$
+\begin{aligned}
+\dot{C} &= \pmb n \cdot (\pmb v_{p1} - \pmb v_{p2}) \\
+&= \pmb n \cdot [\pmb v_2 + \pmb \omega_2 \times \pmb r_2 - (\pmb v_1 + \pmb \omega_1 \times \pmb r_1)] \\
+&= \pmb n \cdot \pmb v_2 + \pmb n \cdot \pmb \omega_2 \times \pmb r_2 - (\pmb n \cdot \pmb v_1 + \pmb n \cdot \pmb \omega_1 \times \pmb r_1)] \\
+\end{aligned}
+$$<p>这里$\pmb v_{p1}, \pmb v_{p2}$是接触点处的速度。</p><p>然后对$\pmb n \cdot \pmb \omega_i \times \pmb r_i$做向量三重积恒等式$a \cdot (b \times c) = b \cdot (c \times a)$的交换，就有$\pmb \omega_i \cdot(\pmb r_i \times \pmb n)$。</p><p>然后需要对广义速度求导，这里广义速度为$\pmb u = [\pmb v_1, \pmb \omega_1, \pmb v_2, \pmb \omega_2]$，就有：</p>$$
+\pmb J = \frac{\partial \dot{C}}{\partial \pmb u} =
+\begin{bmatrix}
+-\pmb n^T & -(\pmb r_1 \times \pmb n)^T & n^T & (\pmb{r}_2 \times \pmb n)^T
+\end{bmatrix}
+$$<p>接下来计算$\pmb J M^{-1}\pmb J^T$（见（53c）式），这里$M^{-1}$是：</p>$$
+M^{-1} =
+\begin{bmatrix}
+\frac{1}{m_1} \pmb 1 & 0 & 0 & 0 \\
+0 & \pmb I_1^{-1} & 0 & 0 \\
+0 & 0 & \frac{1}{m_2}\pmb 1 & 0 \\
+0 & 0 & 0 & \pmb I_2^{-1} \\
+\end{bmatrix}
+$$<p>将其放入$\pmb J M^{-1} \pmb J^T$并拆开，得到：</p><p>$$
+\frac{1}{m_1} + \frac{1}{m_2}</p><ul><li>(\pmb r_1 \times \pmb n)^T \pmb I_1^{-1} (\pmb r_1 \times \pmb n)</li><li>(\pmb r_2 \times \pmb n)^T \pmb I_2^{-1} (\pmb r_2 \times \pmb n)
+$$
+对应代码就是（代码里的$k$）：</li></ul><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>real</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>computeEffectiveMass</span><span class=p>(</span><span class=k>const</span> <span class=n>SolverContact</span><span class=o>&amp;</span> <span class=n>contact</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                       <span class=n>Vector3</span> <span class=n>dir</span><span class=p>)</span> <span class=k>const</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Vector3</span> <span class=n>rn</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_r1</span><span class=p>.</span><span class=n>cross</span><span class=p>(</span><span class=n>dir</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>k</span> <span class=o>+=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_dyn1</span><span class=o>-&gt;</span><span class=n>GetMassProperties</span><span class=p>().</span><span class=n>m_inv_mass</span> <span class=o>+</span>
+</span></span><span class=line><span class=cl>            <span class=n>rn</span><span class=p>.</span><span class=n>dot</span><span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn1</span><span class=o>-&gt;</span><span class=n>MultiplyInvInertiaWorld</span><span class=p>(</span><span class=n>rn</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn2</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>Vector3</span> <span class=n>rn</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_r2</span><span class=p>.</span><span class=n>cross</span><span class=p>(</span><span class=n>dir</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>k</span> <span class=o>+=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_dyn2</span><span class=o>-&gt;</span><span class=n>GetMassProperties</span><span class=p>().</span><span class=n>m_inv_mass</span> <span class=o>+</span>
+</span></span><span class=line><span class=cl>            <span class=n>rn</span><span class=p>.</span><span class=n>dot</span><span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn2</span><span class=o>-&gt;</span><span class=n>MultiplyInvInertiaWorld</span><span class=p>(</span><span class=n>rn</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>k</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=mi>1</span> <span class=o>/</span> <span class=nl>k</span> <span class=p>:</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><p>这里<code>dir</code>是$\pmb n$，$\pmb r \times \pmb n$是<code>rn</code>。最后返回的是$\frac{1}{\pmb{JM^{-1}J^T}}$，取倒数是为了方便后面计算。</p><p>那么为什么需要往<code>dir</code>投影呢？因为式（51）中的$A$矩阵中的$\pmb J_n, \pmb J_D$。这里$\pmb D$本来是摩擦锥近似的多面体的棱的方向，而我们这里用的是盒体近似摩擦锥，所以$\pmb D$就只有两个切向方向。而$\pmb J_D = \pmb D^T \pmb J_f$，也就是将$\pmb J_f$往切向方向的投影。而再看$A$矩阵中的前$3 \times 3$矩阵，将关节约束删掉后为：</p><p>$$
+A =
+\begin{bmatrix}
+\pmb J_n M^{-1} \pmb J_n^{\mathsf T} & \pmb J_nM^{-1}\pmb J_D^{\mathsf T} & 0 \
+\pmb J_D M^{-1} \pmb J_n^{\mathsf T} & \pmb J_DM^{-1}\pmb J_D^{\mathsf T} & {}^u\pmb E \</p><p>\end{bmatrix}
+$$
+观察其对角元素，为：</p>$$
+\pmb J M^{-1} \pmb J^{\mathsf T} +
+(\pmb J M^{-1} \pmb J^{\mathsf T})\,B^{-1}(\pmb J M^{-1} \pmb J^{\mathsf T})
+$$<p>你可以看到有许多$\pmb J M^{-1} \pmb J^{\mathbf T}$，这就是我们要预先算$\pmb J M^{-1} \pmb J^{\mathsf T}$的原因。</p><p>对应代码就是：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_normal_mass</span> <span class=o>=</span> <span class=n>computeEffectiveMass</span><span class=p>(</span><span class=n>contact</span><span class=p>,</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_masses</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=n>computeEffectiveMass</span><span class=p>(</span><span class=n>contact</span><span class=p>,</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_masses</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>computeEffectiveMass</span><span class=p>(</span><span class=n>contact</span><span class=p>,</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent2</span><span class=p>);</span></span></span></code></pre></div></div><hr><p>然后是<code>SolverContact::m_bias</code>的计算。这个对应的是（44）式里面的 $\frac{\partial C_n}{\Delta t}$。这个也是后面要用所以预计算。</p><h3 class="relative group">约束求解<div id=约束求解 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%ba%a6%e6%9d%9f%e6%b1%82%e8%a7%a3 aria-label=锚点>#</a></span></h3><p>接下来进行约束求解。</p><h4 class="relative group">接触约束<div id=接触约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%8e%a5%e8%a7%a6%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h4><p>需要求解$\pmb p_n$，根据（51）式，他是$A$的第一行乘$\pmb x$等于$\pmb b_1$：</p>$$
+A_{11} \pmb p_n + A_{12}\pmb {}^u \pmb \alpha + \pmb b_1 = 0
+$$<p>注意关节约束被删了所以没有${}^b\pmb \alpha$。那么$\pmb p_n$就是：</p>$$
+\pmb p_n = -\frac{\pmb b_1 + A_{12}{}^u \pmb \alpha}{A_{11}}
+$$<p>展开得到：</p>$$
+\pmb p_n = -\frac{(\pmb J_n \pmb r + \frac{C_n}{\Delta t}) + (\pmb J_n M^{-1} \pmb J_D^T)\pmb \alpha}{A_{11}}
+$$<p>注意原式中$\pmb S_{11}$中由于没有关节约束，所有${}^b \pmb J_n$都是0，所以只剩$M^{-1}$。</p><p>这里$\pmb{\alpha} = (\alpha_{i1}, \alpha_{i2}, \cdots, \alpha_{in})$是乘了摩擦锥半径的重心坐标，是摩擦冲量在摩擦多边形顶点方向上的权重。但我们不需要真的使用他，因为我们使用的是盒子摩擦模型，表示摩擦冲量只需要两个元素$\pmb p_t, \pmb p_o$，然后只需将其<code>clamp</code>到$[-\mu \pmb p_n, \mu \pmb p_n]$即可。如果用重心坐标$\pmb \alpha$的话，他得有4个元素（盒子四个顶点），解起来很麻烦。</p><p>那这里的$\pmb J_D$就使用盒子的切基向量表示：</p>$$
+\pmb J_D =
+\begin{bmatrix}
+\pmb J_t \\
+-\pmb J_t \\
+\pmb J_o \\
+-\pmb J_o
+\end{bmatrix}
+$$<p>其中</p>$$
+\begin{aligned}
+\pmb J_t &=
+\begin{bmatrix}
+-\pmb t^T & -(\pmb r_1 \times \pmb t)^T & \pmb t^T & (\pmb r_2 \times \pmb t)^T
+\end{bmatrix} \\
+\pmb J_o &=
+\begin{bmatrix}
+-\pmb o^T & -(\pmb r_1 \times \pmb o)^T & \pmb o^T & (\pmb r_2 \times \pmb o)^T
+\end{bmatrix} \\
+\end{aligned}
+$$<p>其实就和之前求$\pmb J M^{-1} \pmb J^T$中的$\pmb J$一样，只是方向不同。</p><p>然后：</p>$$
+\pmb J_D^{\mathsf T} \pmb \alpha = J_t^T \pmb \alpha_1 - J_t^T \pmb \alpha_2 + J_o^T \pmb \alpha_3 - J_o^T \pmb \alpha_4 = J_t^T(\pmb \alpha_1 - \pmb \alpha_2) + J_o^T(\pmb \alpha_3 - \pmb \alpha_4)
+$$<p>这里$\pmb \alpha_1 - \pmb \alpha_2$就是$\pmb p_t$。而另一个就是$\pmb p_o$，即：</p>$$
+\pmb J_D^{\mathsf T} \pmb \alpha = J_t^T \pmb p_t + J_o^T \pmb p_o
+$$<p>那这样对$(\pmb J_n M^{-1} \pmb J_D)\pmb \alpha$展开得到：</p>$$
+\pmb J_n M^{-1} \pmb J_t^T \pmb p_t + \pmb J_n M^{-1} \pmb J_o^T \pmb p_o
+$$<p>现在分子左边还有$\pmb J_n \pmb r$，将$\pmb r$展开并略去双边约束相关变量，得到：</p>$$
+\pmb r = \pmb u^{(k)} + M^{-1}\pmb{p}_{ext}
+$$<p>再回顾一下$\pmb u^{(k+1)}$的式子：</p><p>$$
+\begin{aligned}
+& \pmb u^{(k+1)} = \pmb u^{(k)}</p><ul><li>\pmb{o}
++M^{-1}\ \pmb p_{ext}^{(k)} \
+&\text{其中} \pmb{o} =
+M^{-1}\ {}^{u}J_n^{\mathsf T}{}^{u}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{u}J_f^{\mathsf T}{}^{u}D,{}^{u}\pmb\alpha
++M^{-1}\ {}^{b}J_n^{\mathsf T}{}^{b}\pmb p_n^{(k+1)}
++M^{-1}\ {}^{b}J_f^{\mathsf T}{}^{b}D,{}^{b}\pmb\alpha
+\end{aligned}
+$$
+可以看到$\pmb r = \pmb u^{(k+1)} - \pmb o$。这里$D \pmb \alpha = \pmb p_t + \pmb p_o$，那么</li></ul><p>$$
+\begin{aligned}
+\pmb J_n \pmb r &= \pmb J_n \pmb u^{(k+1)} - \pmb J_n \pmb o \
+&= \pmb J_n \pmb u^{(k+1)} - \pmb J_n M^{-1}J_n^{\mathsf T}\pmb p_n^{(k+1)}</p><ul><li>\pmb J_n M^{-1}J_t^{\mathsf T}\pmb p_t</li><li>\pmb J_n M^{-1}J_o^{\mathsf T}\pmb p_o \
+\end{aligned}
+$$</li></ul><p>将$\pmb J_n \pmb r$代回原式：</p>$$
+\pmb p_n^{(k+1)} = \pmb p_n^{(k+1)} -\frac{\pmb J_n\pmb u^{(k+1)} + \frac{C_n}{\Delta t}}{A_{11}}
+$$<p>这里注意，不能将两边的$\pmb p_n$消掉，这里的$k+1$不是PGS里的迭代次数，而是整个Solver进行Step的次数。我们现在是在PGS内部对当前$\pmb p_n^{(k+1)}$进行求解，所以这里的理解是使用PGS迭代地去解$\pmb p_n^{(k+1)}$，这个式子在PGS下应该写成：</p>$$
+\pmb p_n^{'} = \pmb p_n -\frac{\pmb J_n\pmb u^{(k+1)} + \frac{C_n}{\Delta t}}{A_{11}}
+$$<p>这就是法向冲量在PGS下的更新公式。记$w = \pmb J_n \pmb u^{(k+1)} + \frac{C_n}{\Delta t}$。</p><p>然后要看PGS的Clamp条件（44）式</p>$$
+\begin{aligned}
+&\pmb 0\le{}^{u}\pmb p_n^{(k+1)}
+\;\perp\;
+\phantom{}{}^{u}J_n^{(k)}\pmb u^{(k+1)}
++\frac{{}^{u}C_n^{(k)}}{\Delta t}
++\frac{\partial{}^{u}C_n^{(k)}}{\partial t}
+\;\ge\pmb 0
+\end{aligned}
+$$<p>这里其实就是对$\pmb p_n \ge 0$和$w \ge 0$的条件。注意PGS只对变量做clamp，所以这里只需要对$\pmb p_n$做clamp即可。</p><p>那么对应代码就是：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>solveNormal</span><span class=p>(</span><span class=n>SolverContact</span><span class=o>&amp;</span> <span class=n>contact</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_normal_mass</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 计算 Jn u
+</span></span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>vn</span> <span class=o>=</span> <span class=n>relativeVelocity</span><span class=p>(</span><span class=n>contact</span><span class=p>).</span><span class=n>dot</span><span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 计算 (-Cn/dt - Jn u)/A11，这里A11是1/Jn M^{-1} Jn^T，即 m_normal_mass
+</span></span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>delta</span> <span class=o>=</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_bias</span> <span class=o>-</span> <span class=n>vn</span><span class=p>)</span> <span class=o>*</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal_mass</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>old</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal_impulse</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 算p_n，以及强制clamp在p_n &gt;= 0 约束内。
+</span></span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>next</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>max</span><span class=o>&lt;</span><span class=n>real</span><span class=o>&gt;</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>old</span> <span class=o>+</span> <span class=n>delta</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>applied</span> <span class=o>=</span> <span class=n>next</span> <span class=o>-</span> <span class=n>old</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 记录新p_n
+</span></span></span><span class=line><span class=cl>    <span class=n>contact</span><span class=p>.</span><span class=n>m_normal_impulse</span> <span class=o>=</span> <span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 如果新旧p_n之间没变化，就直接返回
+</span></span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>applied</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 算出冲量，然后用冲量更新速度&amp;角速度
+</span></span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>Vector3</span> <span class=n>impulse</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal</span> <span class=o>*</span> <span class=n>applied</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>applyContactImpulse</span><span class=p>(</span><span class=n>contact</span><span class=p>,</span> <span class=n>impulse</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><p>这里注意，是用<code>next - old</code>作为冲量。这是因为：</p>$$
+\begin{aligned}
+\pmb u^{'} &= \pmb r + M^{-1}\pmb J_n^T \pmb p_n^{new} \\
+\pmb u &= \pmb r + M^{-1}\pmb J_n^T \pmb p_n^{old} \\
+& \Rightarrow \\
+\pmb u^{'} - \pmb u &= M^{-1}\pmb J_n^T(\pmb p_n^{new} - \pmb p_n^{old})
+\end{aligned}
+$$<p>也就是说，<code>next - old</code>才是导致速度变化的原因，而不是$\pmb p_n$本身。$\pmb p_n$是当前步骤累计的冲量。</p><p>所以这里 <code>impulse = contact.m_normal * applied</code>是在算$J_n^T(\pmb p_n^{new} - \pmb p_n^{old})$。而对于$M^{-1}$的计算则被挪到<code>applyContactImpulse</code>中了：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>applyContactImpulse</span><span class=p>(</span><span class=n>SolverContact</span><span class=o>&amp;</span> <span class=n>contact</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                      <span class=k>const</span> <span class=n>Vector3</span><span class=o>&amp;</span> <span class=n>impulse</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn2</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>contact</span><span class=p>.</span><span class=n>m_dyn2</span><span class=o>-&gt;</span><span class=n>ApplyImpulse</span><span class=p>(</span><span class=n>impulse</span><span class=p>,</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_r2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_dyn1</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>contact</span><span class=p>.</span><span class=n>m_dyn1</span><span class=o>-&gt;</span><span class=n>ApplyImpulse</span><span class=p>(</span><span class=o>-</span><span class=n>impulse</span><span class=p>,</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_r1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=n>DynamicRigidBody</span><span class=o>::</span><span class=n>ApplyImpulse</span><span class=p>(</span><span class=k>const</span> <span class=n>Vector3</span><span class=o>&amp;</span> <span class=n>impulse</span><span class=p>,</span> <span class=k>const</span> <span class=n>Vector3</span><span class=o>&amp;</span> <span class=n>r</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>m_velocity</span> <span class=o>+=</span> <span class=n>impulse</span> <span class=o>*</span> <span class=n>m_mp</span><span class=p>.</span><span class=n>m_inv_mass</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>m_angular_velocity</span> <span class=o>+=</span> <span class=n>MultiplyInvInertiaWorld</span><span class=p>(</span><span class=n>r</span><span class=p>.</span><span class=n>cross</span><span class=p>(</span><span class=n>impulse</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><h4 class="relative group">摩擦约束<div id=摩擦约束 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%91%a9%e6%93%a6%e7%ba%a6%e6%9d%9f aria-label=锚点>#</a></span></h4><p>对应（51）式中的$A$的第二行和$x$相乘。此时变量是$\pmb \alpha$。</p>$$
+\begin{aligned}
+& \pmb J_D \pmb S_{11} \pmb J_n^T \pmb p_n + \pmb J_D \pmb S_{11} \pmb J_D^T \pmb \alpha + \pmb J_D \pmb r = 0 \\
+& \pmb J_D \pmb M^{-1} \pmb J_n^T \pmb p_n + \pmb J_D \pmb M^{-1} \pmb J_D^T \pmb \alpha + \pmb J_D \pmb r = 0 \\
+\end{aligned}
+$$<p>然后和上面说的一样，使用盒模型近似$\pmb \alpha$和将$\pmb J_D$拆成两个切向：</p>$$
+\begin{aligned}
+\pmb J_D &=
+\begin{bmatrix}
+J_t \\
+-J_t \\
+J_o \\
+-J_o \\
+\end{bmatrix}\\
+\pmb \alpha &=
+\begin{bmatrix}
+\alpha_1 \\
+\alpha_2 \\
+\alpha_3 \\
+\alpha_4 \\
+\end{bmatrix} \\
+\end{aligned}
+$$<p>这样整个式子就变成四个等式：</p><p>$$
+\begin{aligned}
+& J_t M^{-1} J_n^\mathsf T p_n</p><ul><li>J_t M^{-1} J_t^\mathsf T \alpha_1</li></ul><ul><li>J_t M^{-1} J_t^\mathsf T \alpha_2</li></ul><ul><li>J_t M^{-1} J_o^\mathsf T \alpha_3</li></ul><ul><li>J_t M^{-1} J_o^\mathsf T \alpha_4</li></ul><ul><li>J_t \mathbf r
+= 0 \
+&- J_t M^{-1} J_n^\mathsf T p_n</li></ul><ul><li>J_t M^{-1} J_t^\mathsf T \alpha_1</li></ul><ul><li>J_t M^{-1} J_t^\mathsf T \alpha_2</li></ul><ul><li>J_t M^{-1} J_o^\mathsf T \alpha_3</li></ul><ul><li>J_t M^{-1} J_o^\mathsf T \alpha_4</li></ul><ul><li>J_t \mathbf r
+= 0 \
+&amp;J_o M^{-1} J_n^\mathsf T p_n</li></ul><ul><li>J_o M^{-1} J_t^\mathsf T \alpha_1</li></ul><ul><li>J_o M^{-1} J_t^\mathsf T \alpha_2</li></ul><ul><li>J_o M^{-1} J_o^\mathsf T \alpha_3</li></ul><ul><li>J_o M^{-1} J_o^\mathsf T \alpha_4</li></ul><ul><li>J_o \mathbf r
+= 0 \
+&-J_o M^{-1} J_n^\mathsf T p_n</li></ul><ul><li>J_o M^{-1} J_t^\mathsf T \alpha_1</li></ul><ul><li>J_o M^{-1} J_t^\mathsf T \alpha_2</li></ul><ul><li>J_o M^{-1} J_o^\mathsf T \alpha_3</li></ul><ul><li>J_o M^{-1} J_o^\mathsf T \alpha_4</li></ul><ul><li>J_o \mathbf r
+= 0 \
+\end{aligned}
+$$</li></ul><p>可以看到，式1其实就是式2取反。而式3就是式4取反。所以本质上只有两个式子。
+$$
+\begin{aligned}
+&amp;J_t M^{-1} J_n^{T} p_n</p><ul><li>J_t M^{-1} J_t^{T} (\alpha_1 - \alpha_2)</li><li>J_t M^{-1} J_o^{T} (\alpha_3 - \alpha_4)</li><li>J_t \mathbf{r}
+= 0 \[6pt]
+&amp;J_o M^{-1} J_n^{T} p_n</li><li>J_o M^{-1} J_t^{T} (\alpha_1 - \alpha_2)</li><li>J_o M^{-1} J_o^{T} (\alpha_3 - \alpha_4)</li><li>J_o \mathbf{r}
+= 0
+\end{aligned}
+$$
+这里由于是盒子模型，所以：</li></ul>$$
+\begin{aligned}
+p_t &= \alpha_1 - \alpha_2 \\
+p_o &= \alpha_3 - \alpha_4 \\
+\end{aligned}
+$$<p>这样式子变成：</p>$$
+\begin{aligned}
+&J_tM^{-1}J_n^\mathsf Tp_n
++J_tM^{-1}J_t^\mathsf Tp_t
++J_tM^{-1}J_o^\mathsf Tp_o
++J_t\mathbf r
+=0\\[6pt]
+&J_oM^{-1}J_n^\mathsf Tp_n
++J_oM^{-1}J_t^\mathsf Tp_t
++J_oM^{-1}J_o^\mathsf Tp_o
++J_o\mathbf r
+=0
+\end{aligned}
+$$<p>然后写成PGS迭代形式：</p>$$
+\begin{aligned}
+p_t &= -\frac{J_tM^{-1}J_n^T p_n + J_tM^{-1}J_o^T p_o + J_t\pmb r}{J_tM^{-1}J_t^T} \\
+p_o &= -\frac{J_tM^{-1}J_n^T p_n + J_tM^{-1}J_t^T p_t + J_o\pmb r}{J_oM^{-1}J_o^T} \\
+\end{aligned}
+$$<p>注意分子，我们可以用</p>$$
+\pmb J_t\pmb u = \pmb J_t \pmb r + \pmb J_t(M^{-1}J_n^T p_n + J_t^Tp_t + J_o^Tp_o)
+$$<p>替换（$\pmb J_o \pmb u$同理），那么式子变成：</p>$$
+\begin{aligned}
+p_t &= p_t -\frac{\pmb J_t \pmb u}{J_tM^{-1}J_t^T} \\
+p_o &= p_o -\frac{\pmb J_o \pmb u}{J_oM^{-1}J_o^T} \\
+\end{aligned}
+$$<p>和接触约束类似。</p><p>这样，我们就可以使用类似接触约束的代码去计算$p_t$和$p_o$了。注意最后将他们投影到$[-\mu p_n, \mu p_n]$区间内满足LCP约束。</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>solveFriction</span><span class=p>(</span><span class=n>SolverContact</span><span class=o>&amp;</span> <span class=n>contact</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// uF_n
+</span></span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>real</span> <span class=n>max_friction</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_friction</span> <span class=o>*</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_normal_impulse</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>2</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_masses</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=c1>// 得到当前对应tangent
+</span></span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>Vector3</span><span class=o>&amp;</span> <span class=n>tangent</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>            <span class=n>i</span> <span class=o>==</span> <span class=mi>0</span> <span class=o>?</span> <span class=n>contact</span><span class=p>.</span><span class=nl>m_tangent1</span> <span class=p>:</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=c1>// 求tangent方向上的速度 J u
+</span></span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>real</span> <span class=n>vt</span> <span class=o>=</span> <span class=n>relativeVelocity</span><span class=p>(</span><span class=n>contact</span><span class=p>).</span><span class=n>dot</span><span class=p>(</span><span class=n>tangent</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=c1>// - v / JM^{-1}J^T
+</span></span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>real</span> <span class=n>delta</span> <span class=o>=</span> <span class=o>-</span><span class=n>vt</span> <span class=o>*</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_masses</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>real</span> <span class=n>old_impulse</span> <span class=o>=</span> <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_impulses</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 新冲量，但是要clamp在[-max_friction, max_friction]之间
+</span></span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>real</span> <span class=n>new_impulse</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>            <span class=n>std</span><span class=o>::</span><span class=n>clamp</span><span class=p>(</span><span class=n>old_impulse</span> <span class=o>+</span> <span class=n>delta</span><span class=p>,</span> <span class=o>-</span><span class=n>max_friction</span><span class=p>,</span> <span class=n>max_friction</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=c1>// 后面和接触冲量一样，应用冲量到物体上
+</span></span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>real</span> <span class=n>applied</span> <span class=o>=</span> <span class=n>new_impulse</span> <span class=o>-</span> <span class=n>old_impulse</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>contact</span><span class=p>.</span><span class=n>m_tangent_impulses</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>new_impulse</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>applied</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>applyContactImpulse</span><span class=p>(</span><span class=n>contact</span><span class=p>,</span> <span class=n>tangent</span> <span class=o>*</span> <span class=n>applied</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><h3 class="relative group">位置积分<div id=位置积分 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e4%bd%8d%e7%bd%ae%e7%a7%af%e5%88%86 aria-label=锚点>#</a></span></h3><p>在上述解约束之后，我们得到了最新的速度&角速度。最后我们做（42）式中的位置积分：</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kt>void</span> <span class=n>RigidSolver</span><span class=o>::</span><span class=n>integrateTransform</span><span class=p>(</span><span class=n>DynamicRigidBody</span><span class=o>&amp;</span> <span class=n>body</span><span class=p>,</span> <span class=n>real</span> <span class=n>dt</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>Transform</span> <span class=n>trans</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetTransform</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>trans</span><span class=p>.</span><span class=n>m_position</span> <span class=o>+=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetVelocity</span><span class=p>()</span> <span class=o>*</span> <span class=n>dt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>angular_velocity</span> <span class=o>=</span> <span class=n>body</span><span class=p>.</span><span class=n>GetAngularVelocity</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>Vector3</span> <span class=n>omega_dt</span> <span class=o>=</span> <span class=n>angular_velocity</span> <span class=o>*</span> <span class=n>dt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>real</span> <span class=n>angle</span> <span class=o>=</span> <span class=n>omega_dt</span><span class=p>.</span><span class=n>norm</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>angle</span> <span class=o>&gt;</span> <span class=n>kREAL_EPSILON</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=n>axis</span> <span class=o>=</span> <span class=n>omega_dt</span> <span class=o>/</span> <span class=n>angle</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=n>Quaternion</span> <span class=nf>dq</span><span class=p>(</span><span class=n>Eigen</span><span class=o>::</span><span class=n>AngleAxis</span><span class=o>&lt;</span><span class=n>real</span><span class=o>&gt;</span><span class=p>(</span><span class=n>angle</span><span class=p>,</span> <span class=n>axis</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=n>trans</span><span class=p>.</span><span class=n>m_rotation</span> <span class=o>=</span> <span class=p>(</span><span class=n>dq</span> <span class=o>*</span> <span class=n>trans</span><span class=p>.</span><span class=n>m_rotation</span><span class=p>).</span><span class=n>normalized</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>body</span><span class=p>.</span><span class=n>Teleport</span><span class=p>(</span><span class=n>trans</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span></span></span></code></pre></div></div><p>这里也是将公式拆开，变成速度的和角速度的单独公式。注意角速度这里是直接用四元数的增量公式，而不是用的矩阵形式。</p><p>注：综合速度积分和位置积分，你会发现我们用的就是半隐式欧拉积分法。</p><h3 class="relative group">现有模型存在的问题<div id=现有模型存在的问题 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e7%8e%b0%e6%9c%89%e6%a8%a1%e5%9e%8b%e5%ad%98%e5%9c%a8%e7%9a%84%e9%97%ae%e9%a2%98 aria-label=锚点>#</a></span></h3><p>先看一下当前代码跑出来的结果：</p><figure><video class="w-full rounded-md aspect-auto object-contain" style=ZgotmplZ preload=metadata controls playsinline>
+<source src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e4%b8%8d%e5%81%9c%e5%bc%b9%e8%b7%b3%e7%9a%84%e7%9b%92%e5%ad%90.mp4><p>Your browser cannot play this video. <a href=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e4%b8%8d%e5%81%9c%e5%bc%b9%e8%b7%b3%e7%9a%84%e7%9b%92%e5%ad%90.mp4>Download video</a>.</p></video><figcaption>不停弹跳的盒子</figcaption></figure><p>你可以看到物体很快就炸开了并不停地弹跳。</p><p>这是因为当前理论模型工作在<strong>速度层</strong>，他是通过给物体一个速度，让物体下一帧能刚好满足约束（物体刚好贴着）。但是满足约束之后速度仍在，在下下帧之后会因为这个速度继续移动物体，导致物体不停地移动。</p><p>这里其实有两种抖动：</p><ol><li>单个盒子本身的抖动。这是因模型本身工作在速度层的问题。</li><li>盒子堆叠时的抖动。这是因为每次迭代中，冲量都从头开始算。盒子堆叠层数越多，迭代次数需要的越多。但是目前我们引擎里是固定60次的次数，所以随着盒子层数增多，PGS算出的结果会离真实解偏差越来越多，这导致系统越来越不稳定。</li></ol><p>而解决方法分别是：</p><ol><li>位置约束求解：因为模型完全工作在加速度层（即确保$\dot{C} = 0$，所以我们可以额外在位置层进行约束求解，以保证$C = 0$也成立。</li><li>Warm Start：将上一帧算出的接触冲量作为这一帧的初始值，以减少PGS需要的迭代次数。</li></ol><h4 class="relative group">Baumgarte Stability<div id=baumgarte-stability class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#baumgarte-stability aria-label=锚点>#</a></span></h4><p>这里我们可以先小小地Hack一下让盒子稳定。使用一种叫<strong>Baumgarte Stability</strong>的方法。这里用在速度层，后面等我们加上位置约束求解时会将他挪到位置层。</p><p>这里盒子不稳定是因为每帧的速度残留导致物体移动。那我们可以让他每帧算的速度小一些来减少这种问题。</p><p>方法是在速度层LCP上增加一个$\beta$参数：</p>$$
+\begin{aligned}
+\text{原来：} & 0 \le \pmb p_n \perp \pmb J_n \pmb u + \frac{C_n}{\Delta t} \ge 0 \\
+\text{现在：} & 0 \le \pmb p_n \perp \pmb J_n \pmb u + \beta\frac{C_n}{\Delta t} \ge 0 \\
+\end{aligned}
+$$<p>这样在接触约束中，我们的计算公式就是：</p>$$
+\pmb p_n^{'} = \pmb p_n - \frac{\pmb J_n \pmb u + \beta \frac{C_n}{\Delta t}}{A_{11}}
+$$<p>但就算是这样，每次还是会有额外速度。那我们就直接设置一个死区<code>slope</code>，当在这个死区内我就认为满足约束了（穿透深度为0），将式子变为：</p>$$
+\pmb p_n^{'} = \pmb p_n - \frac{\pmb J_n \pmb u + \beta \frac{\max (C_n - \text{slop}, 0)}{\Delta t}}{A_{11}}
+$$<p><figure><video class="w-full rounded-md aspect-auto object-contain" style=ZgotmplZ preload=metadata controls playsinline>
+<source src=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e9%80%9f%e5%ba%a6%e5%b1%82%e7%a8%b3%e5%ae%9a%e5%8c%96%e7%9a%84%e5%a0%86%e5%8f%a0.mp4><p>Your browser cannot play this video. <a href=/assets/%e4%bb%8e0%e5%bc%80%e5%a7%8b%e7%bc%96%e5%86%99%e7%89%a9%e7%90%86%e5%bc%95%e6%93%8e/%e9%80%9f%e5%ba%a6%e5%b1%82%e7%a8%b3%e5%ae%9a%e5%8c%96%e7%9a%84%e5%a0%86%e5%8f%a0.mp4>Download video</a>.</p></video><figcaption>速度层稳定化的堆叠</figcaption></figure></p><p>这里每帧20次的PGS迭代。</p><h2 class="relative group">演示<div id=演示 class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#%e6%bc%94%e7%a4%ba aria-label=锚点>#</a></span></h2><p><a href=/projects/toy_physics/box_stack_no_stability/sandbox.html>点击此处</a>，进去后通过左边的下拉框选择<code>Rigid->Boxes</code>场景即可。</p></div><details class="mt-2 mb-5 overflow-hidden rounded-lg ms-0 ps-5"><summary class="py-1 text-lg font-semibold cursor-pointer bg-primary-200 text-neutral-800 -ms-5 ps-5 dark:bg-primary-800 dark:text-neutral-100">从0开始制作游戏物理引擎 -
+这篇文章属于一个选集。</summary><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%80/>§ 1:
+从0开始制作游戏物理引擎（一）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%8C/>§ 2:
+从0开始制作游戏物理引擎（二）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%89/>§ 3:
+从0开始制作游戏物理引擎（三）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%9B%9B/>§ 4:
+从0开始制作游戏物理引擎（四）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%BA%94/>§ 5:
+从0开始制作游戏物理引擎（五）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AD/>§ 6:
+从0开始制作游戏物理引擎（六）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B8%83/>§ 7:
+从0开始制作游戏物理引擎（七）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E5%85%AB/>§ 8:
+从0开始制作游戏物理引擎（八）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%88%86%E6%9E%90%E5%8A%9B%E5%AD%A6%E5%B0%8F%E8%AE%B0/>§ 9:
+分析力学小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E5%87%A0%E4%BD%95%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86%E5%B0%8F%E8%AE%B0/>§ 10:
+几何数值积分小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E6%9C%80%E4%BC%98%E5%8C%96%E7%90%86%E8%AE%BA%E5%B0%8F%E8%AE%B0/>§ 11:
+最优化理论小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/lcp%E5%B0%8F%E8%AE%B0/>§ 12:
+LCP小记</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%E4%B8%AD%E7%9A%84%E5%8A%A8%E5%8A%9B%E5%AD%A6%E6%A8%A1%E5%9E%8B/>§ 13:
+物理模拟中的动力学模型</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600"><a href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B9%9D/>§ 14:
+从0开始制作游戏物理引擎（九）</a></div><div class="py-1 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600">§ 15:
+本文</div></details></div></section><footer class="pt-8 max-w-prose print:hidden"><div class=pt-8><hr class="border-dotted border-neutral-300 dark:border-neutral-600"><div class="flex justify-between pt-3"><span class="flex flex-col"><a class="flex text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/lcp%E5%B0%8F%E8%AE%B0/><span class=leading-6><span class="inline-block rtl:rotate-180">&larr;</span>&ensp;LCP小记
+</span></a><span class="ms-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2026-11-13T22:55:12+08:00>13 November 2026</time>
+</span></span><span class="flex flex-col items-end"><a class="flex text-right text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E6%B8%B8%E6%88%8F%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E%E4%B9%9D/><span class=leading-6>从0开始制作游戏物理引擎（九）&ensp;<span class="inline-block rtl:rotate-180">&rarr;</span>
+</span></a><span class="me-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2026-11-18T22:56:25+08:00>18 November 2026</time></span></span></div></div></footer></article><div id=scroll-to-top class="fixed bottom-6 end-6 z-50 transform translate-y-4 opacity-0 duration-200"><a href=#the-top class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400" aria-label=返回顶部 title=返回顶部>&uarr;</a></div></main><footer id=site-footer class="py-10 print:hidden"><nav aria-label class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400"><ul class="flex list-none flex-col sm:flex-row"><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/tags/ title=Tags>标签</a></li><li class="flex mb-1 text-end sm:mb-0 sm:me-7 sm:last:me-0"><a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2 flex items-center" href=/categories/ title=Categories>分类</a></li></ul></nav><div class="flex items-center justify-between"><p class="text-sm text-neutral-500 dark:text-neutral-400">&copy;
+2026
+VisualGMQ</p><p class="text-xs text-neutral-500 dark:text-neutral-400">由 <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://gohugo.io/ target=_blank rel="noopener noreferrer">Hugo</a> & <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://blowfish.page/ target=_blank rel="noopener noreferrer">Blowfish</a> 强力驱动</p></div></footer><div id=search-wrapper role=dialog aria-modal=true aria-label=搜索 class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-500" data-url=/><div id=search-modal class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"><header class="relative z-10 flex items-center justify-between flex-none px-2"><form class="flex items-center flex-auto min-w-0"><div class="flex items-center justify-center w-8 h-8 text-neutral-400"><span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></span></div><input type=search id=search-query aria-label=搜索 class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent" placeholder=搜索 tabindex=0></form><button id=close-search-button class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" title="关闭 (Esc)">
+<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></button></header><section class="flex-auto px-2 overflow-auto"><ul id=search-results></ul></section></div></div></div></body></html>
